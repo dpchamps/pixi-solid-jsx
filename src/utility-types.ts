@@ -2,8 +2,18 @@ export type UnknownRecord = Record<string, unknown>;
 export type Maybe<T> = T | undefined | null
 
 export function invariant<T>(x: Maybe<T>): asserts x {
-    if(typeof x === "undefined" || x === null){
+    if(!isDefined(x)){
         throw new Error(`invariant`)
+    }
+}
+
+export const unimplemented = (..._: unknown[]): never => {
+    throw new Error("unimplemented")
+}
+
+export function assertTruthy(condition: boolean, message: string = "truthy condition"): asserts condition {
+    if(!condition){
+        throw new Error(`Expected: ${message}`)
     }
 }
 

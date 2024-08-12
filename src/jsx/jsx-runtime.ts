@@ -6,22 +6,29 @@ import {
     UnknownNodeProps,
     RuntimeNode,
     RuntimeTextNode,
-    PixieJsxNode, TextIntrinsicProps, Children, TextIntrinsic, ContainerIntrinsicProps, ContainerIntrinsic
+    PixieJsxNode,
+    TextIntrinsicProps,
+    TextIntrinsic,
+    ContainerIntrinsicProps,
+    ContainerIntrinsic,
+    ApplicationIntrinsicProps, ApplicationIntrinsic, SpriteIntrinsicProps, SpriteIntrinsic
 } from "./jsx-node.ts";
 
 namespace JSX {
     export type IntrinsicElements = {
         text: TextIntrinsicProps
-        container: ContainerIntrinsicProps
+        container: ContainerIntrinsicProps,
+        application: ApplicationIntrinsicProps,
+        sprite: SpriteIntrinsicProps
     }
 
     export type Element = RuntimeNode
 
-    export type PixieNodeProps<T extends UnknownNodeProps> = PixiNodeProps<T>
+    export type PixieNodeProps<T extends UnknownNodeProps = {}> = PixiNodeProps<T>
 }
 
 export type {JSX}
-
+x``
 export const jsx = renderJsx;
 export const jsxs = renderJsx;
 export const jsxDEV =  renderJsx;
@@ -32,16 +39,19 @@ export function renderJsx<T extends UnknownRecord>(
     _key?: string
 ): JSX.Element {
     if(is(tag, "function")) return renderJsxNode(tag(props));
-    if(is(tag, "string")) return renderTag(tag, props, renderChildren(props));
+    if(is(tag, "string")) return renderTag(tag, props);
 
     return PixieJsxNode(undefined, renderChildren(props));
 }
 
+export const Fragment = <T extends UnknownNodeProps>(props: JSX.PixieNodeProps<T>) => PixieJsxNode(undefined, renderChildren(props))
 
-const renderTag = <P extends UnknownNodeProps>(tag: keyof JSX.IntrinsicElements, props: JSX.PixieNodeProps<P>, children: Children) => {
+const renderTag = <P extends UnknownNodeProps>(tag: keyof JSX.IntrinsicElements, props: JSX.PixieNodeProps<P>) => {
     switch (tag){
-        case "text": return TextIntrinsic({...props, children});
-        case "container": return ContainerIntrinsic({...props, children});
+        case "text": return TextIntrinsic({...props});
+        case "container": return ContainerIntrinsic({...props, children: renderChildren(props)});
+        case "application": return ApplicationIntrinsic({...props, children: renderChildren(props)});
+        case "sprite": return SpriteIntrinsic({...props, children: renderChildren(props)})
         default: return unreachable(tag)
     }
 }

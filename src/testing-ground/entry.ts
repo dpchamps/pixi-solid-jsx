@@ -1,10 +1,10 @@
 import {TestComponent} from "./test.tsx";
+import {renderRoot} from "../runtime/pixis-jsx-runtime.ts";
 
 const main = async () => {
     console.log(TestComponent);
     console.log("it works!")
-    const x = TestComponent();
-    debugger
+    await renderRoot(TestComponent, document.body);
 }
 
 
