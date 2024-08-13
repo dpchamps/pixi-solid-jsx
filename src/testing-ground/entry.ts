@@ -1,10 +1,11 @@
 import {TestComponent} from "./test.tsx";
-import {renderRoot} from "../runtime/pixis-jsx-runtime.ts";
+import {render} from "solid-custom-renderer/index.ts";
+import {RuntimeHTMLElementNode} from "jsx-runtime/jsx-node.ts";
+import {ClickSpriteExample} from "./example1.tsx";
 
 const main = async () => {
-    console.log(TestComponent);
     console.log("it works!")
-    await renderRoot(TestComponent, document.body);
+    render(ClickSpriteExample, RuntimeHTMLElementNode(document.body))
 }
 
 

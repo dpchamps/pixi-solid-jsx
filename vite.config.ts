@@ -7,7 +7,8 @@ export default defineConfig({
         tsconfigPaths(),
         solidPlugin({
             solid: {
-                moduleName: "solid-custom-renderer"
+                moduleName: "solid-custom-renderer/index.ts",
+                generate: "universal"
             }
         })
     ],

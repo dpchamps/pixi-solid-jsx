@@ -40,10 +40,11 @@
      "allowUnusedLabels": true,                        /* Disable error reporting for unused labels. */
 
     /* Completeness */
-    "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
+    "skipLibCheck": false,                                 /* Skip type checking all .d.ts files. */
     "paths": {
       "jsx-runtime/*": ["./src/jsx/*"],
       "solid-custom-renderer/*": ["./src/solid-custom-renderer/*"]
-    }
+    },
+    "typeRoots": ["./src/custom-typings", "./node_modules/@types"]
   }
 }
