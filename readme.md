@@ -10,7 +10,7 @@ Declarative, fine-grained reactivity with PixiJs.
 ### `<application/>`
 
 Renders To PixiJs Application. 
-Takes PixiJs `ApplicationOptions` as props. Needs to be initialized. [See `Application` element](./src/core-tags/Assets.tsx)
+Takes PixiJs `ApplicationOptions` as props. Needs to be initialized. [See `Application` element](./src/core-tags/Application.tsx)
 
 ### `<container/>`
 
