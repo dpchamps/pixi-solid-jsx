@@ -4,9 +4,44 @@ A SolidJS Universal Renderer, Targeting Canvas with PixiJs Nodes.
 
 Declarative, fine-grained reactivity with PixiJs.
 
+## Intrinsics
+
+
+### `<application/>`
+
+Renders To PixiJs Application. 
+Takes PixiJs `ApplicationOptions` as props. Needs to be initialized. [See `Application` element](./src/core-tags/Assets.tsx)
+
+### `<container/>`
+
+Renders To PixiJs Container. Takes PixiJs `ContainerOptions` as props
+
+```tsx
+<container x={100} y={100}>
+</container>
+```
+
+
+### `<text/>`
+
+Renders To PixiJs Text. Takes PixiJs `TextOptions` as props.
+
+```tsx
+<text eventMode={'static'} style={{fontSize: fontSize()}} onclick={onClick}>
+    I'm The Coolest Text Node You've Ever Seen
+</text>
+```
+
+### `<sprite/>`
+
+Renders To PixiJs Sprite. Takes PixiJs `SpriteOptions` as props.
+
+```tsx
+<sprite x={50} y={100} width={100} height={500} texture={createTexture("something.png")}/>
+```
 ## Examples
 
-```typescript
+```tsx
 export const ClickSpriteExample = () => {
     const texture = createTexture("fire.png");
     const [scale, setScale] = createSignal(0.4);
@@ -26,7 +61,7 @@ export const ClickSpriteExample = () => {
 Refs work as expected:
 
 
-```typescript
+```tsx
 export const ClickSpriteExample = () => {
     const texture = createTexture("fire.png");
     const [scale, setScale] = createSignal(0.4);
