@@ -16,7 +16,8 @@ import {Suspense, createResource} from "solid-js";
 
 export type ApplicationState = {
     time: {
-        deltaTime: Accessor<number>
+        deltaTime: Accessor<number>,
+        fps: Accessor<number>
     },
     onNextTick: Set<() => void>,
     application: PixiApplication
@@ -56,9 +57,11 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
     const [application, setApplication] = createSignal<BuildableApplicationNode|null>(null);
     const [mount, setOnMount] = createSignal(false);
     const [deltaTime, setDeltaTime] = createSignal(1);
+    const [fps, setFps] = createSignal(0);
     const applicationState: ApplicationState = {
         time: {
-            deltaTime
+            deltaTime,
+            fps
         },
         onNextTick: new Set<() => void>(),
     } as ApplicationState
@@ -71,6 +74,7 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         app.container.ticker.start();
         const tickerFn = (ticker: Ticker) => {
             setDeltaTime(ticker.deltaTime);
+            setFps(ticker.FPS);
             applicationState.onNextTick.forEach(Reflect.apply);
         }
         app.container.ticker.add(tickerFn);

@@ -3,6 +3,7 @@ import {Scene1} from "./Scene1.tsx";
 import {Controller, createController} from "./createController.ts";
 import {createContext, createEffect, createMemo, createSignal, useContext} from "solid-js";
 import {invariant} from "../utility-types.ts";
+import {FpsCounter} from "./FpsCounter.tsx";
 
 type GameState = {
     controller: Controller
@@ -33,6 +34,7 @@ export const Game = () => {
 
     return (
         <Application background={'#ecdddd'} width={500} height={500}>
+            <FpsCounter/>
             <GameContext.Provider value={gameState}>
                 {sceneToggle() ? <Scene1/> : <text>Scene 2</text> }
             </GameContext.Provider>
