@@ -1,5 +1,6 @@
 import {createStore} from "solid-js/store";
 import {createComputed, createEffect, createSignal, onCleanup} from "solid-js";
+import {shallowEqual} from "shallow-equal";
 
 export type Controller = ReturnType<typeof createController>;
 export const createController = () => {
@@ -31,17 +32,10 @@ export const createController = () => {
     });
 
     return {
-        onKeyDown: (...keyCodes: string[]) => {
-            const [keyDown, setKeyDown] = createSignal<string[]>([], );
-            createEffect(() => {
-                setKeyDown(keyCodes.filter((keyCode) => keyState.keyDown.has(keyCode)));
-            })
-            return keyDown;
-        },
         onKeyPress: (...keyCodes: string[]) => {
             const [keyDown, setKeyDown] = createSignal<string[]>(
                 [],
-                {equals: (prev, next) => prev.every(item => next.includes(item)) && next.every((item) => prev.includes(item))}
+                {equals: (prev, next) => shallowEqual(prev, next)}
             );
             createEffect(() => {
                 setKeyDown(keyCodes.filter((keyCode) => keyState.keyDown.has(keyCode)));

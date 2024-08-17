@@ -5,7 +5,7 @@ export type ControllerDirection = ReturnType<typeof createControllerDirection>;
 export const createControllerDirection = (controller: Controller) => {
     const [x, setDirectionX] = createSignal(0, {equals: false});
     const [y, setDirectionY] = createSignal(0, {equals: false});
-    const onPressDirectionKey = controller.onKeyDown("KeyW", "KeyA", "KeyS", "KeyD");
+    const onPressDirectionKey = controller.onKeyPress("KeyW", "KeyA", "KeyS", "KeyD");
     createComputed(() => {
         const directions = onPressDirectionKey();
         setDirectionY(

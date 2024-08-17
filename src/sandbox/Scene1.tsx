@@ -6,6 +6,7 @@ import {Index} from "../solid-custom-renderer";
 import {createEntityList, EntityList} from "./createEntityList.ts";
 import {unwrap} from "solid-js/store";
 import {overlaps} from "./position.ts";
+import {untrack} from "solid-js";
 
 const createPlayerEntity = (entityList: EntityList) => {
     const playerId = "player";
@@ -22,6 +23,7 @@ const createPlayerEntity = (entityList: EntityList) => {
 
     onNextFrame({
         query: (appState) => {
+            // const deltaTime = untrack(appState.time.deltaTime);
             const deltaTime = appState.time.deltaTime();
             const {x, y} = {x: controllerDirection.x(), y: controllerDirection.y()};
 
