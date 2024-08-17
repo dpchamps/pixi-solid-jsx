@@ -1,6 +1,6 @@
 import { createRenderer } from "solid-js/universal";
 import {BuildablePixiJsxNode, RuntimeRawNode} from "jsx-runtime/jsx-node.ts";
-import {assert, unimplemented} from "../utility-types.ts";
+import {invariant, unimplemented} from "../utility-types.ts";
 import {createNode} from "jsx-runtime/jsx-runtime.ts";
 
 export const {
@@ -28,7 +28,13 @@ export const {
         return node.getChildren()[0];
     },
     getNextSibling(node) {
-        return unimplemented(node);
+        const parent = node.getParent();
+        invariant(parent);
+        const children = parent.getChildren();
+        const index = children.findIndex((el) => el.id === node.id);
+        if(index === -1 || index === children.length-1) return undefined;
+        return children[index+1]
+
     },
     getParentNode(node) {
         return node.getParent();
@@ -40,23 +46,7 @@ export const {
         return node.tag === "text";
     },
     removeNode(parent, node): void {
-        switch(parent.tag){
-            case "text":
-            case "container": {
-                if(node.tag === "container" || node.tag === "text"){
-                    parent.container.removeChild(node.container);
-                }
-                break
-            }
-            case "html": {
-                assert(node.tag === "application");
-                parent.container.removeChild(node.container.canvas);
-            }
-        }
-        const childIdx = parent.getChildren().findIndex((c) => c.id === node.id);
-        if(childIdx !== -1){
-            parent.getChildren().splice(childIdx, 1)
-        }
+        parent.removeChild(node);
     },
     replaceText(textNode, value): void {
         return unimplemented(textNode, value)

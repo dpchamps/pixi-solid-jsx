@@ -2,6 +2,7 @@ import { createSignal } from 'solid-js';
 import {Application} from "../core-tags/Application.tsx";
 import {useContext} from "solid-js";
 import {AssetsContext, AssetsProvider} from "../core-tags/Assets.tsx";
+import {Marquee} from "./marquee.tsx";
 
 
 const Child = () => {
@@ -45,6 +46,15 @@ export const TestComponent = () => {
                 </container>
             </AssetsProvider>
 
+        </Application>
+    )
+}
+
+export const M = () => {
+    const [scrollSpeed] = createSignal(100);
+    return (
+        <Application backgroundColor={"#FEFEFE"}>
+            <Marquee scrollSpeed={scrollSpeed} style={{fontSize: 25}}>Helllllloooooo</Marquee>
         </Application>
     )
 }

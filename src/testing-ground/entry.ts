@@ -1,11 +1,12 @@
-import {TestComponent} from "./test.tsx";
+import {TestComponent, M} from "./test.tsx";
 import {render} from "solid-custom-renderer/index.ts";
 import {RuntimeHTMLElementNode} from "jsx-runtime/jsx-node.ts";
 import {ClickSpriteExample} from "./example1.tsx";
+import {Game} from "../sandbox/Game.tsx";
 
 const main = async () => {
     console.log("it works!")
-    render(ClickSpriteExample, RuntimeHTMLElementNode(document.body))
+    render(Game, RuntimeHTMLElementNode(document.body))
 }
 
 

@@ -1,22 +1,30 @@
-import {createTexture} from "../core-hooks/createTexture.ts";
-import {createEffect, createSignal} from "solid-js";
-import {Application} from "../core-tags/Application.tsx";
-import {BuildableSpriteNode} from "jsx-runtime/jsx-node.ts";
+import {createAsset} from "../core-effects/createAsset.ts";
+import {Application, useApplicationState} from "../core-tags/Application.tsx";
+import {Texture} from "pixi.js";
+import {createController} from "../sandbox/createController.ts";
+import {createControllerDirection} from "../sandbox/createControllerDirection.ts";
+import {Entity} from "../sandbox/Entity.tsx";
+import {createStore} from "solid-js/store";
+import {createEffect} from "solid-js";
 
 export const ClickSpriteExample = () => {
-    const texture = createTexture("fire.png");
-    const [scale, setScale] = createSignal(0.4);
-    const [spriteRef, setSpriteRef] = createSignal<BuildableSpriteNode>();
-    const onClick = () => setScale(scale() + 0.1);
+    const controller = createController();
+    const direction = createControllerDirection(controller);
+    const [playerState, setPlayerState] = createStore({
+        x: 0,
+        y: 0
+    });
+    const [applicationState] = useApplicationState() || [] as any;
     createEffect(() => {
-        const sprite = spriteRef();
-        console.log(scale(), sprite?.container.width)
-    })
+        console.log(applicationState);
+        setPlayerState((p) => ({
+            x: p.x+direction.x()*2,
+            y: p.y+direction.y()*2
+        }))
+    });
     return (
         <Application background={'#ecdddd'} width={500} height={500}>
-            <container>
-                <sprite eventMode={'static'} texture={texture()} onclick={onClick} scale={scale()} ref={setSpriteRef}/>
-            </container>
+            <Entity {...playerState}></Entity>
         </Application>
     )
 }

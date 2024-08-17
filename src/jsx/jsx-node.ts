@@ -1,8 +1,9 @@
-import {assert, invariant, isDefined, Maybe, unimplemented, UnknownRecord} from "../utility-types.ts";
+import {assert, invariant, Maybe, UnknownRecord} from "../utility-types.ts";
 import {
     Application,
     Container, TextOptions, ApplicationOptions, Text, ContainerOptions, Sprite, SpriteOptions,
 } from "pixi.js";
+import {buildableNode} from "jsx-runtime/buildable-node.ts";
 
 
 export type ContainerClass = typeof Container;
@@ -13,7 +14,7 @@ export type PixiNodeProps<T extends UnknownRecord = {}> = T & ChildPropType & Cl
 export type PixiNodePropsIntrinsic<T extends UnknownNodeProps = {}, RefValue = unknown> = T & ChildPropIntrinsicType & ClassType & RefType<RefValue>;
 export type RawNode = string | number
 
-export type Children<T = never> = Maybe<(PixiJsxNode)[] | PixiJsxNode | T>;
+export type Children<T = never, Node = PixiJsxNode> = Maybe<(Node)[] | Node | T>;
 export type ChildPropType = {children?: Children};
 export type ChildPropIntrinsicType = {children?: Children<RawNode>};
 export type RefType<RefValue> = {ref?: Maybe<RefValue> | ((e: Maybe<RefValue>) => void)}
@@ -34,13 +35,14 @@ export type BuildableNode<Tag extends string, Container> = {
     id: number,
     container: Container
     addChild: (node: BuildablePixiJsxNode) => void,
+    removeChild: (node: BuildablePixiJsxNode) => void,
     getParent: () => BuildablePixiJsxNode|undefined,
     getChildren: () => BuildablePixiJsxNode[],
     setParent: (parent: BuildablePixiJsxNode) => void;
     setProp: <T>(name: string, value: T, prev: Maybe<T>) => void,
 }
 
-export type BuildableApplicationNode = BuildableNode<'application', Application> & {initializationProps: Partial<ApplicationOptions>, initialize: () => Promise<void>};
+export type BuildableApplicationNode = BuildableNode<'application', Application> & {initializationProps: () => Partial<ApplicationOptions>, initialize: () => Promise<void>};
 export type BuildableContainerNode = BuildableNode<'container', Container>;
 export type BuildableTextNode = BuildableNode<'text', Text>;
 export type BuildableRawTextNode = BuildableNode<'raw', string|number>
@@ -54,176 +56,114 @@ export type JSXNode =
 
 export type FunctionComponent = <T extends UnknownNodeProps>(props: T) => JSXNode
 
-const createId = () => Math.floor(Math.random() * 10000);
 
 export const RuntimeApplicationNode = (): BuildableApplicationNode => {
     const application = new Application();
-    const props: Record<string, unknown> = {};
-    let root: Maybe<BuildablePixiJsxNode> = null;
-    const children: BuildablePixiJsxNode[] = [];
-    const id = createId();
-    
-    return {
+    const initializationProps: Record<string, unknown> = {};
+    return buildableNode({
         tag: "application",
         container: application,
-        get id(){ return id},
-        addChild: (node: BuildablePixiJsxNode) => {
+        onAddChild: (node) => {
             assert(node.tag !== "application" && node.tag !== 'html', `unexpected node as child to application: ${node.tag}`);
-            const child = node.tag === "raw" ? new Text({text:node.container}) : node.container;
-
-            application.stage.addChild(child);
-            children.push(node);
+            const child = node.tag === "raw" ? RuntimeTextNode({text: node.container}) : node;
+            application.stage.addChild(child.container)
+            return child
+        },
+        onRemoveChild: (child) => {
+            assert(child.tag !== "raw" && child.tag !== 'html' && child.tag !== "application", `unexpected node as child to application: ${child.tag}`);
+            application.stage.removeChild(child.container);
         },
         setProp: (name, value) => {
-            props[name] = value;
+            initializationProps[name] = value
         },
-        get initializationProps(){
-            return props;
-        },
-        setParent: (element) => {
-            root = element
-        },
-        getChildren: () => children,
-        initialize: async () => {
+        initializationProps: () => initializationProps,
+        async initialize() {
+            const root = this.getParent?.();
             invariant(root, `Cannot initialize application before root has been appended`);
             assert(root.tag === "html", `Received an unexpected parent for Application: ${root.tag}. Expected html`);
-            await application.init(props);
+            await application.init(initializationProps);
             root.container.appendChild(application.canvas);
         },
-        getParent: () => isDefined(root) ? root : undefined
-    };
+    }) as BuildableApplicationNode
 }
 
-export const RuntimeHTMLElementNode = (element: HTMLElement): BuildableHTMLElementNode => {
-    const children: BuildablePixiJsxNode[] = [];
-    const id = createId();
 
-
-    return {
-        tag: "html",
-        container: element,
-        get id(){ return id},
-        addChild(child: BuildablePixiJsxNode){
-            assert(child.tag === "application", "Application must be inserted into HTMLElement");
-            child.setParent(this);
-            children.push(child);
-        },
-        setParent: (parent) => {
-            return unimplemented(parent)
-        },
-        getParent: () => {
-            return unimplemented()
-        },
-        getChildren: () => children,
-        setProp: (name, value) => {
-            return unimplemented(name, value)
+export const RuntimeHTMLElementNode = (element: HTMLElement): BuildableHTMLElementNode => buildableNode({
+    tag: "html",
+    container: element,
+    onAddChild: (child) => {
+        assert(child.tag === "application", "Application must be inserted into HTMLElement");
+        return child;
+    },
+    onRemoveChild: (child) => {
+        assert(child.tag === "application", "Application must be inserted into HTMLElement");
+        if(child.container.canvas){
+            element.removeChild(child.container.canvas);
         }
-    };
-}
+    }
+})
+
 
 export const RuntimeTextNode = <T extends TextOptions>(textOptions?: T): BuildableTextNode => {
     const textNode = new Text(textOptions);
-    let parent: Maybe<BuildablePixiJsxNode> = null;
-    const children: BuildablePixiJsxNode[] = [];
-    const id = createId();
 
-    return {
+    return buildableNode({
         tag: "text",
         container: textNode,
-        get id(){ return id },
-        addChild(node: BuildablePixiJsxNode){
+        onAddChild: (node, children) => {
             assert(node.tag === "raw", `unexpected tag for text: ${node.tag}`);
-            textNode.text += node.container;
-            node.setParent(this);
-            children.push(node);
+            textNode.text = `${[...children, node].map(({container}) => container).join("")}`;
+            return node;
         },
-        setParent: (node) => {
-            parent = node
+        onRemoveChild: (node, children) => {
+            textNode.text = children.filter(x => x.id !== node.id).map(({container}) => container).join("")
         },
-        getParent: () => isDefined(parent) ? parent : undefined,
-        getChildren: () => children,
-        setProp: (name, value) => {
-            (textNode as any)[name] = value
-        }
-    }
+    })
 }
 
 export const RuntimeContainerNode = <T extends ContainerOptions>(containerOptions?: T): BuildableContainerNode => {
     const container = new Container(containerOptions);
-    let parent: Maybe<BuildablePixiJsxNode> = null;
-    const children: BuildablePixiJsxNode[] = [];
-    const id = createId();
 
-    return {
+    return buildableNode({
         tag: "container",
         container,
-        get id(){ return id},
-        addChild(node: BuildablePixiJsxNode){
+        onAddChild: (node) => {
             assert(node.tag !== "application" && node.tag !== "html" && node.tag !== "raw", `unexpected node as child to container: ${node.tag}`);
-            node.setParent(this);
             container.addChild(node.container);
-            children.push(node);
+            return node;
         },
-        setParent: (node) => {
-            parent = node
-        },
-        getParent: () => isDefined(parent) ? parent : undefined,
-        getChildren: () => children,
-        setProp: (name, value) => {
-            (container as any)[name] = value
+        onRemoveChild: (node) => {
+            assert(node.tag !== "application" && node.tag !== "html" && node.tag !== "raw", `unexpected node as child to container: ${node.tag}`);
+            container.removeChild(node.container)
         }
-    }
+    })
 }
 
-export const RuntimeRawNode = (value: string): BuildableRawTextNode => {
-    let parent: Maybe<BuildablePixiJsxNode> = null;
-    const id = createId();
-
-    return {
-        tag: "raw",
-        container: value,
-        get id(){ return id},
-        addChild: (node: BuildablePixiJsxNode) => {
-            unimplemented(node)
-        },
-        setProp: (name, value) => {
-            unimplemented(name, value)
-        },
-        setParent: (node) => {
-            parent = node
-        },
-        getChildren: () => {
-            return unimplemented();
-        },
-        getParent: () => isDefined(parent) ? parent : undefined,
+export const RuntimeRawNode = (value: string): BuildableRawTextNode => buildableNode({
+    tag: "raw",
+    container: value,
+    onAddChild: (_) => {
+        throw new Error(`cannot add a child to a raw node`);
+    },
+    onRemoveChild: (_) => {
+        throw new Error(`cannot remove a child from a raw node`);
     }
-}
-
+})
 
 export const RuntimeSpriteNode = (spriteOptions?: SpriteOptions): BuildableSpriteNode => {
     const sprite = new Sprite(spriteOptions);
-    let parent: Maybe<BuildablePixiJsxNode> = null;
-    const id = createId();
 
-    return {
+    return buildableNode({
         tag: "sprite",
         container: sprite,
-        get id(){ return id},
-        addChild: (_) => {
-            throw new Error(`sprite does not take children`)
+        onAddChild: (_) => {
+            throw new Error(`sprite does not take children`);
         },
-        setProp: (name, value) => {
-            Reflect.set(sprite, name, value);
-        },
-        setParent: (node) => {
-            parent = node;
-        },
-        getChildren: () => {
-            throw new Error(`sprite does not take children`)
-        },
-        getParent: () => isDefined(parent) ? parent : undefined
-    }
-};
+        onRemoveChild: (_) => {
+            throw new Error(`cannot remove children from sprite`)
+        }
+    })
+}
 
 
 export * from "./intrinsic-nodes.ts"
