@@ -1,5 +1,5 @@
-import {createAsset} from "../../src/core-effects/createAsset.ts";
-import {Application, useApplicationState} from "../../src/core-tags/Application.tsx";
+import {createAsset} from "../../src/engine/effects/createAsset.ts";
+import {Application, useApplicationState} from "../../src/engine/tags/Application.tsx";
 import {Texture} from "pixi.js";
 import {createController} from "../example-1/createController.ts";
 import {createControllerDirection} from "../example-1/createControllerDirection.ts";

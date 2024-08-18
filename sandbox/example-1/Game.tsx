@@ -1,4 +1,4 @@
-import {Application} from "../../src/core-tags/Application.tsx";
+import {Application} from "../../src/engine/tags/Application.tsx";
 import {Scene1} from "./Scene1.tsx";
 import {Controller, createController} from "./createController.ts";
 import {createContext, createEffect, createMemo, useContext} from "solid-js";

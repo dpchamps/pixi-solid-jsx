@@ -4,7 +4,7 @@ import {
     onNextFrame,
     OnNextFrameQuery,
     useApplicationState
-} from "../../src/core-tags/Application.tsx";
+} from "../../src/engine/tags/Application.tsx";
 import {Entity, EntityProps} from "./Entity.tsx";
 import {GameState, useGameState} from "./Game.tsx";
 import {Index} from "solid-custom-renderer/index.ts";

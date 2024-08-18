@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
-import {Application} from "../../src/core-tags/Application.tsx";
+import {Application} from "../../src/engine/tags/Application.tsx";
 import {useContext} from "solid-js";
-import {AssetsContext, AssetsProvider} from "../../src/core-tags/Assets.tsx";
+import {AssetsContext, AssetsProvider} from "../../src/engine/tags/Assets.tsx";
 import {Marquee} from "./marquee.tsx";
 
 

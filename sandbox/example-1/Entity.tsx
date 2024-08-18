@@ -1,4 +1,4 @@
-import {createAsset} from "../../src/core-effects/createAsset.ts";
+import {createAsset} from "../../src/engine/effects/createAsset.ts";
 import {Texture} from "pixi.js";
 import {SpriteIntrinsicProps} from "jsx-runtime/intrinsic-nodes.ts";
 

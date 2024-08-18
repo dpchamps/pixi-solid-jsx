@@ -11,7 +11,7 @@ import {
 } from 'solid-js';
 import {BuildableApplicationNode} from "jsx-runtime/jsx-node.ts";
 import {Ticker, Application as PixiApplication} from "pixi.js";
-import {invariant} from "../utility-types.ts";
+import {invariant} from "../../utility-types.ts";
 
 export type ApplicationState = {
     time: {
