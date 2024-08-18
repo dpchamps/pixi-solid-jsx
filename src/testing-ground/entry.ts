@@ -3,10 +3,11 @@ import {render} from "solid-custom-renderer/index.ts";
 import {RuntimeHTMLElementNode} from "jsx-runtime/jsx-node.ts";
 import {ClickSpriteExample} from "./example1.tsx";
 import {Game} from "../sandbox/Game.tsx";
+import {renderRoot} from "../index.ts";
 
 const main = async () => {
     console.log("it works!")
-    render(Game, RuntimeHTMLElementNode(document.body))
+    renderRoot(Game, document.body)
 }
 
 

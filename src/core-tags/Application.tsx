@@ -1,18 +1,17 @@
 import {JSX} from "jsx-runtime/jsx-runtime.ts";
 import {
-    Accessor,
+    Accessor, batch,
     createComputed,
     createContext,
-    createEffect,
     createSignal,
     onCleanup,
     onMount,
-    useContext
+    useContext,
+    createResource
 } from 'solid-js';
 import {BuildableApplicationNode} from "jsx-runtime/jsx-node.ts";
 import {Ticker, Application as PixiApplication} from "pixi.js";
 import {invariant} from "../utility-types.ts";
-import {Suspense, createResource} from "solid-js";
 
 export type ApplicationState = {
     time: {
@@ -36,7 +35,6 @@ export type OnNextFrameQuery<QueryResult> = {
     tick: (queryResult: QueryResult) => void
 }
 
-export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>): void;
 export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
     const appState = useApplicationState();
 
@@ -73,9 +71,11 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         app.container.ticker.maxFPS = 60;
         app.container.ticker.start();
         const tickerFn = (ticker: Ticker) => {
-            setDeltaTime(ticker.deltaTime);
-            setFps(ticker.FPS);
-            applicationState.onNextTick.forEach(Reflect.apply);
+            batch(() => {
+                setDeltaTime(ticker.deltaTime);
+                setFps(ticker.FPS);
+                applicationState.onNextTick.forEach(Reflect.apply);
+            });
         }
         app.container.ticker.add(tickerFn);
         applicationState.application = app.container;
@@ -91,9 +91,7 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         <application {...props} ref={setApplication}>
             {/*@ts-ignore */}
             <ApplicationContext.Provider value={applicationState}>
-                <Suspense fallback={<text>Loading...</text>}>
-                    {applicationReady() ? props.children : []}
-                </Suspense>
+                {applicationReady() ? props.children : []}
             </ApplicationContext.Provider>
         </application>
     )

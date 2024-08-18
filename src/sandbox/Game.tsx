@@ -1,11 +1,11 @@
 import {Application} from "../core-tags/Application.tsx";
 import {Scene1} from "./Scene1.tsx";
 import {Controller, createController} from "./createController.ts";
-import {createContext, createEffect, createMemo, createSignal, useContext} from "solid-js";
+import {createContext, createEffect, createMemo, useContext} from "solid-js";
 import {invariant} from "../utility-types.ts";
-import {FpsCounter} from "./FpsCounter.tsx";
+import {Show} from "solid-custom-renderer/index.ts";
 
-type GameState = {
+export type GameState = {
     controller: Controller
 }
 
@@ -32,11 +32,19 @@ export const Game = () => {
         return prev
     }, true);
 
+    createEffect(() => {
+        console.log("Game Render", gameState)
+    })
+
     return (
-        <Application background={'#ecdddd'} width={500} height={500}>
-            <FpsCounter/>
+        <Application background={'#ecdddd'} width={window.innerWidth} height={window.innerHeight}>
             <GameContext.Provider value={gameState}>
-                {sceneToggle() ? <Scene1/> : <text>Scene 2</text> }
+                <container>
+                    <Show when={sceneToggle()} fallback={<text>Scene 2</text>}>
+                        <Scene1/>
+                    </Show>
+                </container>
+
             </GameContext.Provider>
         </Application>
     )

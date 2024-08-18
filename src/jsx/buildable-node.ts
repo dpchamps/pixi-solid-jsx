@@ -13,7 +13,9 @@ type BuildableNodeOptions<Tag extends string, Container> =
     } & Record<string, unknown>
 export const buildableNode= <Tag extends string, Container> (options: BuildableNodeOptions<Tag, Container>): BuildableNode<Tag, Container> => {
     let parent: Maybe<BuildablePixiJsxNode> = null;
-    const children: Array<[BuildablePixiJsxNode, BuildablePixiJsxNode]> = [];
+    const originalChildrenNodes: BuildablePixiJsxNode[] = [];
+    const augmentedChildrenNodes: BuildablePixiJsxNode[] = [];
+
     const id = getId();
     const {onAddChild, onRemoveChild, ...restOptions} = options
 
@@ -22,23 +24,27 @@ export const buildableNode= <Tag extends string, Container> (options: BuildableN
             return id;
         },
         addChild(child){
-            const addedChild = onAddChild(child, children.map(([x]) => x));
-            children.push([child, addedChild] as const);
+            const addedChild = onAddChild(child, originalChildrenNodes);
+            originalChildrenNodes.push(child);
+            augmentedChildrenNodes.push(addedChild)
             child.setParent(this as BuildablePixiJsxNode)
         },
         removeChild(child){
-            const index = children.findIndex(([originalNode, _]) => originalNode.id === child.id);
+            const index = originalChildrenNodes.findIndex((originalNode) => originalNode.id === child.id);
             assert(index > -1, "this should never happen");
-            const childElement = children[index];
-            invariant(childElement);
-            onRemoveChild(childElement[1], children.map(([x]) => x))
-            children.splice(index, 1);
+            const originalChildElement = originalChildrenNodes[index];
+            const augmentedChildrenNode = augmentedChildrenNodes[index];
+            invariant(originalChildElement);
+            invariant(augmentedChildrenNode);
+            onRemoveChild(augmentedChildrenNode, augmentedChildrenNodes)
+            originalChildrenNodes.splice(index, 1);
+            augmentedChildrenNodes.splice(index, 1);
         },
         setParent: (value: BuildablePixiJsxNode) => {
             parent = value;
         },
         getParent: () => isDefined(parent) ? parent : undefined,
-        getChildren: () => children.map(([x]) => x),
+        getChildren: () => originalChildrenNodes,
         setProp: (name, value) => {
             if(typeof options.container === 'object' && options.container !== null){
                 Reflect.set(options.container, name, value)

@@ -54,9 +54,6 @@ export type JSXNode =
     | (() => JSXNode)
     | RawNode
 
-export type FunctionComponent = <T extends UnknownNodeProps>(props: T) => JSXNode
-
-
 export const RuntimeApplicationNode = (): BuildableApplicationNode => {
     const application = new Application();
     const initializationProps: Record<string, unknown> = {};

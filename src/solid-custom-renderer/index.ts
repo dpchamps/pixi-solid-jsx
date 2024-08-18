@@ -67,4 +67,5 @@ export {
     Index,
     ErrorBoundary,
     createContext,
+    children
 } from "solid-js";
