@@ -1,9 +1,9 @@
-import {assert, invariant, Maybe, UnknownRecord} from "../utility-types.ts";
+import {assert, invariant, Maybe, UnknownRecord} from "../../utility-types.ts";
 import {
     Application,
     Container, TextOptions, ApplicationOptions, Text, ContainerOptions, Sprite, SpriteOptions,
 } from "pixi.js";
-import {buildableNode} from "jsx-runtime/buildable-node.ts";
+import {buildableNode} from "./buildable-node.ts";
 
 
 export type ContainerClass = typeof Container;
@@ -48,6 +48,16 @@ export type BuildableTextNode = BuildableNode<'text', Text>;
 export type BuildableRawTextNode = BuildableNode<'raw', string|number>
 export type BuildableHTMLElementNode = BuildableNode<'html', HTMLElement>
 export type BuildableSpriteNode = BuildableNode<'sprite', Sprite>
+
+type IntrinsicProps<Options,  RefType = unknown, OptionsToOmit extends keyof Options = never> = PixiNodePropsIntrinsic<Partial<Omit<Options, OptionsToOmit | "children">>, RefType>
+
+export type TextIntrinsicProps = IntrinsicProps<TextOptions, BuildableTextNode, "text">;
+
+export type ContainerIntrinsicProps = IntrinsicProps<ContainerOptions, BuildableContainerNode>
+
+export type ApplicationIntrinsicProps = IntrinsicProps<ApplicationOptions, BuildableApplicationNode>;
+
+export type SpriteIntrinsicProps = IntrinsicProps<SpriteOptions, BuildableSpriteNode>;
 
 export type JSXNode =
     | PixiJsxNode
@@ -161,6 +171,3 @@ export const RuntimeSpriteNode = (spriteOptions?: SpriteOptions): BuildableSprit
         }
     })
 }
-
-
-export * from "./intrinsic-nodes.ts"

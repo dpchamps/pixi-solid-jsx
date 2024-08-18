@@ -1,7 +1,7 @@
 import {createContext, createResource} from "solid-js";
 import {createStore} from "solid-js/store";
 import {Texture, Assets} from "pixi.js";
-import {JSX} from "jsx-runtime/jsx-runtime.ts";
+import {JSX} from "../../pixi-jsx/jsx/jsx-runtime.ts";
 
 type Asset = {
     url: string,

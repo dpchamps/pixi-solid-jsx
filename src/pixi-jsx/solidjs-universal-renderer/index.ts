@@ -1,7 +1,7 @@
 import { createRenderer } from "solid-js/universal";
-import {BuildablePixiJsxNode, RuntimeRawNode} from "jsx-runtime/jsx-node.ts";
-import {invariant, unimplemented} from "../utility-types.ts";
-import {createNode} from "jsx-runtime/jsx-runtime.ts";
+import {BuildablePixiJsxNode, RuntimeRawNode} from "../jsx/jsx-node.ts";
+import {invariant, unimplemented} from "../../utility-types.ts";
+import {createNode} from "../jsx/jsx-runtime.ts";
 
 export const {
     render,

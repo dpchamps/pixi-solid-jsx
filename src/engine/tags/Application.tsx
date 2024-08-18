@@ -1,4 +1,4 @@
-import {JSX} from "jsx-runtime/jsx-runtime.ts";
+import {JSX} from "../../pixi-jsx/jsx/jsx-runtime.ts";
 import {
     Accessor, batch,
     createComputed,
@@ -9,7 +9,7 @@ import {
     useContext,
     createResource
 } from 'solid-js';
-import {BuildableApplicationNode} from "jsx-runtime/jsx-node.ts";
+import {BuildableApplicationNode} from "../../pixi-jsx/jsx/jsx-node.ts";
 import {Ticker, Application as PixiApplication} from "pixi.js";
 import {invariant} from "../../utility-types.ts";
 

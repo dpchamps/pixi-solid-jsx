@@ -1,5 +1,5 @@
-import {BuildableNode, BuildablePixiJsxNode} from "jsx-runtime/jsx-node.ts";
-import {assert, invariant, isDefined, Maybe} from "../utility-types.ts";
+import {BuildableNode, BuildablePixiJsxNode} from "./jsx-node.ts";
+import {assert, invariant, isDefined, Maybe} from "../../utility-types.ts";
 
 let _id = 0;
 const getId = () => ++_id;

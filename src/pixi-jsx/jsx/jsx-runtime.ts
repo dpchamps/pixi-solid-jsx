@@ -1,14 +1,15 @@
 import {
     PixiNodeProps,
     UnknownNodeProps,
-    TextIntrinsicProps,
-    ContainerIntrinsicProps,
-    ApplicationIntrinsicProps,
-    SpriteIntrinsicProps,
     RuntimeTextNode,
     RuntimeContainerNode,
     RuntimeApplicationNode,
-    BuildablePixiJsxNode, RuntimeSpriteNode
+    BuildablePixiJsxNode,
+    RuntimeSpriteNode,
+    TextIntrinsicProps,
+    ContainerIntrinsicProps,
+    ApplicationIntrinsicProps,
+    SpriteIntrinsicProps
 } from "./jsx-node.ts";
 
 namespace JSX {

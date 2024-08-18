@@ -3,7 +3,7 @@ import {Scene1} from "./Scene1.tsx";
 import {Controller, createController} from "./createController.ts";
 import {createContext, createEffect, createMemo, useContext} from "solid-js";
 import {invariant} from "../../src/utility-types.ts";
-import {Show} from "solid-custom-renderer/index.ts";
+import {Show} from "../../src/pixi-jsx/solidjs-universal-renderer";
 
 export type GameState = {
     controller: Controller

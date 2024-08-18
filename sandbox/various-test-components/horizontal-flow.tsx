@@ -1,4 +1,4 @@
-import {JSX} from "jsx-runtime/jsx-runtime.ts";
+import {JSX} from "../../src/pixi-jsx/jsx/jsx-runtime.ts";
 import {intoArray} from "../../src/utility-types.ts";
 
 

@@ -7,7 +7,7 @@ import {
 } from "../../src/engine/tags/Application.tsx";
 import {Entity, EntityProps} from "./Entity.tsx";
 import {GameState, useGameState} from "./Game.tsx";
-import {Index} from "solid-custom-renderer/index.ts";
+import {Index} from "../../src/pixi-jsx/solidjs-universal-renderer";
 import {createEntityList, EntityList} from "./createEntityList.ts";
 import {overlaps, randomBetween} from "./position.ts";
 import {createEffect, createSignal, from, getOwner, runWithOwner, untrack} from "solid-js";
