@@ -1,9 +1,9 @@
-import {createAsset} from "../core-effects/createAsset.ts";
-import {Application, useApplicationState} from "../core-tags/Application.tsx";
+import {createAsset} from "../../src/core-effects/createAsset.ts";
+import {Application, useApplicationState} from "../../src/core-tags/Application.tsx";
 import {Texture} from "pixi.js";
-import {createController} from "../sandbox/createController.ts";
-import {createControllerDirection} from "../sandbox/createControllerDirection.ts";
-import {Entity} from "../sandbox/Entity.tsx";
+import {createController} from "../example-1/createController.ts";
+import {createControllerDirection} from "../example-1/createControllerDirection.ts";
+import {Entity} from "../example-1/Entity.tsx";
 import {createStore} from "solid-js/store";
 import {createEffect} from "solid-js";
 

@@ -1,8 +1,8 @@
-import {Application} from "../core-tags/Application.tsx";
+import {Application} from "../../src/core-tags/Application.tsx";
 import {Scene1} from "./Scene1.tsx";
 import {Controller, createController} from "./createController.ts";
 import {createContext, createEffect, createMemo, useContext} from "solid-js";
-import {invariant} from "../utility-types.ts";
+import {invariant} from "../../src/utility-types.ts";
 import {Show} from "solid-custom-renderer/index.ts";
 
 export type GameState = {

@@ -1,5 +1,5 @@
 import {JSX} from "jsx-runtime/jsx-runtime.ts";
-import {intoArray} from "../utility-types.ts";
+import {intoArray} from "../../src/utility-types.ts";
 
 
 type HorizontalFlowProps = JSX.PixieNodeProps<{

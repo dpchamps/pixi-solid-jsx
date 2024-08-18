@@ -34,7 +34,6 @@ export const {
         const index = children.findIndex((el) => el.id === node.id);
         if(index === -1 || index === children.length-1) return undefined;
         return children[index+1]
-
     },
     getParentNode(node) {
         return node.getParent();

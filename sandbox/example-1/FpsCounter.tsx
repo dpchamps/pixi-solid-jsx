@@ -1,4 +1,4 @@
-import {useApplicationState} from "../core-tags/Application.tsx";
+import {useApplicationState} from "../../src/core-tags/Application.tsx";
 import {TextIntrinsicProps} from "jsx-runtime/intrinsic-nodes.ts";
 
 export const FpsCounter = (props?: TextIntrinsicProps) => {

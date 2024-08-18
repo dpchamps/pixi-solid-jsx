@@ -1,7 +1,7 @@
 import {EntityProps} from "./Entity.tsx";
-import {invariant} from "../utility-types.ts";
+import {invariant} from "../../src/utility-types.ts";
 import {createSignal} from "solid-js";
-import {shallowAssignAndDiff} from "../utility-arrays.ts";
+import {shallowAssignAndDiff} from "../../src/utility-arrays.ts";
 
 export type EntityList = ReturnType<typeof createEntityList>;
 export const createEntityList = () => {
