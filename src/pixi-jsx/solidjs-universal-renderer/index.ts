@@ -2,6 +2,7 @@ import { createRenderer } from "solid-js/universal";
 import {BuildablePixiJsxNode, RuntimeRawNode} from "../jsx/jsx-node.ts";
 import {invariant, unimplemented} from "../../utility-types.ts";
 import {createNode} from "../jsx/jsx-runtime.ts";
+import {createProxiedPixieContainerNode, ProxyDomNode, RawNode} from "../proxy-dom";
 
 export const {
     render,
@@ -16,13 +17,13 @@ export const {
     setProp,
     mergeProps,
     use,
-} = createRenderer<BuildablePixiJsxNode>({
+} = createRenderer<ProxyDomNode>({
     createElement(tag) {
-        const node = createNode(tag);
+        const node = createProxiedPixieContainerNode(tag);
         return node
     },
     createTextNode(value) {
-        return RuntimeRawNode(value)
+        return RawNode.create(value)
     },
     getFirstChild(node) {
         return node.getChildren()[0];
@@ -36,7 +37,8 @@ export const {
         return children[index+1]
     },
     getParentNode(node) {
-        return node.getParent();
+        const parent = node.getParent();
+        return parent === null ? undefined : parent;
     },
     insertNode(parent, node, _anchor): void {
         parent.addChild(node);
@@ -45,6 +47,7 @@ export const {
         return node.tag === "text";
     },
     removeNode(parent, node): void {
+        debugger
         parent.removeChild(node);
     },
     replaceText(textNode, value): void {
