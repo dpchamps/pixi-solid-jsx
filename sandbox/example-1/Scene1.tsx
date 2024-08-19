@@ -7,10 +7,9 @@ import {
 } from "../../src/engine/tags/Application.tsx";
 import {Entity, EntityProps} from "./Entity.tsx";
 import {GameState, useGameState} from "./Game.tsx";
-import {Index} from "../../src/pixi-jsx/solidjs-universal-renderer";
+import {Index, createEffect, createSignal, getOwner, runWithOwner, untrack} from "solid-custom-renderer/index.ts";
 import {createEntityList, EntityList} from "./createEntityList.ts";
 import {overlaps, randomBetween} from "./position.ts";
-import {createEffect, createSignal, from, getOwner, runWithOwner, untrack} from "solid-js";
 import {FpsCounter} from "./FpsCounter.tsx";
 import {Texture} from "pixi.js";
 
@@ -190,7 +189,7 @@ export const Scene1 = () => {
             <container zIndex={10000}>
                 <sprite texture={Texture.WHITE} width={270} height={75}/>
                 <FpsCounter zIndex={10_000}/>
-                <text y={25} zIndex={10000}>Entity Count: {entityList.entities().length}</text>
+                <text y={25} zIndex={10000}>Entity Count: {`${entityList.entities().length}`}</text>
             </container>
             {/*<text>Helos</text>*/}
             <Index each={entityList.entities()}>

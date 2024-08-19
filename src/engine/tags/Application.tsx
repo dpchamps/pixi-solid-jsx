@@ -8,10 +8,10 @@ import {
     onMount,
     useContext,
     createResource
-} from 'solid-js';
-import {BuildableApplicationNode} from "../../pixi-jsx/jsx/jsx-node.ts";
+} from 'solid-custom-renderer/index.ts';
 import {Ticker, Application as PixiApplication} from "pixi.js";
 import {invariant} from "../../utility-types.ts";
+import {ApplicationNode} from "../../pixi-jsx/proxy-dom";
 
 export type ApplicationState = {
     time: {
@@ -52,7 +52,7 @@ export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
 }
 
 export const Application = (props: JSX.IntrinsicElements['application']) => {
-    const [application, setApplication] = createSignal<BuildableApplicationNode|null>(null);
+    const [application, setApplication] = createSignal<ApplicationNode>();
     const [mount, setOnMount] = createSignal(false);
     const [deltaTime, setDeltaTime] = createSignal(1);
     const [fps, setFps] = createSignal(0);
@@ -89,10 +89,11 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
 
     return (
         <application {...props} ref={setApplication}>
-            {/*@ts-ignore */}
-            <ApplicationContext.Provider value={applicationState}>
-                {applicationReady() ? props.children : []}
-            </ApplicationContext.Provider>
+            <container>
+                <ApplicationContext.Provider value={applicationState}>
+                    {applicationReady() ? props.children : []}
+                </ApplicationContext.Provider>
+            </container>
         </application>
     )
 }

@@ -1,30 +1,55 @@
-import {Maybe, UnknownRecord} from "../../utility-types.ts";
+import {UnknownRecord} from "../../utility-types.ts";
 import {
-    Container, TextOptions, ApplicationOptions, ContainerOptions, SpriteOptions,
+    TextOptions, ApplicationOptions, ContainerOptions, SpriteOptions,
 } from "pixi.js";
 import {ApplicationNode, ContainerNode, ProxyDomNode, SpriteNode, TextNode} from "../proxy-dom";
+import {Setter} from "../solidjs-universal-renderer";
 
 export type UnknownNodeProps = Record<string, unknown>;
-export type PixiNodeProps<T extends UnknownRecord = {}> = T & ChildPropType & ClassType;
-export type PixiNodePropsIntrinsic<T extends UnknownNodeProps = {}, RefValue = unknown> = T & ChildPropIntrinsicType & ClassType & RefType<RefValue>;
-export type RawNode = string | number
+export type PixiNodeProps<
+    Props extends UnknownRecord = {},
+    RefValue = JSXNode,
+    ChildType = JSXNode
+> = Props & RefType<RefValue> & ChildPropType<ChildType> & ClassType;
 
-export type Children<T = never, Node = PixiJsxNode> = Maybe<(Node)[] | Node | T>;
-export type ChildPropType = {children?: Children};
-export type ChildPropIntrinsicType = {children?: Children<RawNode>};
-export type RefType<RefValue> = {ref?: Maybe<RefValue> | ((e: Maybe<RefValue>) => void)}
+
+export type Children<Node = JSXNode> = Node | Node[];
+export type ChildPropType<Node=JSXNode> = {children?: Children<Node>};
+
+
+export type RefType<RefValue> = {ref?: RefValue|undefined | Setter<RefValue|undefined>}
 
 export type ClassType = {class?: string | undefined};
-export type PixiJsxNode = Container
 
-type IntrinsicProps<Options,  RefType = unknown, OptionsToOmit extends keyof Options = never> = PixiNodePropsIntrinsic<Partial<Omit<Options, OptionsToOmit | "children">>, RefType>
 
-export type TextIntrinsicProps = IntrinsicProps<TextOptions, TextNode, "text">;
+type PixieOptionsProps<Options,  OptionsToOmit extends keyof Options = never> = Partial<Omit<Options, OptionsToOmit | "children">>
 
-export type ContainerIntrinsicProps = IntrinsicProps<ContainerOptions, ContainerNode>
+export type RawNode = string | number
 
-export type ApplicationIntrinsicProps = IntrinsicProps<ApplicationOptions, ApplicationNode>;
+export type TextIntrinsicProps = PixiNodeProps<
+    PixieOptionsProps<TextOptions, "text">,
+    TextNode,
+    RawNode|RawNode[]|(() => RawNode)|(() => RawNode[])
+>
 
-export type SpriteIntrinsicProps = IntrinsicProps<SpriteOptions, SpriteNode>;
+export type ContainerIntrinsicProps = PixiNodeProps<
+    PixieOptionsProps<ContainerOptions>,
+    ContainerNode
+>
 
-export type JSXNode = ProxyDomNode
+export type ApplicationIntrinsicProps = PixiNodeProps<
+    PixieOptionsProps<ApplicationOptions>,
+    ApplicationNode
+>;
+
+export type SpriteIntrinsicProps = PixiNodeProps<
+    PixieOptionsProps<SpriteOptions>,
+    SpriteNode,
+    never
+>;
+
+export type JSXNode =
+    | ProxyDomNode
+    | JSXNode[]
+    | (() => JSXNode)
+    | undefined

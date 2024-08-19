@@ -30,7 +30,7 @@ export function expectNode<Node extends ProxyDomNode, Tag extends ProxyDomNode['
 
 export function expectNodeNot<Node extends ProxyDomNode, Tag extends ProxyDomNode['tag']>(node: Node, context: string, ...tags: Tag[]): asserts node is Exclude<Node, {tag: Tag}> {
     if(tags.some((tag) => node.tag === tag)){
-        throw new Error(`${context}. unexpected node ${node.tag}. expected on of: ${tags.join(",")}`)
+        throw new Error(`${context}. unexpected node ${node.tag}. cannot be: ${tags.join(",")}`)
     }
 }
 

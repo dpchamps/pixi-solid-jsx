@@ -2,6 +2,7 @@ import { createRenderer } from "solid-js/universal";
 import {invariant, unimplemented} from "../../utility-types.ts";
 import {createProxiedPixieContainerNode, ProxyDomNode, RawNode} from "../proxy-dom";
 
+
 export const {
     render,
     effect,
@@ -45,7 +46,6 @@ export const {
         return node.tag === "text";
     },
     removeNode(parent, node): void {
-        debugger
         parent.removeChild(node);
     },
     replaceText(textNode, value): void {
@@ -57,15 +57,6 @@ export const {
 
 });
 
-export {
-    For,
-    Show,
-    Suspense,
-    SuspenseList,
-    Switch,
-    Match,
-    Index,
-    ErrorBoundary,
-    createContext,
-    children
-} from "solid-js";
+
+
+export * from "./patched-types.ts"

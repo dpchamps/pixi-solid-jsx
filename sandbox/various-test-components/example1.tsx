@@ -1,6 +1,4 @@
-import {createAsset} from "../../src/engine/effects/createAsset.ts";
 import {Application, useApplicationState} from "../../src/engine/tags/Application.tsx";
-import {Texture} from "pixi.js";
 import {createController} from "../example-1/createController.ts";
 import {createControllerDirection} from "../example-1/createControllerDirection.ts";
 import {Entity} from "../example-1/Entity.tsx";
@@ -14,7 +12,7 @@ export const ClickSpriteExample = () => {
         x: 0,
         y: 0
     });
-    const [applicationState] = useApplicationState() || [] as any;
+    const applicationState = useApplicationState();
     createEffect(() => {
         console.log(applicationState);
         setPlayerState((p) => ({

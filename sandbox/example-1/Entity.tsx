@@ -1,6 +1,7 @@
 import {createAsset} from "../../src/engine/effects/createAsset.ts";
 import {Texture} from "pixi.js";
 import {SpriteIntrinsicProps} from "jsx-runtime/jsx-node.ts";
+import {Show} from "solid-custom-renderer/patched-types.ts";
 
 export type EntityProps = {
     id: string,
@@ -20,7 +21,15 @@ export const Entity = (entityProps: EntityProps) => {
 
     return (
         <container zIndex={entityProps.zIndex || 1}>
-            <sprite eventMode={'static'} texture={texture()} scale={entityProps.scale || 1}  x={entityProps.x} y={entityProps.y} tint={entityProps.tint || "white"} {...entityProps.spriteProps}/>
+            <sprite
+                eventMode={'static'}
+                texture={texture()!}
+                scale={entityProps.scale || 1}
+                x={entityProps.x}
+                y={entityProps.y}
+                tint={entityProps.tint || "white"}
+                {...entityProps.spriteProps}
+            />
         </container>
     )
 }

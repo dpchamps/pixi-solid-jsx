@@ -1,7 +1,6 @@
-import {createContext, createResource} from "solid-js";
-import {createStore} from "solid-js/store";
 import {Texture, Assets} from "pixi.js";
 import {JSX} from "../../pixi-jsx/jsx/jsx-runtime.ts";
+import {createContext, createStore, createResource} from "solid-custom-renderer/index.ts";
 
 type Asset = {
     url: string,
@@ -48,7 +47,7 @@ export const AssetsProvider = (props: JSX.PixieNodeProps<AssetProviderProps>) =>
         loadingState: "Loading" as const
     });
 
-    const [resource] = createResource(async () => {
+    const [_resource] = createResource(async () => {
         try{
             for(const asset of props.assets){
                 console.log('loading asset', asset);
@@ -70,7 +69,6 @@ export const AssetsProvider = (props: JSX.PixieNodeProps<AssetProviderProps>) =>
 
 
     return (
-        // @ts-ignore
         <AssetsContext.Provider value={assetContext}>
             {props.children}
         </AssetsContext.Provider>
