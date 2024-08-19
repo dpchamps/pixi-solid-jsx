@@ -1,5 +1,5 @@
 import {useApplicationState} from "../../src/engine/tags/Application.tsx";
-import {TextIntrinsicProps} from "../../src/pixi-jsx/jsx/intrinsic-nodes.ts";
+import {TextIntrinsicProps} from "jsx-runtime/jsx-node.ts";
 
 export const FpsCounter = (props?: TextIntrinsicProps) => {
     const applicationState = useApplicationState();

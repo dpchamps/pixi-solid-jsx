@@ -9,6 +9,12 @@ export {RawNode} from "./nodes/RawNode.ts";
 export {HtmlElementNode} from "./nodes/HtmlElementNode.ts";
 export {type ProxyDomNode} from "./nodes/Node.ts";
 
+export * from "./nodes/TextNode.ts";
+export * from "./nodes/ContainerNode.ts";
+export * from "./nodes/ApplicationNode.ts";
+export * from "./nodes/SpriteNode.ts";
+
+
 export const createProxiedPixieContainerNode = (tag: string) => {
     switch (tag){
         case "text": return TextNode.create();

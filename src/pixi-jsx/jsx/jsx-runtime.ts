@@ -1,15 +1,10 @@
 import {
     PixiNodeProps,
     UnknownNodeProps,
-    RuntimeTextNode,
-    RuntimeContainerNode,
-    RuntimeApplicationNode,
-    BuildablePixiJsxNode,
-    RuntimeSpriteNode,
     TextIntrinsicProps,
     ContainerIntrinsicProps,
     ApplicationIntrinsicProps,
-    SpriteIntrinsicProps
+    SpriteIntrinsicProps, JSXNode
 } from "./jsx-node.ts";
 
 namespace JSX {
@@ -20,21 +15,9 @@ namespace JSX {
         sprite: SpriteIntrinsicProps
     }
 
-    export type Element = BuildablePixiJsxNode
+    export type Element = JSXNode
 
     export type PixieNodeProps<T extends UnknownNodeProps = {}> = PixiNodeProps<T>
 }
 
 export type {JSX}
-
-export const createNode = (tag: keyof JSX.IntrinsicElements|string) => {
-    switch (tag){
-        case "text": return RuntimeTextNode();
-        case "container": return RuntimeContainerNode();
-        case "application": return RuntimeApplicationNode();
-        case "sprite": return RuntimeSpriteNode();
-        default: {
-            throw new Error(`Received Invalid Tag ${tag}`)
-        }
-    }
-}

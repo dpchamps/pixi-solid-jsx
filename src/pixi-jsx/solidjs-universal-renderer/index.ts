@@ -1,7 +1,5 @@
 import { createRenderer } from "solid-js/universal";
-import {BuildablePixiJsxNode, RuntimeRawNode} from "../jsx/jsx-node.ts";
 import {invariant, unimplemented} from "../../utility-types.ts";
-import {createNode} from "../jsx/jsx-runtime.ts";
 import {createProxiedPixieContainerNode, ProxyDomNode, RawNode} from "../proxy-dom";
 
 export const {
