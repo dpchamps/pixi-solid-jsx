@@ -4,8 +4,8 @@ import {Parent} from "./honest-children-rendering";
 
 const main = async () => {
     console.log("it works!")
-    renderRoot(Game, document.body)
-    // renderRoot(Parent, document.body)
+    // renderRoot(Game, document.body)
+    renderRoot(Parent, document.body)
 }
 
 

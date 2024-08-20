@@ -1,7 +1,6 @@
 import {createAsset} from "../../src/engine/effects/createAsset.ts";
 import {Texture} from "pixi.js";
 import {SpriteIntrinsicProps} from "jsx-runtime/jsx-node.ts";
-import {Show} from "solid-custom-renderer/patched-types.ts";
 
 export type EntityProps = {
     id: string,

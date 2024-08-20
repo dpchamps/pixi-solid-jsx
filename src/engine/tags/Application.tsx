@@ -1,6 +1,6 @@
 import {JSX} from "../../pixi-jsx/jsx/jsx-runtime.ts";
 import {
-    Accessor, batch,
+    Accessor,
     createComputed,
     createContext,
     createSignal,
@@ -9,14 +9,16 @@ import {
     useContext,
     createResource
 } from 'solid-custom-renderer/index.ts';
-import {Ticker, Application as PixiApplication} from "pixi.js";
-import {invariant} from "../../utility-types.ts";
+import {Application as PixiApplication} from "pixi.js";
+import {invariant, Maybe} from "../../utility-types.ts";
 import {ApplicationNode} from "../../pixi-jsx/proxy-dom";
+import {createTimer} from "../core/time.ts";
 
 export type ApplicationState = {
     time: {
         deltaTime: Accessor<number>,
-        fps: Accessor<number>
+        fps: Accessor<number>,
+        elapsedMsSinceLastFrame: Accessor<number>
     },
     onNextTick: Set<() => void>,
     application: PixiApplication
@@ -37,9 +39,10 @@ export type OnNextFrameQuery<QueryResult> = {
 
 export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
     const appState = useApplicationState();
-
+    const [cancel, setCancel] = createSignal(false);
     createComputed(() => {
         const queryResult = args.query(appState);
+        if(cancel()) return;
         const execution = () => {
             args.tick(queryResult);
             appState.onNextTick.delete(execution)
@@ -49,37 +52,26 @@ export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
             appState.onNextTick.delete(execution)
         });
     });
+
+    return () => setCancel(true);
 }
 
 export const Application = (props: JSX.IntrinsicElements['application']) => {
     const [application, setApplication] = createSignal<ApplicationNode>();
     const [mount, setOnMount] = createSignal(false);
-    const [deltaTime, setDeltaTime] = createSignal(1);
-    const [fps, setFps] = createSignal(0);
-    const applicationState: ApplicationState = {
-        time: {
-            deltaTime,
-            fps
-        },
-        onNextTick: new Set<() => void>(),
-    } as ApplicationState
+    const nextFrameFns = new Set<() => void>();
+    const timer = createTimer({nextFrameFns: nextFrameFns})
+    const applicationState = {
+        time: timer.time,
+        onNextTick: nextFrameFns,
+        application: null as Maybe<ApplicationState['application']>
+    } satisfies Omit<ApplicationState, "application"> & {application: Maybe<ApplicationState['application']>}
 
     const [applicationReady] = createResource(mount, async () => {
         const app = application();
         invariant(app);
         await app.initialize();
-        app.container.ticker.maxFPS = 60;
-        app.container.ticker.start();
-        const tickerFn = (ticker: Ticker) => {
-            batch(() => {
-                setDeltaTime(ticker.deltaTime);
-                setFps(ticker.FPS);
-                applicationState.onNextTick.forEach(Reflect.apply);
-            });
-        }
-        app.container.ticker.add(tickerFn);
         applicationState.application = app.container;
-        onCleanup(() => app.container.ticker.remove(tickerFn));
         return true;
     });
 
@@ -90,7 +82,7 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
     return (
         <application {...props} ref={setApplication}>
             <container>
-                <ApplicationContext.Provider value={applicationState}>
+                <ApplicationContext.Provider value={applicationState as ApplicationState}>
                     {applicationReady() ? props.children : []}
                 </ApplicationContext.Provider>
             </container>
