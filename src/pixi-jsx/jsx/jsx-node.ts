@@ -1,9 +1,10 @@
 import {UnknownRecord} from "../../utility-types.ts";
 import {
-    TextOptions, ApplicationOptions, ContainerOptions, SpriteOptions,
+    TextOptions, ApplicationOptions, ContainerOptions, SpriteOptions, GraphicsOptions,
 } from "pixi.js";
 import {ApplicationNode, ContainerNode, ProxyDomNode, SpriteNode, TextNode} from "../proxy-dom";
 import {Setter} from "../solidjs-universal-renderer";
+import {GraphicsNode} from "../proxy-dom/nodes/Graphics.ts";
 
 export type UnknownNodeProps = Record<string, unknown>;
 export type PixiNodeProps<
@@ -45,6 +46,12 @@ export type ApplicationIntrinsicProps = PixiNodeProps<
 export type SpriteIntrinsicProps = PixiNodeProps<
     PixieOptionsProps<SpriteOptions>,
     SpriteNode,
+    never
+>;
+
+export type GraphicsIntrinsicProps = PixiNodeProps<
+    PixieOptionsProps<GraphicsOptions>,
+    GraphicsNode,
     never
 >;
 

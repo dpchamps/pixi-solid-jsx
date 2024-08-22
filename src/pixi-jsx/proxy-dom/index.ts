@@ -2,6 +2,7 @@ import {TextNode} from "./nodes/TextNode.ts";
 import {ContainerNode} from "./nodes/ContainerNode.ts";
 import {ApplicationNode} from "./nodes/ApplicationNode.ts";
 import {SpriteNode} from "./nodes/SpriteNode.ts";
+import {GraphicsNode} from "./nodes/Graphics.ts";
 
 
 
@@ -21,6 +22,7 @@ export const createProxiedPixieContainerNode = (tag: string) => {
         case "container": return ContainerNode.create();
         case "application": return ApplicationNode.create();
         case "sprite": return SpriteNode.create();
+        case "graphics": return GraphicsNode.create();
         default: {
             throw new Error(`Received Invalid Tag ${tag}`)
         }

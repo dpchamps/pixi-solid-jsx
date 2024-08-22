@@ -1,5 +1,5 @@
 import {assert, invariant, Maybe} from "../../../utility-types.ts";
-import {Application, Container, Sprite, Text} from "pixi.js";
+import {Application, Container, Graphics, Sprite, Text} from "pixi.js";
 
 export type ProxyDomNode =
     | IProxyNode<'application', Application, ProxyDomNode>
@@ -8,6 +8,7 @@ export type ProxyDomNode =
     | IProxyNode<'container', Container, ProxyDomNode>
     | IProxyNode<'raw', string, ProxyDomNode>
     | IProxyNode<'sprite', Sprite, ProxyDomNode>
+    | IProxyNode<'graphics', Graphics, ProxyDomNode>
 
 interface GenericNode extends IProxyNode<any, any, any>{}
 

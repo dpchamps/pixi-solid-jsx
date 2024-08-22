@@ -4,7 +4,7 @@ import {
     TextIntrinsicProps,
     ContainerIntrinsicProps,
     ApplicationIntrinsicProps,
-    SpriteIntrinsicProps, JSXNode
+    SpriteIntrinsicProps, JSXNode, GraphicsIntrinsicProps
 } from "./jsx-node.ts";
 
 // Reference: https://www.typescriptlang.org/docs/handbook/jsx.html#type-checking
@@ -15,6 +15,7 @@ namespace JSX {
         container: ContainerIntrinsicProps,
         application: ApplicationIntrinsicProps,
         sprite: SpriteIntrinsicProps
+        graphics: GraphicsIntrinsicProps
     }
 
     export type Element = JSXNode
