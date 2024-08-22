@@ -7,7 +7,7 @@ import {
     onCleanup,
     onMount,
     useContext,
-    createResource
+    createResource, createEffect
 } from 'solid-custom-renderer/index.ts';
 import {Application as PixiApplication} from "pixi.js";
 import {invariant, Maybe} from "../../utility-types.ts";
@@ -72,6 +72,7 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         invariant(app);
         await app.initialize();
         applicationState.application = app.container;
+        console.log("application initialized")
         return true;
     });
 

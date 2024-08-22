@@ -1,4 +1,4 @@
-import {onNextFrame} from "../tags/Application.tsx";
+import {onNextFrame, OnNextFrameQuery} from "../tags/Application.tsx";
 
 export const createInterval = (fn: () => void, ms: number) => {
     let current = ms;
@@ -23,4 +23,8 @@ export const createTimeout = (fn: () => void, ms: number) => {
     }, ms)
 
     return dispose;
+}
+
+export const createRequestFramesForDuration = <Q>(duration: number, query: OnNextFrameQuery<Q>) => {
+
 }

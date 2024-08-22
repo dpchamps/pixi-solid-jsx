@@ -1,11 +1,9 @@
-import {Game} from "./example-1/Game.tsx";
 import {renderRoot} from "../src/pixi-jsx";
-import {Parent} from "./honest-children-rendering";
-
+import {Main} from "./Main.tsx";
 const main = async () => {
     console.log("it works!")
     // renderRoot(Game, document.body)
-    renderRoot(Parent, document.body)
+    renderRoot(Main, document.body)
 }
 
 

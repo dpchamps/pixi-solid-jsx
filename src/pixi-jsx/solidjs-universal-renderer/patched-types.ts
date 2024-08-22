@@ -1,6 +1,5 @@
 
 export {
-    For,
     Suspense,
     SuspenseList,
     Switch,
@@ -22,7 +21,7 @@ export {
     type Setter
 } from "solid-js";
 
-export {createStore} from "solid-js/store";
+export {createStore, unwrap} from "solid-js/store";
 
 /***
  * Patching JSX Element types for downstream
@@ -40,12 +39,12 @@ type RequiredParameter<T> = T extends () => unknown ? never : T;
 import {
     Index as SolidIndex,
     Show as SolidShow,
+    For as SolidFor,
     Accessor as SolidAccessor,
     createContext as solidCreateContext,
     useContext as solidUseContext,
     children as solidChildren,
     EffectOptions,
-    ChildrenReturn
 } from "solid-js";
 
 /// Index
@@ -56,6 +55,13 @@ declare function IndexType<T extends readonly any[], U extends JSX.Element>(prop
 }): JSX.Element;
 export const Index = SolidIndex as unknown as typeof IndexType;
 
+/// For
+declare function ForType<T extends readonly any[], U extends JSX.Element>(props: {
+    each: T | undefined | null | false;
+    fallback?: JSX.Element;
+    children: (item: T[number], index: SolidAccessor<number>) => U;
+}): JSX.Element;
+export const For = SolidFor as unknown as typeof ForType;
 
 /// Show
 export declare function ShowType<
@@ -97,7 +103,10 @@ export const useContext = solidUseContext as unknown as typeof useContextType;
 
 
 /// children
-
+export type ResolvedChildren = JSX.Element | JSX.Element[];
+export type ChildrenReturn = SolidAccessor<ResolvedChildren> & {
+    toArray: () => JSX.Element[];
+};
 export declare function childrenType(fn: SolidAccessor<JSX.Element>): ChildrenReturn;
 
 export const children = solidChildren as unknown as typeof childrenType;

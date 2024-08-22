@@ -1,4 +1,6 @@
 import {onNextFrame} from "../tags/Application.tsx";
+import {lerp} from "../libs/Math.ts";
+import {createSignal} from "solid-custom-renderer/patched-types.ts";
 
 export type GeneratorYieldResult =
     | GeneratorStop
@@ -9,7 +11,7 @@ type GeneratorStop = {type: "GeneratorStop"};
 type GeneratorWaitForMs = {type: "GeneratorWaitMs", ms: number};
 type GeneratorWaitForFrames = {type: "GeneratorWaitFrames", frames: number};
 
-type CoroutineFn = () => Generator<GeneratorYieldResult|undefined, void, never>;
+export type CoroutineFn = () => Generator<GeneratorYieldResult|undefined, void, number>;
 
 type TimestampState = { timeStamp: number, duration: number };
 
@@ -49,30 +51,35 @@ const initializeCounterState = (frames: number) => frames;
 const isInWaitingState = (timeStampState: TimestampState|null, counterState: number|null) =>
     timeStampState !== null || counterState !== null;
 
-export const createCoroutine = (fn: CoroutineFn) => {
+export const startCoroutine = (fn: CoroutineFn) => {
     const iterator = fn();
     let timeStampState: TimestampState|null = null;
     let counter: number|null = null;
+    let [stopped, setStopped] = createSignal(false);
+    const onCoroutineDone = () => {
+        setStopped(true);
+        dispose();
+    }
 
     const dispose = onNextFrame({
         query: (applicationState) => {
-            return applicationState.time.deltaTime()
+            return applicationState.time.elapsedMsSinceLastFrame()
         },
-        tick: () => {
+        tick: (elapsedMs) => {
             timeStampState = getNextTimeStampState(timeStampState);
             counter = getNextCounterState(counter);
             if(isInWaitingState(timeStampState, counter)) return;
 
-            const result = iterator.next();
+            const result = iterator.next(elapsedMs);
 
             if(result.done || !result.value){
-                result.done && dispose();
+                result.done && onCoroutineDone();
                 return
             }
 
             switch(result.value.type){
                 case "GeneratorStop": {
-                    dispose();
+                    onCoroutineDone();
                     break;
                 }
                 case "GeneratorWaitMs":{
@@ -87,35 +94,29 @@ export const createCoroutine = (fn: CoroutineFn) => {
         }
     })
 
-    return dispose;
+    return {dispose, stopped};
 }
 
+/**
+ * Creates a coroutine that is specialized for easing functions
+ *
+ * @param cb
+ * @param easingFn
+ * @param duration
+ */
+export const createEasingCoroutine = (
+    cb: (fn: (a: number, b: number) => number) => void,
+    easingFn: (x: number) => number,
+    duration: number
+): CoroutineFn => {
 
-export const easingFunctionCoroutine = (fn: () => Generator, steps: number, easingFunction: (x: number) => number) => {
-    const iterator = fn();
-    let ease = 1;
-    let counter = 0;
-
-    const dispose = onNextFrame({
-        query: (applicationState) => {
-            return applicationState.time.deltaTime()
-        },
-        tick: () => {
-            if(counter === steps){
-                dispose();
-                return;
-            }
-
-            if((counter++)%ease === 0){
-                const result = iterator.next();
-                ease = easingFunction(ease)
-                console.log("ease", ease)
-                if(result.done){
-                    dispose();
-                }
-            }
+    return function* (){
+        let elapsed = 0;
+        while(elapsed <= duration){
+            cb((a: number, b: number) => lerp(a, b, easingFn(elapsed/duration)));
+            const elapsedSinceLastFrame = yield;
+            elapsed += elapsedSinceLastFrame;
+            yield waitFrames(1);
         }
-    })
-
-    return dispose;
+    }
 }
