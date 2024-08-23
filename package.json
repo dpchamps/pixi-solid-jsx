@@ -11,7 +11,7 @@
   "type": "module",
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@vitest/coverage-v8": "^2.0.5",
     "typescript": "^5.5.4",
