@@ -18,6 +18,10 @@ export class TextNode extends ProxyNode<"text", Text, ProxyDomNode> {
         this.container.text = value;
     }
 
+    override addChildProxyUntracked(_untracked: Text) {
+        throw new Error("cannot add untracked child to text")
+    }
+
     removeChildProxy(proxied: ProxyDomNode) {
         const nextText = this.children.reduce(
             (acc, el) => {

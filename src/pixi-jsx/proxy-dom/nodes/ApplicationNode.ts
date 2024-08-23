@@ -31,6 +31,11 @@ export class ApplicationNode extends ProxyNode<"application", Application, Proxy
         invariant(root, `Cannot initialize application before root has been appended`);
         expectNode(root, "html", `unexpected parent for application`);
         await this.container.init(this.initializationProps);
+        this.container.render();
         root.container.appendChild(this.container.canvas);
+    }
+
+    override addChildProxyUntracked(_untracked: Application) {
+        throw new Error("cannot add untracked child to application")
     }
 }

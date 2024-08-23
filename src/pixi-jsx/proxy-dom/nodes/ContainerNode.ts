@@ -15,4 +15,17 @@ export class ContainerNode extends ProxyNode<'container', Container, ProxyDomNod
         expectNodeNot(proxied, "unexpected child to container on removal (this is an invariant state)", "application", "html", "raw");
         this.container.removeChild(proxied.container);
     }
+
+    override addChildProxyUntracked(untracked: Container) {
+        this.container.addChild(untracked);
+        this.untrackedChildren.push(untracked)
+    }
+
+    override syncUntracked() {
+        for(const untracked of this.untrackedChildren){
+            if(!this.container.children.includes(untracked)){
+                this.container.children.push(untracked);
+            }
+        }
+    }
 }

@@ -13,4 +13,8 @@ export class RawNode extends ProxyNode<"raw", string, ProxyDomNode> {
     removeChildProxy(node: ProxyDomNode) {
         throw new Error(`invariant state: cannot remove child from raw node (value: ${this.container}), got: ${node.tag}`);
     }
+
+    override addChildProxyUntracked(_untracked: string) {
+        throw new Error(`invariant state: cannot add untracked child to raw`);
+    }
 }

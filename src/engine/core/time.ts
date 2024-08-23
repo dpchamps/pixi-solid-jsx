@@ -46,6 +46,7 @@ export const createTimer = (args: CreateTimerArgs) => {
             deltaTime: () => timerData.deltaTime,
             fps: () => timerData.currentFps,
             elapsedMsSinceLastFrame: () => timerData.elapsedMsSinceLastFrame
-        }
+        },
+        ticker
     }
 }

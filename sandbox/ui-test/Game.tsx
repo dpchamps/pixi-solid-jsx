@@ -5,7 +5,7 @@ import {FlexBox} from "../../src/engine/tags/FlexBox/FlexBox.tsx";
 import {createMouse} from "../../src/engine/effects/createMouse.ts";
 import {createAsset} from "../../src/engine/effects/createAsset.ts";
 import {Texture} from "pixi.js";
-import {BackgroundContainer} from "./BackgroundContainer.tsx";
+import {BackgroundContainer, Box} from "./BackgroundContainer.tsx";
 import {Graphics} from "./Graphics.tsx";
 import {createRect} from "../../src/engine/effects/createGraphics.ts";
 
@@ -21,32 +21,37 @@ export const Stage = () => {
     const [containerList, setContainerList] = createSignal<string[]>([]);
     const mouse = createMouse(document);
 
+    const [margin, setMargin] = createSignal(0);
     createEffect(() => {
         if(mouse.click() === "Main"){
             setContainerList((prev) => [...prev, `Next: ${Math.random()}`]);
         }
     })
 
+    createEffect(() => {
+        const dy = mouse.wheel()?.deltaY || 0;
+        setMargin((val) => val + (dy ? dy > 0 ? 1 : -1 : 0))
+    })
+
     return (
         <>
-            {/*<FlexBox*/}
-            {/*    x={100}*/}
-            {/*    y={100}*/}
-            {/*    margin={50}*/}
-            {/*    orientation={"vertical"}*/}
-            {/*    width={100}*/}
-            {/*>*/}
-            {/*    <text>Blah</text>*/}
-            {/*    <text>Another Blah</text>*/}
-            {/*</FlexBox>*/}
-
-            <BackgroundContainer x={100} y={100} observe={containerList} background={RedBackground} padding={50}>
-                <FlexBox margin={50} orientation={'vertical'}>
+            <Box
+                x={200}
+                y={100}
+                backgroundColor={"red"}
+                borderColor={"black"}
+                observe={containerList}
+                padding={margin()}
+                margin={2}
+            >
+                <FlexBox>
+                    <text>Hello</text>
+                    <text>World</text>
                     <For each={containerList()}>
                         {(t) => <text zIndex={1000}>{t}</text>}
                     </For>
                 </FlexBox>
-            </BackgroundContainer>
+            </Box>
         </>
     )
 }

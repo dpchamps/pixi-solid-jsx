@@ -16,4 +16,7 @@ export class HtmlElementNode extends ProxyNode<"html", HTMLElement, ProxyDomNode
         }
     }
 
+    override addChildProxyUntracked(_untracked: HTMLElement) {
+        throw new Error("cannot add untracked child to html node")
+    }
 }

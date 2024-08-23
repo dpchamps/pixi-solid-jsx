@@ -7,7 +7,7 @@ import {
     onCleanup,
     onMount,
     useContext,
-    createResource
+    createResource, Show
 } from 'solid-custom-renderer/index.ts';
 import {Application as PixiApplication} from "pixi.js";
 import {invariant, Maybe} from "../../utility-types.ts";
@@ -70,10 +70,8 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
     const [applicationReady] = createResource(mount, async () => {
         const app = application();
         invariant(app);
-        console.log("initializing...");
-        const then = performance.now();
+        app.container.ticker = timer.ticker;
         await app.initialize();
-        console.log("initialized", performance.now()-then);
         applicationState.application = app.container;
         console.log("application initialized")
         return true;
@@ -87,7 +85,9 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         <application {...props} ref={setApplication}>
             <container>
                 <ApplicationContext.Provider value={applicationState as ApplicationState}>
-                    {applicationReady() ? props.children : []}
+                    <Show when={applicationReady} fallback={<text>Loading...</text>}>
+                        {props.children}
+                    </Show>
                 </ApplicationContext.Provider>
             </container>
         </application>

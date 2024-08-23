@@ -1,4 +1,4 @@
-import {assert, invariant, Maybe} from "../../../utility-types.ts";
+import {assert, invariant, Maybe, unimplemented} from "../../../utility-types.ts";
 import {Application, Container, Graphics, Sprite, Text} from "pixi.js";
 
 export type ProxyDomNode =
@@ -47,6 +47,7 @@ export abstract class ProxyNode<Tag extends string, Container, NodeType extends 
     protected parent: Maybe<NodeType> = null;
     protected children: NodeType[] = [];
     protected proxiedChildren: NodeType[] = [];
+    protected untrackedChildren: Container[] = [];
 
     protected constructor(tag: Tag, container: Container) {
         this.tag = tag;
@@ -61,6 +62,7 @@ export abstract class ProxyNode<Tag extends string, Container, NodeType extends 
     }
 
     abstract addChildProxy(child: NodeType): NodeType|void
+    abstract addChildProxyUntracked(untracked: Container): void;
 
     addChild(node: NodeType) {
         const proxied = this.addChildProxy(node);
@@ -89,6 +91,8 @@ export abstract class ProxyNode<Tag extends string, Container, NodeType extends 
     }
 
     abstract removeChildProxy(node: NodeType): void;
+
+    syncUntracked() {}
 
     removeChild(node: NodeType){
         const proxiedChild = this.removeChildBase(node);

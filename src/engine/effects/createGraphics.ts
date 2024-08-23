@@ -1,4 +1,4 @@
-import {FillInput, Graphics, GraphicsContext, GraphicsOptions} from "pixi.js";
+import {ColorSource, FillInput, FillStyle, Graphics, GraphicsContext, GraphicsOptions, StrokeInput} from "pixi.js";
 
 type GFXOptions = GraphicsOptions|GraphicsContext;
 
@@ -27,6 +27,8 @@ export const createRect = (props: CreateRectProps) => {
     return createGraphics({
         graphicsOptions: props.graphicsOptions,
         build: (graphics) => {
-            graphics.rect(props.x, props.y, props.height, props.width).fill(props.fill);
+            graphics
+                .rect(props.x, props.y, props.height, props.width)
+                .fill(props.fill);
         }})
 }

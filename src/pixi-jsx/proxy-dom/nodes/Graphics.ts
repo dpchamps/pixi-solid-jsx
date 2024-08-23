@@ -13,4 +13,8 @@ export class GraphicsNode extends ProxyNode<"graphics", Graphics  , ProxyDomNode
     removeChildProxy(node: ProxyDomNode) {
         throw new Error(`invariant state: cannot remove child from sprite node (id: ${this.id}), got: ${node.tag}`);
     }
+
+    override addChildProxyUntracked(_untracked: Graphics) {
+        throw new Error("cannot add untracked child to graphics")
+    }
 }
