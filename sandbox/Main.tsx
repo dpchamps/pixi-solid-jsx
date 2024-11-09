@@ -5,11 +5,11 @@ import {Game} from "./ui-test/Game.tsx";
 export const Main = () => {
     return (
         <Application
-            width={1000}
+            width={600}
             height={800}
-            backgroundColor={"white"}
+            backgroundColor={"pink"}
             // resolution={window.devicePixelRatio}
-            // antialias={true}
+            antialias={true}
         >
             <>
                 <FpsCounter/>

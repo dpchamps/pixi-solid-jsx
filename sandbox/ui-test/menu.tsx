@@ -9,6 +9,8 @@ import {Container, Texture, Text} from "pixi.js";
 import {createController} from "../example-1/createController.ts";
 import {ContainerNode} from "../../src/pixi-jsx/proxy-dom";
 import {invariant} from "../../src/utility-types.ts";
+import {Box} from "./BackgroundContainer.tsx";
+import {FlexBox} from "../../src/engine/tags/FlexBox/FlexBox.tsx";
 
 type HorizontalSpacingProps = {
     x?: number,
@@ -89,15 +91,22 @@ export const Menu = (props: JSX.PixieNodeProps<{visible: boolean}>) => {
     })
 
     return (
-        <container visible={props.visible}>
-            <Spacer x={100} y={100} margin={60} type={'horizontal'}>
-                <sprite x={(-25)} y={indicatorPosition()} texture={texture()!} width={50} height={50}/>
-                <Spacer margin={60} type={'vertical'}>
-                    <For each={menu()}>
-                        {(title) => <text>{title}</text>}
-                    </For>
-                </Spacer>
-            </Spacer>
-        </container>
+        <Box
+            type={'fixed'}
+            x={0}
+            y={0}
+            width={400}
+            height={400}
+            backgroundColor={'grey'}
+            borderColor={'grey'}
+        >
+            <sprite x={(-25)} y={indicatorPosition()} texture={texture()!} width={50} height={50}/>
+
+            <FlexBox orientation={'vertical'} padding={60}>
+                <For each={menu()}>
+                    {(title) => <text>{title}</text>}
+                </For>
+          </FlexBox>
+        </Box>
     )
 }

@@ -3,55 +3,66 @@ import {createEffect, createSignal, For} from "solid-custom-renderer/patched-typ
 import {Menu} from "./menu.tsx";
 import {FlexBox} from "../../src/engine/tags/FlexBox/FlexBox.tsx";
 import {createMouse} from "../../src/engine/effects/createMouse.ts";
-import {createAsset} from "../../src/engine/effects/createAsset.ts";
-import {Texture} from "pixi.js";
-import {BackgroundContainer, Box} from "./BackgroundContainer.tsx";
-import {Graphics} from "./Graphics.tsx";
-import {createRect} from "../../src/engine/effects/createGraphics.ts";
+import {Box} from "./BackgroundContainer.tsx";
+import {createControllerDirection} from "../example-1/createControllerDirection.ts";
+import {clamp} from "../../src/utility-numbers.ts";
+import {createWindowDimensions} from "../../src/engine/effects/createWindow.ts";
+import {onNextFrame} from "../../src/engine/tags/Application.tsx";
 
-const RedBackground = createRect({
-    x: 0,
-    y: 0,
-    height: 1,
-    width: 1,
-    fill: "red"
-})
 export const Stage = () => {
-    const texture = createAsset<Texture>("fire.png");
     const [containerList, setContainerList] = createSignal<string[]>([]);
     const mouse = createMouse(document);
-
-    const [margin, setMargin] = createSignal(0);
+    const keyboard = createController();
+    const direction = createControllerDirection(keyboard);
+    const [containerX, setContainerX] = createSignal(100);
+    const [containerY, setContainerY] = createSignal(100);
     createEffect(() => {
         if(mouse.click() === "Main"){
             setContainerList((prev) => [...prev, `Next: ${Math.random()}`]);
         }
     })
 
+    const onScroll = () => {
+        const dy = clamp(-1, 1, mouse.wheel()?.deltaY || 0);
+        const dx = clamp(-1, 1, mouse.wheel()?.deltaX || 0);
+
+        return {x: dx*10, y: dy*10};
+    }
+
     createEffect(() => {
-        const dy = mouse.wheel()?.deltaY || 0;
-        setMargin((val) => val + (dy ? dy > 0 ? 1 : -1 : 0))
+        const dX = direction.x();
+        const dY = direction.y();
+        setContainerX((v) => v+dX*10);
+        setContainerY((v) => v+dY*10);
     })
 
     return (
         <>
-            <Box
-                x={200}
-                y={100}
-                backgroundColor={"red"}
-                borderColor={"black"}
-                observe={containerList}
-                padding={margin()}
-                margin={2}
-            >
-                <FlexBox>
-                    <text>Hello</text>
-                    <text>World</text>
-                    <For each={containerList()}>
-                        {(t) => <text zIndex={1000}>{t}</text>}
-                    </For>
-                </FlexBox>
+                {/*<Box*/}
+                {/*    type={'fixed'}*/}
+                {/*    x={containerX()}*/}
+                {/*    y={containerY()}*/}
+                {/*    backgroundColor={"red"}*/}
+                {/*    borderColor={"black"}*/}
+                {/*    padding={10}*/}
+                {/*    onScroll={onScroll}*/}
+                {/*    width={300}*/}
+                {/*    height={200}*/}
+                {/*    margin={15}*/}
+                {/*    observe={containerList}*/}
+                {/*>*/}
+                {/*    <FlexBox>*/}
+                {/*        <text>Hello</text>*/}
+                {/*        <text>World</text>*/}
+                {/*        <For each={containerList()}>*/}
+                {/*            {(t) => <text zIndex={1000}>{t}</text>}*/}
+                {/*        </For>*/}
+                {/*    </FlexBox>*/}
+                {/*</Box>*/}
+            <Box type={"dynamic"} x={100} y={100} backgroundColor={"red"} borderColor={"0xFFFFFF00"}>
+                <text>This is the game</text>
             </Box>
+
         </>
     )
 }
@@ -60,8 +71,18 @@ export const Game = () => {
     const controller = createController();
     const menuToggleButton = controller.onKeyPress("Escape");
     const [showMenu, setShowMenu] = createSignal(false);
+    // const windowDimensions = createWindowDimensions(window);
+    //
+    // onNextFrame({
+    //     query: (applicationState) => {
+    //         return {application: applicationState.application, windowDimensions: windowDimensions()}
+    //     },
+    //     tick: ({application, windowDimensions}) => {
+    //         application.renderer.resize(windowDimensions.innerWidth, windowDimensions.outerWidth)
+    //     }
+    // })
+
     createEffect(() => {
-        console.log("rendering game")
         if(menuToggleButton().includes("Escape")) {
             setShowMenu((x) => !x)
         }

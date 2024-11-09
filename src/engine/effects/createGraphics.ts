@@ -28,7 +28,7 @@ export const createRect = (props: CreateRectProps) => {
         graphicsOptions: props.graphicsOptions,
         build: (graphics) => {
             graphics
-                .rect(props.x, props.y, props.height, props.width)
+                .rect(props.x, props.y, props.width, props.height)
                 .fill(props.fill);
         }})
 }

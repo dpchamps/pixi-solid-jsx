@@ -13,6 +13,9 @@ import {Application as PixiApplication} from "pixi.js";
 import {invariant, Maybe} from "../../utility-types.ts";
 import {ApplicationNode} from "../../pixi-jsx/proxy-dom";
 import {createTimer} from "../core/time.ts";
+import {createWindowDimensions} from "../effects/createWindow.ts";
+
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export type ApplicationState = {
     time: {
@@ -61,6 +64,7 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
     const [mount, setOnMount] = createSignal(false);
     const nextFrameFns = new Set<() => void>();
     const timer = createTimer({nextFrameFns: nextFrameFns})
+    // const windowDimensions = createWindowDimensions(window);
     const applicationState = {
         time: timer.time,
         onNextTick: nextFrameFns,
@@ -73,7 +77,6 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         app.container.ticker = timer.ticker;
         await app.initialize();
         applicationState.application = app.container;
-        console.log("application initialized")
         return true;
     });
 
@@ -81,11 +84,16 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         setOnMount(true)
     });
 
+    // createComputed(() => {
+    //     console.log(windowDimensions())
+    // })
+    // console.log(`dimensions:`, windowDimensions());
+
     return (
         <application {...props} ref={setApplication}>
             <container>
                 <ApplicationContext.Provider value={applicationState as ApplicationState}>
-                    <Show when={applicationReady} fallback={<text>Loading...</text>}>
+                    <Show when={applicationReady()} fallback={<text>Loading...</text>}>
                         {props.children}
                     </Show>
                 </ApplicationContext.Provider>

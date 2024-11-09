@@ -13,7 +13,7 @@ export type BoxModel = {
 export type FlexBoxProps = Partial<{
     x: number,
     y: number,
-    orientation: FlexBoxOrientation
+    orientation: FlexBoxOrientation|undefined
 } & BoxModel>;
 
 export type AnyProxyNode = ProxyNode<any, any, any>;
