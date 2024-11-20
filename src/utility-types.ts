@@ -52,7 +52,7 @@ export const isSome = <T, ExtractType extends StringOfType<T>>(input: T, ...type
 }
 
 export const isDefined = <T>(input: Maybe<T>): input is T => {
-    return !(is(input, "undefined") || input === null);
+    return !(is(input, "undefined" as any) || input === null);
 }
 
 export const intoArray = <T>(maybeEls: Maybe<T|T[]>) => Array.isArray(maybeEls) ? maybeEls : isDefined(maybeEls) ? [maybeEls] : [];

@@ -1,5 +1,5 @@
 import {ProxyDomNode, ProxyNode} from "./Node.ts";
-import {Sprite} from "pixi.js";
+import {Application, Sprite} from "pixi.js";
 
 export class SpriteNode extends ProxyNode<"sprite", Sprite  , ProxyDomNode> {
     static create() {
@@ -12,6 +12,10 @@ export class SpriteNode extends ProxyNode<"sprite", Sprite  , ProxyDomNode> {
 
     override addChildProxyUntracked(_untracked: Sprite) {
         throw new Error(`cannot add untracked child to sprite`);
+    }
+
+    override removeChildProxyUntracked(_untracked: Sprite) {
+        throw new Error("cannot remove an untracked child from Sprite")
     }
 
     removeChildProxy(node: ProxyDomNode) {

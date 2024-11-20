@@ -1,5 +1,5 @@
 import {expectNodeNot, ProxyDomNode, ProxyNode} from "./Node.ts";
-import {Container} from "pixi.js";
+import {Application, Container} from "pixi.js";
 
 export class ContainerNode extends ProxyNode<'container', Container, ProxyDomNode> {
     static create(){
@@ -7,18 +7,25 @@ export class ContainerNode extends ProxyNode<'container', Container, ProxyDomNod
     }
 
     addChildProxy(node: ProxyDomNode) {
-        expectNodeNot(node, "unexpected child to container", "application", "html", "raw");
+        expectNodeNot(node, "unexpected child to container", "application", "html");
+        if(node.tag === 'raw') return;
         this.container.addChild(node.container);
     }
 
     removeChildProxy(proxied: ProxyDomNode) {
-        expectNodeNot(proxied, "unexpected child to container on removal (this is an invariant state)", "application", "html", "raw");
+        expectNodeNot(proxied, "unexpected child to container on removal (this is an invariant state)", "application", "html");
+        if(proxied.tag === 'raw') return;
         this.container.removeChild(proxied.container);
     }
 
     override addChildProxyUntracked(untracked: Container) {
         this.container.addChild(untracked);
         this.untrackedChildren.push(untracked)
+    }
+
+    override removeChildProxyUntracked(untracked: Container) {
+        this.container.removeChild(untracked);
+        this.untrackedChildren = this.untrackedChildren.filter(x => x.uid!==untracked.uid);
     }
 
     override syncUntracked() {
