@@ -8,6 +8,7 @@ export {
     createEffect,
     createMemo,
     createResource,
+    type ResourceReturn,
     createSignal,
     onMount,
     onCleanup,
@@ -18,10 +19,13 @@ export {
     runWithOwner,
     untrack,
     type Accessor,
-    type Setter
+    type Setter,
+    createRoot,
+    type Resource
 } from "solid-js";
 
-export {createStore, unwrap} from "solid-js/store";
+
+export {createStore, unwrap, produce, type SetStoreFunction} from "solid-js/store";
 
 /***
  * Patching JSX Element types for downstream
@@ -81,7 +85,7 @@ export const Show = SolidShow as unknown as typeof ShowType;
 export type ContextProviderComponent<T> = FlowComponent<{
     value: T;
 }>;
-interface Context<T> {
+export interface Context<T> {
     id: symbol;
     Provider: ContextProviderComponent<T>;
     defaultValue: T;

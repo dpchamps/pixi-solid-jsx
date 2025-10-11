@@ -7,13 +7,14 @@ import {
     onCleanup,
     onMount,
     useContext,
-    createResource, Show
+    createResource,
+    Show,
+    createRoot
 } from 'solid-custom-renderer/index.ts';
 import {Application as PixiApplication} from "pixi.js";
 import {invariant, Maybe} from "../../utility-types.ts";
 import {ApplicationNode} from "../../pixi-jsx/proxy-dom";
 import {createTimer} from "../core/time.ts";
-import {createWindowDimensions} from "../effects/createWindow.ts";
 
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -43,20 +44,32 @@ export type OnNextFrameQuery<QueryResult> = {
 export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
     const appState = useApplicationState();
     const [cancel, setCancel] = createSignal(false);
-    createComputed(() => {
-        const queryResult = args.query(appState);
-        if(cancel()) return;
-        const execution = () => {
-            args.tick(queryResult);
-            appState.onNextTick.delete(execution)
-        }
-        appState.onNextTick.add(execution);
-        onCleanup(() => {
-            appState.onNextTick.delete(execution)
+    let dispose = () => {};
+    createRoot((__dispose) => {
+        dispose = __dispose;
+        createComputed(() => {
+            const queryResult = args.query(appState);
+            if(cancel()) return;
+            const execution = () => {
+                args.tick(queryResult);
+                appState.onNextTick.delete(execution)
+            }
+            appState.onNextTick.add(execution);
+            onCleanup(() => {
+                appState.onNextTick.delete(execution)
+            });
         });
     });
 
-    return () => setCancel(true);
+    onCleanup(() => {
+        dispose();
+    })
+
+
+    return () => {
+        dispose();
+        setCancel(true);
+    }
 }
 
 export const Application = (props: JSX.IntrinsicElements['application']) => {
@@ -76,6 +89,7 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         invariant(app);
         app.container.ticker = timer.ticker;
         await app.initialize();
+        await props.appInitialize?.(app.container);
         applicationState.application = app.container;
         return true;
     });
@@ -84,16 +98,13 @@ export const Application = (props: JSX.IntrinsicElements['application']) => {
         setOnMount(true)
     });
 
-    // createComputed(() => {
-    //     console.log(windowDimensions())
-    // })
-    // console.log(`dimensions:`, windowDimensions());
+    const fallback = props.loadingState ?? <text>Loading...</text>;
 
     return (
         <application {...props} ref={setApplication}>
             <container>
                 <ApplicationContext.Provider value={applicationState as ApplicationState}>
-                    <Show when={applicationReady()} fallback={<text>Loading...</text>}>
+                    <Show when={applicationReady()} fallback={fallback}>
                         {props.children}
                     </Show>
                 </ApplicationContext.Provider>

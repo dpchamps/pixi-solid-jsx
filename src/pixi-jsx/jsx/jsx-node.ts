@@ -1,6 +1,6 @@
 import {UnknownRecord} from "../../utility-types.ts";
 import {
-    TextOptions, ApplicationOptions, ContainerOptions, SpriteOptions, GraphicsOptions,
+    TextOptions, ApplicationOptions, ContainerOptions, SpriteOptions, GraphicsOptions, Application,
 } from "pixi.js";
 import {ApplicationNode, ContainerNode, ProxyDomNode, SpriteNode, TextNode} from "../proxy-dom";
 import {Setter} from "../solidjs-universal-renderer";
@@ -39,7 +39,7 @@ export type ContainerIntrinsicProps = PixiNodeProps<
 >
 
 export type ApplicationIntrinsicProps = PixiNodeProps<
-    PixieOptionsProps<ApplicationOptions>,
+    PixieOptionsProps<ApplicationOptions&{loadingState: JSXNode, appInitialize?: (application: Application) => Promise<void>|void}>,
     ApplicationNode
 >;
 

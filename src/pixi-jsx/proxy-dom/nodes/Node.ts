@@ -12,12 +12,12 @@ export type ProxyDomNode =
 
 interface GenericNode extends IProxyNode<any, any, any>{}
 
-interface IProxyNode<Tag extends string, Container, NodeType extends GenericNode> {
+export interface IProxyNode<Tag extends string, Container, NodeType extends GenericNode> {
     id: number,
     tag: Tag,
     container: Container,
 
-    addChild: (node: NodeType) => void,
+    addChild: (node: NodeType, anchor?: NodeType) => void,
     removeChild: (node: NodeType) => void,
     getParent: () => Maybe<NodeType>,
     getChildren: () => Array<NodeType>
@@ -55,18 +55,23 @@ export abstract class ProxyNode<Tag extends string, Container, NodeType extends 
         this.id = getId();
     }
 
-    private addChildWithProxy(child: NodeType, proxiedChild: NodeType){
-        this.children.push(child);
-        this.proxiedChildren.push(proxiedChild);
+    private addChildWithProxy(child: NodeType, proxiedChild: NodeType, anchor?: NodeType){
+        const idx = this.children.findIndex((n) => anchor?.id === n.id);
+        const spliceAt = idx === -1 ? this.children.length : idx;
+
+        this.children.splice(spliceAt, 0, child);
+        this.proxiedChildren.splice(spliceAt, 0, proxiedChild);
+
         child.setParent(this);
     }
 
-    abstract addChildProxy(child: NodeType): NodeType|void
+    abstract addChildProxy(child: NodeType, anchor?: NodeType): NodeType|void
     abstract addChildProxyUntracked(untracked: Container): void;
+    abstract removeChildProxyUntracked(untracked: Container): void;
 
-    addChild(node: NodeType) {
-        const proxied = this.addChildProxy(node);
-        this.addChildWithProxy(node, proxied || node);
+    addChild(node: NodeType, anchor?: NodeType) {
+        const proxied = this.addChildProxy(node, anchor);
+        this.addChildWithProxy(node, proxied || node, anchor);
     }
 
     getChildren() {

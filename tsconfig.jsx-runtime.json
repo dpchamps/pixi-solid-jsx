@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outFile": "./dist/jsx-runtime.d.ts",
+    "emitDeclarationOnly": true,
+    "declaration": true
+  },
+  "include": ["./src/pixi-jsx/jsx/jsx-runtime.ts"]
+}

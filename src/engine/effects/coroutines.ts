@@ -6,12 +6,17 @@ export type GeneratorYieldResult =
     | GeneratorStop
     | GeneratorWaitForMs
     | GeneratorWaitForFrames
+    | GeneratorPromise
 
 type GeneratorStop = {type: "GeneratorStop"};
 type GeneratorWaitForMs = {type: "GeneratorWaitMs", ms: number};
 type GeneratorWaitForFrames = {type: "GeneratorWaitFrames", frames: number};
 
+type GeneratorPromise = {type: "GeneratorPromise", promise: Promise<unknown>}
+
 export type CoroutineFn = () => Generator<GeneratorYieldResult|undefined, void, number>;
+
+export type AsyncCoroutineFn = () => AsyncGenerator<unknown, void, number>;
 
 type TimestampState = { timeStamp: number, duration: number };
 
@@ -28,6 +33,11 @@ export const waitFrames = (frames: number): GeneratorWaitForFrames => ({
     type: "GeneratorWaitFrames",
     frames
 });
+
+export const waitPromise = (promise: Promise<unknown>): GeneratorPromise => ({
+    type: "GeneratorPromise",
+    promise
+})
 
 const getNextTimeStampState = (state: TimestampState | null): TimestampState|null => {
     if(state === null) return state;
@@ -56,6 +66,7 @@ export const startCoroutine = (fn: CoroutineFn) => {
     let timeStampState: TimestampState|null = null;
     let counter: number|null = null;
     let [stopped, setStopped] = createSignal(false);
+    let [paused, setPaused] = createSignal(false);
     const onCoroutineDone = () => {
         setStopped(true);
         dispose();
@@ -68,7 +79,7 @@ export const startCoroutine = (fn: CoroutineFn) => {
         tick: (elapsedMs) => {
             timeStampState = getNextTimeStampState(timeStampState);
             counter = getNextCounterState(counter);
-            if(isInWaitingState(timeStampState, counter)) return;
+            if(isInWaitingState(timeStampState, counter) || paused()) return;
 
             const result = iterator.next(elapsedMs);
 
@@ -91,6 +102,34 @@ export const startCoroutine = (fn: CoroutineFn) => {
                     break;
                 }
             }
+        }
+    })
+
+    return {dispose, stopped};
+}
+
+export const startAsyncCoroutine = (fn: AsyncCoroutineFn) => {
+    const iterator = fn();
+
+    let [stopped, setStopped] = createSignal(false);
+    let [result, setResult] = createSignal<IteratorResult<void, void>>();
+    const onCoroutineDone = () => {
+        setStopped(true);
+        dispose();
+    }
+
+    const dispose = onNextFrame({
+        query: () => {
+            return result()
+        },
+        tick: (lastResult) => {
+            if(lastResult){
+                if(lastResult.done){
+                    onCoroutineDone();
+                    return
+                }
+            }
+            iterator.next().then(setResult);
         }
     })
 

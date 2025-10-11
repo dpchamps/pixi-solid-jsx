@@ -1,4 +1,5 @@
 import {expectNode, ProxyDomNode, ProxyNode} from "./Node.ts";
+import {Application} from "pixi.js";
 
 export class HtmlElementNode extends ProxyNode<"html", HTMLElement, ProxyDomNode>{
     static create(element: HTMLElement) {
@@ -18,5 +19,9 @@ export class HtmlElementNode extends ProxyNode<"html", HTMLElement, ProxyDomNode
 
     override addChildProxyUntracked(_untracked: HTMLElement) {
         throw new Error("cannot add untracked child to html node")
+    }
+
+    override removeChildProxyUntracked(_untracked: HTMLElement) {
+        throw new Error("cannot remove an untracked child from HTMLElement")
     }
 }

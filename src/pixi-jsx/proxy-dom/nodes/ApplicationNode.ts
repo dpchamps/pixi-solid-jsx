@@ -2,6 +2,7 @@ import {ProxyNode, ProxyDomNode, expectNode, expectNodeNot} from "./Node.ts";
 import {Application} from "pixi.js";
 import {assert, invariant} from "../../../utility-types.ts";
 import {TextNode} from "./TextNode.ts";
+import {IProxyNode} from "./Node.ts";
 
 export class ApplicationNode extends ProxyNode<"application", Application, ProxyDomNode> {
     initializationProps: Record<string, unknown> = {};
@@ -37,5 +38,9 @@ export class ApplicationNode extends ProxyNode<"application", Application, Proxy
 
     override addChildProxyUntracked(_untracked: Application) {
         throw new Error("cannot add untracked child to application")
+    }
+
+    override removeChildProxyUntracked(_untracked: Application) {
+        throw new Error("cannot remove an untracked child from application")
     }
 }

@@ -39,8 +39,8 @@ export const {
         const parent = node.getParent();
         return parent === null ? undefined : parent;
     },
-    insertNode(parent, node, _anchor): void {
-        parent.addChild(node);
+    insertNode(parent, node, anchor): void {
+        parent.addChild(node, anchor);
     },
     isTextNode(node): boolean {
         return node.tag === "text";
@@ -54,7 +54,6 @@ export const {
     setProperty(node, name, value, prev): void {
         node.setProp(name, value, prev);
     }
-
 });
 
 
