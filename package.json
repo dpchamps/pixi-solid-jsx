@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "vitest",
+    "test": "VITE_STAGE=DEV vitest",
     "dev": "vite",
     "build": "npm run build:core && npm run build:runtime",
     "build:core": "vite build",
     "build:runtime": "tsc -b ./tsconfig.jsx-runtime.json",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "analyze-bundle": "npx vite-bundle-analyzer"
   },
   "type": "module",
   "keywords": [],
@@ -17,23 +18,23 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.7.2",
-    "@vitest/coverage-v8": "^2.0.5",
-    "pixi.js": "8.3.2",
     "typescript": "^5.5.4",
     "vite": "7.1.5",
     "vite-bundle-analyzer": "^1.2.3",
     "vite-plugin-dts": "^4.3.0",
     "vite-tsconfig-paths": "^5.0.1",
-    "vitest": "3.0.5"
+    "vitest": "3.0.5",
+    "pixi.js": "8.3.2",
+    "solid-js": "1.9.4"
   },
   "dependencies": {
     "@solid-primitives/deep": "^0.2.9",
     "css": "^3.0.0",
     "shallow-equal": "^3.1.0",
-    "vite-plugin-solid": "^2.10.2"
+    "vite-plugin-solid": "2.11.9"
   },
   "peerDependencies": {
     "pixi.js": "8.3.2",
-    "solid-js": "^1.8.20"
+    "solid-js": "1.9.4"
   }
 }
