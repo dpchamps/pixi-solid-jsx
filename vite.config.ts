@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import solidPlugin from "vite-plugin-solid";
-import {fileURLToPath} from "url";
+import {fileURLToPath} from "node:url";
 import dts from 'vite-plugin-dts'
 
 export default defineConfig({

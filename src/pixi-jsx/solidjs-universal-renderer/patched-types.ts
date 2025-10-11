@@ -85,7 +85,7 @@ export const Show = SolidShow as unknown as typeof ShowType;
 export type ContextProviderComponent<T> = FlowComponent<{
     value: T;
 }>;
-interface Context<T> {
+export interface Context<T> {
     id: symbol;
     Provider: ContextProviderComponent<T>;
     defaultValue: T;

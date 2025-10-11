@@ -1,6 +1,6 @@
 {
   "name": "pixi-jsx",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,20 +8,22 @@
     "dev": "vite",
     "build": "npm run build:core && npm run build:runtime",
     "build:core": "vite build",
-    "build:runtime": "tsc -b ./tsconfig.jsx-runtime.json"
+    "build:runtime": "tsc -b ./tsconfig.jsx-runtime.json",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module",
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^24.7.2",
     "@vitest/coverage-v8": "^2.0.5",
+    "pixi.js": "8.3.2",
     "typescript": "^5.5.4",
     "vite": "^5.4.0",
     "vite-plugin-dts": "^4.3.0",
     "vite-tsconfig-paths": "^5.0.1",
-    "vitest": "^2.0.5",
-    "pixi.js": "8.3.2"
+    "vitest": "^2.0.5"
   },
   "dependencies": {
     "@solid-primitives/deep": "^0.2.9",
