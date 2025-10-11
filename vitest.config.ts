@@ -1,12 +1,29 @@
 import { defineConfig } from 'vitest/config'
+import tsconfigPaths from "vite-tsconfig-paths";
+import solidPlugin from "vite-plugin-solid";
+import dts from "vite-plugin-dts";
 
 export default defineConfig({
     test: {
-        include: ["src/__tests__/**/*"],
+        include: ["src/**/*/__tests__/**/*"],
+        exclude: ["src/pixi-jsx/__tests__/test-utils.tsx"],
         coverage: {
             provider: "v8",
             enabled: true,
-            exclude: ["src/__tests__/**/*", "vitest.config.ts"]
-        }
+            exclude: ["src/__tests__/**/*", 'sandbox/**/*', "vitest.config.ts"]
+        },
+        environment: "jsdom",
+        setupFiles: ['vitest-webgl-canvas-mock'],
+        // deps: { optimizer: { web: { include: ['vitest-webgl-canvas-mock'] } } },
     },
+    plugins: [
+        tsconfigPaths(),
+        solidPlugin({
+            solid: {
+                moduleName: "solid-custom-renderer/index.ts",
+                generate: "universal"
+            }
+        }),
+        dts({tsconfigPath: "tsconfig.build.json"})
+    ]
 })

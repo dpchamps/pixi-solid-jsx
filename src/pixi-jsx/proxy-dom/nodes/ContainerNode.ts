@@ -6,10 +6,15 @@ export class ContainerNode extends ProxyNode<'container', Container, ProxyDomNod
         return new ContainerNode("container", new Container());
     }
 
-    addChildProxy(node: ProxyDomNode) {
+    addChildProxy(node: ProxyDomNode, anchor?: ProxyDomNode) {
         expectNodeNot(node, "unexpected child to container", "application", "html");
         if(node.tag === 'raw') return;
-        this.container.addChild(node.container);
+        // find the index of the next nonraw node from anchor
+        const anchorIndex = anchor ? this.children.findIndex((childNode) => childNode.id === anchor.id) : -1;
+        const insertIndex = anchor ? this.children.findIndex((childNode, idx) => childNode.tag !== "raw" && idx >= anchorIndex) : -1;
+        const finalIndex = insertIndex === -1 ? this.container.children.length : insertIndex !== anchorIndex ? insertIndex-1 : insertIndex;
+
+        this.container.addChildAt(node.container,finalIndex);
     }
 
     removeChildProxy(proxied: ProxyDomNode) {

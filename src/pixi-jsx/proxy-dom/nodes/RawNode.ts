@@ -1,9 +1,14 @@
-import {ProxyDomNode, ProxyNode} from "./Node.ts";
+import {expectNode, ProxyDomNode, ProxyNode} from "./Node.ts";
+import {invariant} from "../../../utility-types.ts";
 
 
 export class RawNode extends ProxyNode<"raw", string, ProxyDomNode> {
     static create(value: string) {
         return new RawNode('raw', value);
+    }
+
+    override replaceChild(value: ProxyDomNode) {
+        throw new Error(`cannot replace child on raw node.`);
     }
 
     addChildProxy(node: ProxyDomNode) {

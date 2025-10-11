@@ -19,6 +19,7 @@ export interface IProxyNode<Tag extends string, Container, NodeType extends Gene
 
     addChild: (node: NodeType, anchor?: NodeType) => void,
     removeChild: (node: NodeType) => void,
+    replaceChild: (oldNode: NodeType, newNode: NodeType) => void,
     getParent: () => Maybe<NodeType>,
     getChildren: () => Array<NodeType>
     setParent: (parent: NodeType) => void,
@@ -72,6 +73,13 @@ export abstract class ProxyNode<Tag extends string, Container, NodeType extends 
     addChild(node: NodeType, anchor?: NodeType) {
         const proxied = this.addChildProxy(node, anchor);
         this.addChildWithProxy(node, proxied || node, anchor);
+        this.recomputeProxy();
+    }
+
+    replaceChild(oldNode: NodeType, newNode: NodeType) {
+        this.addChild(newNode, oldNode);
+        this.removeChild(oldNode);
+        this.recomputeProxy();
     }
 
     getChildren() {
@@ -102,6 +110,7 @@ export abstract class ProxyNode<Tag extends string, Container, NodeType extends 
     removeChild(node: NodeType){
         const proxiedChild = this.removeChildBase(node);
         this.removeChildProxy(proxiedChild);
+        this.recomputeProxy();
     }
 
     setParent(parent: NodeType): void {
@@ -112,5 +121,9 @@ export abstract class ProxyNode<Tag extends string, Container, NodeType extends 
         if(typeof this.container === "object" && this.container !== null){
             Reflect.set(this.container, name, value);
         }
+    }
+
+    protected recomputeProxy() {
+        // noop
     }
 }

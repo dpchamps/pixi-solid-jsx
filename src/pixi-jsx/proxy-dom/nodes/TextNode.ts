@@ -1,6 +1,7 @@
 import {expectNode, ProxyDomNode, ProxyNode} from "./Node.ts";
 import {Application, Text} from "pixi.js";
-import {isDefined} from "../../../utility-types.ts";
+import {invariant, isDefined} from "../../../utility-types.ts";
+import {RawNode} from "./RawNode.ts";
 
 
 export class TextNode extends ProxyNode<"text", Text, ProxyDomNode> {
@@ -8,23 +9,18 @@ export class TextNode extends ProxyNode<"text", Text, ProxyDomNode> {
         return new TextNode("text", new Text())
     }
 
+    static createFromRaw(...nodes: string[]){
+        const node = TextNode.create();
+        nodes.forEach((child) => node.addChild(RawNode.create(child)));
+        return node;
+    }
+
     addChildProxy(node: ProxyDomNode, anchor?: ProxyDomNode): void {
         expectNode(node, "raw", `unexpect tag for text`);
-        const nextText = this.children.reduce(
-            (acc, el, idx, arr) => {
-                if(isDefined(anchor) && el.id === anchor.id && node.id === anchor.id) {
-                    return `${acc}${node.container}`
-                } else if (isDefined(anchor) && el.id === anchor.id) {
-                    return `${acc}${node.container}${el.container}`
-                } else {
-                    return `${acc}${el.container}`;
-                }
-            },
-            ""
-        );
-        const value = isDefined(anchor) ? nextText : `${nextText}${node.container}`
+    }
 
-        this.container.text = value;
+    protected override recomputeProxy() {
+        this.container.text = this.children.reduce((acc, child) => `${acc}${child.container}`, ``);
     }
 
     override addChildProxyUntracked(_untracked: Text) {

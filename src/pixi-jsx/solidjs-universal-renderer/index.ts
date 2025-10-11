@@ -1,6 +1,7 @@
 import { createRenderer } from "solid-js/universal";
 import {invariant, unimplemented} from "../../utility-types.ts";
-import {createProxiedPixieContainerNode, ProxyDomNode, RawNode} from "../proxy-dom";
+import {createProxiedPixieContainerNode, ProxyDomNode, RawNode, TextNode} from "../proxy-dom";
+import {expectNode} from "../proxy-dom/nodes/Node.ts";
 
 
 export const {
@@ -48,8 +49,10 @@ export const {
     removeNode(parent, node): void {
         parent.removeChild(node);
     },
-    replaceText(textNode, value): void {
-        return unimplemented(textNode, value)
+    replaceText(rawNode, value): void {
+        const parent = rawNode.getParent();
+        invariant(parent);
+        parent.replaceChild(rawNode, RawNode.create(value));
     },
     setProperty(node, name, value, prev): void {
         node.setProp(name, value, prev);

@@ -13,7 +13,7 @@ export class ApplicationNode extends ProxyNode<"application", Application, Proxy
 
     override addChildProxy(node: ProxyDomNode) {
         assert(node.tag !== "application" && node.tag !== 'html', `unexpected node as child to application: ${node.tag}`);
-        const child = node.tag === "raw" ? TextNode.create() : node;
+        const child = node.tag === "raw" ? TextNode.createFromRaw(node.container) : node;
         this.container.stage.addChild(child.container);
         return child;
     }
