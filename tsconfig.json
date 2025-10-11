@@ -42,7 +42,8 @@
       "jsx-runtime/*": ["./src/pixi-jsx/jsx/*"],
       "solid-custom-renderer/*": ["./src/pixi-jsx/solidjs-universal-renderer/*"]
     },
-    "typeRoots": ["./src/custom-typings", "./node_modules/@types"]
+    "typeRoots": ["./src/custom-typings", "./node_modules/@types"],
+    "resolveJsonModule": true
   },
-  "include": ["src"]
+  "include": ["src", "sandbox"]
 }

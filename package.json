@@ -20,11 +20,11 @@
     "@vitest/coverage-v8": "^2.0.5",
     "pixi.js": "8.3.2",
     "typescript": "^5.5.4",
-    "vite": "^5.4.0",
+    "vite": "7.1.5",
     "vite-bundle-analyzer": "^1.2.3",
     "vite-plugin-dts": "^4.3.0",
     "vite-tsconfig-paths": "^5.0.1",
-    "vitest": "^2.0.5"
+    "vitest": "3.0.5"
   },
   "dependencies": {
     "@solid-primitives/deep": "^0.2.9",

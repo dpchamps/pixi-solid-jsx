@@ -3,6 +3,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import solidPlugin from "vite-plugin-solid";
 import {fileURLToPath} from "node:url";
 import dts from 'vite-plugin-dts'
+import buildTsConfig from './tsconfig.build.json';
 
 export default defineConfig({
     build: {
@@ -28,6 +29,6 @@ export default defineConfig({
                 generate: "universal"
             }
         }),
-        dts({rollupTypes: true})
-    ],
+        dts({rollupTypes: true, tsconfigPath: "tsconfig.build.json"})
+    ]
 })
