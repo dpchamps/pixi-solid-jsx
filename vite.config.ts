@@ -14,9 +14,11 @@ export default defineConfig({
         },
         rollupOptions: {
             external: [
-                'pixi.js'
+                'pixi.js',
+                'solid-js'
             ]
-        }
+        },
+        copyPublicDir: false,
     },
     plugins: [
         tsconfigPaths(),
