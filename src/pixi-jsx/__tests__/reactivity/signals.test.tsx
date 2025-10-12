@@ -19,11 +19,11 @@ describe("signal reactivity", () => {
     expect(container.y).toBe(0);
 
     setX(100);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.x).toBe(100);
 
     setY(200);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.y).toBe(200);
   });
 
@@ -40,11 +40,11 @@ describe("signal reactivity", () => {
     expect(sprite.height).toBe(50);
 
     setWidth(100);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(sprite.width).toBe(100);
 
     setHeight(150);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(sprite.height).toBe(150);
   });
 
@@ -61,7 +61,7 @@ describe("signal reactivity", () => {
     expect(sprite.height).toBe(20);
 
     setRadius(25);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(sprite.width).toBe(50);
     expect(sprite.height).toBe(50);
   });
@@ -81,12 +81,12 @@ describe("signal reactivity", () => {
     expect(container.alpha).toBe(1);
 
     setX(50);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.x).toBe(50);
     expect(container.alpha).toBe(1);
 
     setAlpha(0.5);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.x).toBe(50);
     expect(container.alpha).toBe(0.5);
   });
@@ -110,12 +110,12 @@ describe("signal reactivity", () => {
     expect(child.x).toBe(20);
 
     setParentX(100);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(parent.x).toBe(100);
     expect(child.x).toBe(20);
 
     setChildX(50);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(parent.x).toBe(100);
     expect(child.x).toBe(50);
   });
@@ -135,11 +135,11 @@ describe("signal reactivity", () => {
     expect(container.x).toBe(10);
 
     setBaseX(100);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.x).toBe(110);
 
     setOffsetX(50);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.x).toBe(150);
   });
 });

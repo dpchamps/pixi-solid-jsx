@@ -1,113 +1,118 @@
-import {JSX} from "../../pixi-jsx/jsx/jsx-runtime.ts";
+import { JSX } from "../../pixi-jsx/jsx/jsx-runtime.ts";
 import {
-    Accessor,
-    createComputed,
-    createContext,
-    createSignal,
-    onCleanup,
-    onMount,
-    useContext,
-    createResource,
-    Show,
-    createRoot
-} from 'solid-custom-renderer/index.ts';
-import {Application as PixiApplication} from "pixi.js";
-import {invariant, Maybe} from "../../utility-types.ts";
-import {ApplicationNode} from "../../pixi-jsx/proxy-dom";
-import {createTimer} from "../core/time.ts";
-
+  Accessor,
+  createComputed,
+  createContext,
+  createSignal,
+  onCleanup,
+  onMount,
+  useContext,
+  createResource,
+  Show,
+  createRoot,
+} from "solid-custom-renderer/index.ts";
+import { Application as PixiApplication } from "pixi.js";
+import { invariant, Maybe } from "../../utility-types.ts";
+import { ApplicationNode } from "../../pixi-jsx/proxy-dom";
+import { createTimer } from "../core/time.ts";
 
 export type ApplicationState = {
-    time: {
-        deltaTime: Accessor<number>,
-        fps: Accessor<number>,
-        elapsedMsSinceLastFrame: Accessor<number>
-    },
-    onNextTick: Set<() => void>,
-    application: PixiApplication
+  time: {
+    deltaTime: Accessor<number>;
+    fps: Accessor<number>;
+    elapsedMsSinceLastFrame: Accessor<number>;
+  };
+  onNextTick: Set<() => void>;
+  application: PixiApplication;
 };
 
 const ApplicationContext = createContext<ApplicationState>();
 
 export const useApplicationState = () => {
-    const applicationState = useContext(ApplicationContext);
-    invariant(applicationState, "app state undefined");
-    return applicationState;
-}
+  const applicationState = useContext(ApplicationContext);
+  invariant(applicationState, "app state undefined");
+  return applicationState;
+};
 
 export type OnNextFrameQuery<QueryResult> = {
-    query: (applicationState: ApplicationState) => QueryResult,
-    tick: (queryResult: QueryResult) => void
-}
+  query: (applicationState: ApplicationState) => QueryResult;
+  tick: (queryResult: QueryResult) => void;
+};
 
 export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
-    const appState = useApplicationState();
-    const [cancel, setCancel] = createSignal(false);
-    let dispose = () => {};
-    createRoot((__dispose) => {
-        dispose = __dispose;
-        createComputed(() => {
-            const queryResult = args.query(appState);
-            if(cancel()) return;
-            const execution = () => {
-                args.tick(queryResult);
-                appState.onNextTick.delete(execution)
-            }
-            appState.onNextTick.add(execution);
-            onCleanup(() => {
-                appState.onNextTick.delete(execution)
-            });
-        });
+  const appState = useApplicationState();
+  const [cancel, setCancel] = createSignal(false);
+  let dispose = () => {};
+  createRoot((__dispose) => {
+    dispose = __dispose;
+    createComputed(() => {
+      const queryResult = args.query(appState);
+      if (cancel()) return;
+      const execution = () => {
+        args.tick(queryResult);
+        appState.onNextTick.delete(execution);
+      };
+      appState.onNextTick.add(execution);
+      onCleanup(() => {
+        appState.onNextTick.delete(execution);
+      });
     });
+  });
 
-    onCleanup(() => {
-        dispose();
-    })
+  onCleanup(() => {
+    dispose();
+  });
 
-
-    return () => {
-        dispose();
-        setCancel(true);
-    }
+  return () => {
+    dispose();
+    setCancel(true);
+  };
 }
 
-export const Application = (props: JSX.IntrinsicElements['application']) => {
-    const [application, setApplication] = createSignal<ApplicationNode>();
-    const [mount, setOnMount] = createSignal(false);
-    const nextFrameFns = new Set<() => void>();
-    const timer = createTimer({nextFrameFns: nextFrameFns, createTicker: props.createTicker})
-    const applicationState = {
-        time: timer.time,
-        onNextTick: nextFrameFns,
-        application: null as Maybe<ApplicationState['application']>
-    } satisfies Omit<ApplicationState, "application"> & {application: Maybe<ApplicationState['application']>}
+export const Application = (props: JSX.IntrinsicElements["application"]) => {
+  const [application, setApplication] = createSignal<ApplicationNode>();
+  const [mount, setOnMount] = createSignal(false);
+  const nextFrameFns = new Set<() => void>();
+  const timer = createTimer({
+    nextFrameFns: nextFrameFns,
+    createTicker: props.createTicker,
+  });
+  const applicationState = {
+    time: timer.time,
+    onNextTick: nextFrameFns,
+    application: null as Maybe<ApplicationState["application"]>,
+  } satisfies Omit<ApplicationState, "application"> & {
+    application: Maybe<ApplicationState["application"]>;
+  };
 
-    const [applicationReady] = createResource(mount, async () => {
-        const app = application();
-        invariant(app);
-        await app.initialize();
-        await props.appInitialize?.(app.container);
-        app.container.ticker = timer.ticker;
-        timer.start();
-        applicationState.application = app.container;
-        return true;
-    });
+  const [applicationReady] = createResource(mount, async () => {
+    const app = application();
+    invariant(app);
+    await app.initialize();
+    await props.appInitialize?.(app.container);
+    app.container.ticker = timer.ticker;
+    timer.start();
+    applicationState.application = app.container;
+    return true;
+  });
 
-    onMount(() => {
-        setOnMount(true)
-    });
+  onMount(() => {
+    setOnMount(true);
+  });
 
-    const fallback = props.loadingState ?? <text>Loading...</text>;
+  const fallback = props.loadingState ?? <text>Loading...</text>;
 
-    return (
-        <application {...props} ref={setApplication}>
-            <container>
-                <ApplicationContext.Provider value={applicationState as ApplicationState}>
-                    <Show when={applicationReady()} fallback={fallback}>
-                        {props.children}
-                    </Show>
-                </ApplicationContext.Provider>
-            </container>
-        </application>
-    )
-}
+  return (
+    <application {...props} ref={setApplication}>
+      <container>
+        <ApplicationContext.Provider
+          value={applicationState as ApplicationState}
+        >
+          <Show when={applicationReady()} fallback={fallback}>
+            {props.children}
+          </Show>
+        </ApplicationContext.Provider>
+      </container>
+    </application>
+  );
+};

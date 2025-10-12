@@ -26,8 +26,16 @@ describe("Node ID generation", () => {
   });
 
   test("ProxyNodes from different renders share global ID sequence", () => {
-    const html1 = renderPixiScene(() => <application><container /></application>);
-    const html2 = renderPixiScene(() => <application><container /></application>);
+    const html1 = renderPixiScene(() => (
+      <application>
+        <container />
+      </application>
+    ));
+    const html2 = renderPixiScene(() => (
+      <application>
+        <container />
+      </application>
+    ));
 
     const app1 = html1.getChildren()[0];
     const app2 = html2.getChildren()[0];

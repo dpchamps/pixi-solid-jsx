@@ -47,7 +47,7 @@ describe("insertNode", () => {
     expect(container.children.length).toBe(0);
 
     setShow(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(1);
     expect((container.children[0] as Text).text).toBe("Conditional");
@@ -72,7 +72,7 @@ describe("insertNode", () => {
     expect((container.children[1] as Text).text).toBe("Last");
 
     setShow(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(3);
     expect((container.children[0] as Text).text).toBe("First");
@@ -85,9 +85,7 @@ describe("insertNode", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -99,9 +97,7 @@ describe("insertNode", () => {
   });
 
   test("raw text transformed to TextNode under application", async () => {
-    const stage = await renderApplicationNode(() => (
-      <>Plain text</>
-    ));
+    const stage = await renderApplicationNode(() => <>Plain text</>);
 
     expect(stage.children[0]).toBeInstanceOf(Text);
     expect((stage.children[0] as Text).text).toBe("Plain text");

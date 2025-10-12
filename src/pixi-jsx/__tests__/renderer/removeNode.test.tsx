@@ -19,7 +19,7 @@ describe("removeNode", () => {
     expect(container.children.length).toBe(1);
 
     setShow(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(0);
   });
@@ -29,9 +29,7 @@ describe("removeNode", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -39,7 +37,7 @@ describe("removeNode", () => {
     expect(container.children.length).toBe(3);
 
     setItems(["A", "C"]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(2);
     expect((container.children[0] as Text).text).toBe("A");
@@ -51,9 +49,7 @@ describe("removeNode", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -61,7 +57,7 @@ describe("removeNode", () => {
     expect(container.children.length).toBe(3);
 
     setItems([]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(0);
   });
@@ -87,7 +83,7 @@ describe("removeNode", () => {
     expect(innerContainer.children.length).toBe(2);
 
     setShow(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(outerContainer.children.length).toBe(0);
   });
@@ -97,9 +93,7 @@ describe("removeNode", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -107,7 +101,7 @@ describe("removeNode", () => {
     expect(container.children.length).toBe(3);
 
     setItems(["First", "Last"]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(2);
     expect((container.children[0] as Text).text).toBe("First");
@@ -138,13 +132,13 @@ describe("removeNode", () => {
     expect((container.children[3] as Text).text).toBe("Final");
 
     setShow(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(2);
     expect((container.children[0] as Text).text).toBe("Before");
     expect((container.children[1] as Text).text).toBe("After");
 
     setShow(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect((container.children[0] as Text).text).toBe("Before");
     expect((container.children[1] as Text).text).toBe("Toggle");
     expect((container.children[2] as Text).text).toBe("After");

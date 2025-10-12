@@ -6,12 +6,12 @@ import {
   stop,
   createEasingCoroutine,
   CoroutineControl,
-  waitMs
+  waitMs,
 } from "../../effects/coroutines";
-import {Sprite, Text} from "pixi.js";
+import { Sprite, Text } from "pixi.js";
 
-import {renderApplicationWithFakeTicker} from "../../../__tests__/test-utils/test-utils.tsx";
-import {invariant, assert} from "../../../utility-types.ts";
+import { renderApplicationWithFakeTicker } from "../../../__tests__/test-utils/test-utils.tsx";
+import { invariant, assert } from "../../../utility-types.ts";
 
 describe("startCoroutine", () => {
   describe("basic execution", () => {
@@ -19,9 +19,8 @@ describe("startCoroutine", () => {
       const TestComponent = () => {
         const [i, setI] = createSignal(0);
 
-
-       startCoroutine(function* () {
-          setI(1)
+        startCoroutine(function* () {
+          setI(1);
           yield CoroutineControl.continue();
           setI(2);
           yield CoroutineControl.continue();
@@ -31,7 +30,9 @@ describe("startCoroutine", () => {
         return <text>Test {i()}</text>;
       };
 
-      const {stage, ticker} = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -53,13 +54,15 @@ describe("startCoroutine", () => {
           const elapsed1 = yield CoroutineControl.continue();
           setElapsedText(`${Math.floor(elapsed1)},`);
           const elapsed2 = yield CoroutineControl.continue();
-          setElapsedText(prev => prev + Math.floor(elapsed2));
+          setElapsedText((prev) => prev + Math.floor(elapsed2));
         });
 
         return <text>{elapsedText()}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -76,8 +79,8 @@ describe("startCoroutine", () => {
         const [x, setX] = createSignal(0);
 
         startCoroutine(function* () {
-          for(let i = 0; i < 3; i++) {
-            setX(prev => prev + 10);
+          for (let i = 0; i < 3; i++) {
+            setX((prev) => prev + 10);
             yield CoroutineControl.continue();
           }
         });
@@ -85,7 +88,9 @@ describe("startCoroutine", () => {
         return <sprite x={x()} />;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const sprite = stage.children[0]?.children[0];
       invariant(sprite);
       assert(sprite instanceof Sprite);
@@ -110,14 +115,16 @@ describe("startCoroutine", () => {
 
         startCoroutine(function* () {
           setStatus("before-wait");
-          yield waitMs(frameMs*2);
+          yield waitMs(frameMs * 2);
           setStatus("after-wait");
         });
 
         return <text>{status()}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -146,7 +153,9 @@ describe("startCoroutine", () => {
         return <text>{status()}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -178,7 +187,9 @@ describe("startCoroutine", () => {
         return <text>{status()}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -209,7 +220,9 @@ describe("startCoroutine", () => {
         return <sprite x={x()} />;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const sprite = stage.children[0]?.children[0];
       invariant(sprite);
       assert(sprite instanceof Sprite);
@@ -240,7 +253,9 @@ describe("startCoroutine", () => {
         return <text>{status()}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -264,7 +279,9 @@ describe("startCoroutine", () => {
         return <text>{stopped() ? "stopped" : "running"}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -285,8 +302,8 @@ describe("startCoroutine", () => {
         const [count, setCount] = createSignal(0);
 
         const coroutine = function* () {
-          while(true) {
-            setCount(prev => prev + 1);
+          while (true) {
+            setCount((prev) => prev + 1);
             yield CoroutineControl.continue();
           }
         };
@@ -299,7 +316,9 @@ describe("startCoroutine", () => {
         return <text>{count()}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -327,8 +346,8 @@ describe("startCoroutine", () => {
         const [x, setX] = createSignal(0);
 
         const coroutine = function* () {
-          while(true) {
-            setX(prev => prev + 10);
+          while (true) {
+            setX((prev) => prev + 10);
             yield CoroutineControl.continue();
           }
         };
@@ -341,7 +360,9 @@ describe("startCoroutine", () => {
         return <sprite x={x()} />;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const sprite = stage.children[0]?.children[0];
       invariant(sprite);
       assert(sprite instanceof Sprite);
@@ -383,7 +404,9 @@ describe("startCoroutine", () => {
         return <text>{step()}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -406,12 +429,12 @@ describe("startCoroutine", () => {
         const [count, setCount] = createSignal(0);
 
         startCoroutine(function* () {
-          while(true) {
+          while (true) {
             const current = count();
-            if(current >= 5) {
+            if (current >= 5) {
               yield stop();
             }
-            setCount(prev => prev + 1);
+            setCount((prev) => prev + 1);
             yield CoroutineControl.continue();
           }
         });
@@ -419,7 +442,9 @@ describe("startCoroutine", () => {
         return <text>{count()}</text>;
       };
 
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
       const textNode = stage.children[0]?.children[0];
       invariant(textNode);
       assert(textNode instanceof Text);
@@ -449,18 +474,22 @@ describe("createEasingCoroutine", () => {
       const targetX = 100;
       const linearEasing = (t: number) => t;
 
-      startCoroutine(createEasingCoroutine(
-        (lerp) => {
-          setX(lerp(startX, targetX));
-        },
-        linearEasing,
-        1020
-      ));
+      startCoroutine(
+        createEasingCoroutine(
+          (lerp) => {
+            setX(lerp(startX, targetX));
+          },
+          linearEasing,
+          1020,
+        ),
+      );
 
       return <sprite x={x()} />;
     };
 
-    const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+    const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+      <TestComponent />
+    ));
     const sprite = stage.children[0]?.children[0];
     invariant(sprite);
     assert(sprite instanceof Sprite);
@@ -482,18 +511,22 @@ describe("createEasingCoroutine", () => {
     const TestComponent = () => {
       const [x, setX] = createSignal(0);
 
-      startCoroutine(createEasingCoroutine(
-        (lerp) => {
-          setX(lerp(0, 100));
-        },
-        (t) => t * t, // Quadratic easing
-        1020
-      ));
+      startCoroutine(
+        createEasingCoroutine(
+          (lerp) => {
+            setX(lerp(0, 100));
+          },
+          (t) => t * t, // Quadratic easing
+          1020,
+        ),
+      );
 
       return <sprite x={x()} />;
     };
 
-    const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+    const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+      <TestComponent />
+    ));
     const sprite = stage.children[0]?.children[0];
     invariant(sprite);
     assert(sprite instanceof Sprite);
@@ -515,19 +548,23 @@ describe("createEasingCoroutine", () => {
       const [y, setY] = createSignal(50);
       const linearEasing = (t: number) => t;
 
-      startCoroutine(createEasingCoroutine(
-        (lerp) => {
-          setX(lerp(0, 100));
-          setY(lerp(50, 150));
-        },
-        linearEasing,
-        1020
-      ));
+      startCoroutine(
+        createEasingCoroutine(
+          (lerp) => {
+            setX(lerp(0, 100));
+            setY(lerp(50, 150));
+          },
+          linearEasing,
+          1020,
+        ),
+      );
 
       return <sprite x={x()} y={y()} />;
     };
 
-    const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+    const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+      <TestComponent />
+    ));
     const sprite = stage.children[0]?.children[0];
     invariant(sprite);
     assert(sprite instanceof Sprite);

@@ -19,12 +19,12 @@ describe("conditional rendering", () => {
     expect(container.children.length).toBe(0);
 
     setVisible(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(1);
     expect((container.children[0] as Text).text).toBe("Conditional");
 
     setVisible(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(0);
   });
 
@@ -45,11 +45,11 @@ describe("conditional rendering", () => {
     expect(originalText.text).toBe("Toggle");
 
     setVisible(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(0);
 
     setVisible(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(1);
     expect((container.children[0] as Text).text).toBe("Toggle");
   });
@@ -74,18 +74,18 @@ describe("conditional rendering", () => {
     expect(container.children.length).toBe(0);
 
     setOuter(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(1);
     const innerContainer = container.children[0] as Container;
     expect(innerContainer.children.length).toBe(0);
 
     setInner(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(innerContainer.children.length).toBe(1);
     expect((innerContainer.children[0] as Text).text).toBe("Nested");
 
     setOuter(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(0);
   });
 
@@ -105,12 +105,12 @@ describe("conditional rendering", () => {
     expect((container.children[0] as Text).text).toBe("Fallback");
 
     setCondition(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(1);
     expect((container.children[0] as Text).text).toBe("Primary");
 
     setCondition(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(1);
     expect((container.children[0] as Text).text).toBe("Fallback");
   });
@@ -134,18 +134,18 @@ describe("conditional rendering", () => {
     expect(container.children.length).toBe(0);
 
     setShowA(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(1);
     expect((container.children[0] as Text).text).toBe("A");
 
     setShowB(true);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(2);
     expect((container.children[0] as Text).text).toBe("A");
     expect((container.children[1] as Text).text).toBe("B");
 
     setShowA(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(1);
     expect((container.children[0] as Text).text).toBe("B");
   });

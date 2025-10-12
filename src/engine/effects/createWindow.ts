@@ -1,31 +1,36 @@
-import {createComputed, createSignal} from "solid-custom-renderer/patched-types.ts";
+import {
+  createComputed,
+  createSignal,
+} from "solid-custom-renderer/patched-types.ts";
 
 type WindowDimensions = {
-    innerWidth: number,
-    outerWidth: number,
-    innerHeight: number,
-    outerHeight: number
-}
+  innerWidth: number;
+  outerWidth: number;
+  innerHeight: number;
+  outerHeight: number;
+};
 
 const intoCurrentDimensions = (window: Window) => ({
-    innerWidth: window.innerWidth,
-    outerWidth: window.outerWidth,
-    innerHeight: window.innerHeight,
-    outerHeight: window.outerHeight
+  innerWidth: window.innerWidth,
+  outerWidth: window.outerWidth,
+  innerHeight: window.innerHeight,
+  outerHeight: window.outerHeight,
 });
 
 export const createWindowDimensions = (element: Window) => {
-    const [windowDimensions, setWindowDimensions] = createSignal<WindowDimensions>(intoCurrentDimensions(element.window));
+  const [windowDimensions, setWindowDimensions] =
+    createSignal<WindowDimensions>(intoCurrentDimensions(element.window));
 
-    const setCurrentDimensions = () => setWindowDimensions(intoCurrentDimensions(element.window));
+  const setCurrentDimensions = () =>
+    setWindowDimensions(intoCurrentDimensions(element.window));
 
-    createComputed(() => {
-        element.window.addEventListener('resize', setCurrentDimensions)
-        setCurrentDimensions();
-        return () => {
-            element.window.removeEventListener('resize', setCurrentDimensions);
-        }
-    });
+  createComputed(() => {
+    element.window.addEventListener("resize", setCurrentDimensions);
+    setCurrentDimensions();
+    return () => {
+      element.window.removeEventListener("resize", setCurrentDimensions);
+    };
+  });
 
-    return windowDimensions;
-}
+  return windowDimensions;
+};

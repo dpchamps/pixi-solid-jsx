@@ -1,7 +1,7 @@
-import {describe, expect, test} from 'vitest';
+import { describe, expect, test } from "vitest";
 
 describe("jsx-runtime", () => {
-    test("It Does a thing", () => {
-        expect(true).toBe(true);
-    })
+  test("It Does a thing", () => {
+    expect(true).toBe(true);
+  });
 });

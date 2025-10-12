@@ -1,29 +1,32 @@
-import {expectNode, ProxyDomNode, ProxyNode} from "./Node.ts";
-import {invariant} from "../../../utility-types.ts";
-
+import { expectNode, ProxyDomNode, ProxyNode } from "./Node.ts";
+import { invariant } from "../../../utility-types.ts";
 
 export class RawNode extends ProxyNode<"raw", string, ProxyDomNode> {
-    static create(value: string) {
-        return new RawNode('raw', value);
-    }
+  static create(value: string) {
+    return new RawNode("raw", value);
+  }
 
-    override replaceChild(value: ProxyDomNode) {
-        throw new Error(`cannot replace child on raw node.`);
-    }
+  override replaceChild(value: ProxyDomNode) {
+    throw new Error(`cannot replace child on raw node.`);
+  }
 
-    addChildProxy(node: ProxyDomNode) {
-        throw new Error(`cannot add child to raw node (value: ${this.container}), got: ${node.tag}`);
-    }
+  addChildProxy(node: ProxyDomNode) {
+    throw new Error(
+      `cannot add child to raw node (value: ${this.container}), got: ${node.tag}`,
+    );
+  }
 
-    removeChildProxy(node: ProxyDomNode) {
-        throw new Error(`invariant state: cannot remove child from raw node (value: ${this.container}), got: ${node.tag}`);
-    }
+  removeChildProxy(node: ProxyDomNode) {
+    throw new Error(
+      `invariant state: cannot remove child from raw node (value: ${this.container}), got: ${node.tag}`,
+    );
+  }
 
-    override addChildProxyUntracked(_untracked: string) {
-        throw new Error(`invariant state: cannot add untracked child to raw`);
-    }
+  override addChildProxyUntracked(_untracked: string) {
+    throw new Error(`invariant state: cannot add untracked child to raw`);
+  }
 
-    override removeChildProxyUntracked(_untracked: string) {
-        throw new Error("cannot remove an untracked child from RawNode")
-    }
+  override removeChildProxyUntracked(_untracked: string) {
+    throw new Error("cannot remove an untracked child from RawNode");
+  }
 }

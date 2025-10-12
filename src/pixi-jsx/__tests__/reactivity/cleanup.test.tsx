@@ -1,5 +1,10 @@
 import { describe, test, expect } from "vitest";
-import { createSignal, Show, For, onCleanup } from "../../solidjs-universal-renderer";
+import {
+  createSignal,
+  Show,
+  For,
+  onCleanup,
+} from "../../solidjs-universal-renderer";
 import { Text, Container } from "pixi.js";
 import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
@@ -19,7 +24,7 @@ describe("cleanup and memory management", () => {
     expect(container.children.length).toBe(1);
 
     setShow(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(0);
   });
@@ -39,11 +44,11 @@ describe("cleanup and memory management", () => {
 
     for (let i = 0; i < 5; i++) {
       setShow(false);
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(container.children.length).toBe(0);
 
       setShow(true);
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(container.children.length).toBe(1);
     }
   });
@@ -53,9 +58,7 @@ describe("cleanup and memory management", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -63,11 +66,11 @@ describe("cleanup and memory management", () => {
     expect(container.children.length).toBe(5);
 
     setItems(["A", "B"]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(2);
 
     setItems([]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(0);
   });
 
@@ -95,7 +98,7 @@ describe("cleanup and memory management", () => {
     expect(innerContainer.children.length).toBe(3);
 
     setShow(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(outerContainer.children.length).toBe(0);
   });
@@ -124,7 +127,7 @@ describe("cleanup and memory management", () => {
     expect(cleanupCalled).toBe(false);
 
     setShow(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(0);
     expect(cleanupCalled).toBe(true);
@@ -135,9 +138,7 @@ describe("cleanup and memory management", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -145,11 +146,11 @@ describe("cleanup and memory management", () => {
 
     for (let i = 0; i < 10; i++) {
       setItems([`Item ${i}`]);
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(container.children.length).toBe(1);
 
       setItems([]);
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(container.children.length).toBe(0);
     }
   });
@@ -171,7 +172,7 @@ describe("cleanup and memory management", () => {
     expect(container.children.length).toBe(3);
 
     setShowDynamic(false);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(container.children.length).toBe(2);
     expect((container.children[0] as Text).text).toBe("Static 1");

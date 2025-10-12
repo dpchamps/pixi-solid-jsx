@@ -88,9 +88,15 @@ describe("untracked child operations", () => {
     containerNode.addChildProxyUntracked(untracked3);
 
     expect(containerNode.container.children.length).toBe(3);
-    expect((containerNode.container.children[0] as Container).label).toBe("first");
-    expect((containerNode.container.children[1] as Container).label).toBe("second");
-    expect((containerNode.container.children[2] as Container).label).toBe("third");
+    expect((containerNode.container.children[0] as Container).label).toBe(
+      "first",
+    );
+    expect((containerNode.container.children[1] as Container).label).toBe(
+      "second",
+    );
+    expect((containerNode.container.children[2] as Container).label).toBe(
+      "third",
+    );
   });
 
   test("removing all untracked children", () => {
@@ -158,7 +164,7 @@ describe("untracked child operations", () => {
     containerNode.removeChildProxyUntracked(untracked1);
 
     const remaining = containerNode.container.children as Container[];
-    expect(remaining.every(c => c.uid !== uid1)).toBe(true);
+    expect(remaining.every((c) => c.uid !== uid1)).toBe(true);
   });
 
   test("syncUntracked is idempotent", () => {

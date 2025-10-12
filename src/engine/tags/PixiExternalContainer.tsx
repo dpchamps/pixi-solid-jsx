@@ -1,7 +1,11 @@
-import {Container} from "pixi.js";
-import {createEffect, createSignal, onCleanup} from "../../pixi-jsx/solidjs-universal-renderer";
-import {ContainerNode} from "../../pixi-jsx/proxy-dom";
-import {ContainerIntrinsicProps} from "../../pixi-jsx/jsx/jsx-node";
+import { Container } from "pixi.js";
+import {
+  createEffect,
+  createSignal,
+  onCleanup,
+} from "../../pixi-jsx/solidjs-universal-renderer";
+import { ContainerNode } from "../../pixi-jsx/proxy-dom";
+import { ContainerIntrinsicProps } from "../../pixi-jsx/jsx/jsx-node";
 
 /**
  * Bridges imperatively-created PixiJS Container instances into the declarative pixi-jsx render tree.
@@ -44,36 +48,29 @@ import {ContainerIntrinsicProps} from "../../pixi-jsx/jsx/jsx-node";
  * - Automatically removes external container on component unmount
  * - When container prop changes, old container is swapped for new one
  */
-export const PixiExternalContainer = (props: ContainerIntrinsicProps & { container: Container|undefined }) => {
-    const [
-        containerRef,
-        setContainerRef
-    ] = createSignal<ContainerNode>();
+export const PixiExternalContainer = (
+  props: ContainerIntrinsicProps & { container: Container | undefined },
+) => {
+  const [containerRef, setContainerRef] = createSignal<ContainerNode>();
 
-    const [
-        previousContainer,
-        setPreviousContainer
-    ] = createSignal<Container>();
+  const [previousContainer, setPreviousContainer] = createSignal<Container>();
 
-    const maybeRemovePreviousContainer = () => {
-        const prev = previousContainer();
-        if(prev) {
-            containerRef()?.removeChildProxyUntracked(prev);
-        }
+  const maybeRemovePreviousContainer = () => {
+    const prev = previousContainer();
+    if (prev) {
+      containerRef()?.removeChildProxyUntracked(prev);
     }
+  };
 
-    onCleanup(maybeRemovePreviousContainer);
+  onCleanup(maybeRemovePreviousContainer);
 
-    createEffect(() => {
-        maybeRemovePreviousContainer();
-        if(!props.container) return;
+  createEffect(() => {
+    maybeRemovePreviousContainer();
+    if (!props.container) return;
 
-        containerRef()?.addChildProxyUntracked(props.container);
-        setPreviousContainer(props.container);
-    })
+    containerRef()?.addChildProxyUntracked(props.container);
+    setPreviousContainer(props.container);
+  });
 
-
-    return (
-        <container {...props} ref={setContainerRef} />
-    );
-}
+  return <container {...props} ref={setContainerRef} />;
+};

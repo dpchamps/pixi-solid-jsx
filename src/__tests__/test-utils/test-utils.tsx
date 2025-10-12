@@ -1,18 +1,22 @@
 import { createRoot } from "solid-js";
 import { JSX } from "jsx-runtime/jsx-runtime.ts";
 import { render } from "solid-custom-renderer/index.ts";
-import { HtmlElementNode, ProxyDomNode, ApplicationNode } from "../../pixi-jsx/proxy-dom";
+import {
+  HtmlElementNode,
+  ProxyDomNode,
+  ApplicationNode,
+} from "../../pixi-jsx/proxy-dom";
 import { vi } from "vitest";
 import { Container } from "pixi.js";
-import {FakeTestingTicker} from "./FakeTestingTicker";
-import {Application as PixiApplication} from "pixi.js";
-import {Application} from "../../engine";
-import {setImmediate} from "node:timers/promises";
+import { FakeTestingTicker } from "./FakeTestingTicker";
+import { Application as PixiApplication } from "pixi.js";
+import { Application } from "../../engine";
+import { setImmediate } from "node:timers/promises";
 
 export const renderPixiScene = (jsx: () => JSX.Element): HtmlElementNode => {
   const mockElement = {
     appendChild: vi.fn(),
-    removeChild: vi.fn()
+    removeChild: vi.fn(),
   } as unknown as HTMLElement;
 
   const htmlNode = HtmlElementNode.create(mockElement);
@@ -21,9 +25,17 @@ export const renderPixiScene = (jsx: () => JSX.Element): HtmlElementNode => {
   return htmlNode;
 };
 
-export const renderApplicationNode = async (jsx: () => JSX.Element): Promise<Container> => {
+export const renderApplicationNode = async (
+  jsx: () => JSX.Element,
+): Promise<Container> => {
   const htmlNode = renderPixiScene(() => (
-    <application width={800} height={600} preference={"webgl"} autoStart={false} hello={false}>
+    <application
+      width={800}
+      height={600}
+      preference={"webgl"}
+      autoStart={false}
+      hello={false}
+    >
       {jsx()}
     </application>
   ));
@@ -34,11 +46,11 @@ export const renderApplicationNode = async (jsx: () => JSX.Element): Promise<Con
   return appNode.container.stage;
 };
 
-export const renderApplicationTag = async (jsx: () => JSX.Element): Promise<Container> => {
+export const renderApplicationTag = async (
+  jsx: () => JSX.Element,
+): Promise<Container> => {
   const htmlNode = renderPixiScene(() => (
-      <Application preference={"webgl"} >
-        {jsx()}
-      </Application>
+    <Application preference={"webgl"}>{jsx()}</Application>
   ));
 
   const appNode = htmlNode.getChildren()[0] as ApplicationNode;
@@ -57,15 +69,19 @@ export const renderApplicationTag = async (jsx: () => JSX.Element): Promise<Cont
  * ticker.tickFrames(10); // Advance by 10 frames
  */
 export const renderApplicationWithFakeTicker = async (
-  jsx: () => JSX.Element
+  jsx: () => JSX.Element,
 ): Promise<{ stage: Container; ticker: FakeTestingTicker }> => {
   const ticker = new FakeTestingTicker();
 
   const application = await new Promise<PixiApplication>((res) => {
     renderPixiScene(() => (
-        <Application preference={"webgl"} createTicker={() => ticker} appInitialize={(app) => res(app)}>
-          {jsx()}
-        </Application>
+      <Application
+        preference={"webgl"}
+        createTicker={() => ticker}
+        appInitialize={(app) => res(app)}
+      >
+        {jsx()}
+      </Application>
     ));
   });
   // allow render tree to update into intialized state
@@ -73,6 +89,6 @@ export const renderApplicationWithFakeTicker = async (
 
   return {
     stage: application.stage,
-    ticker
+    ticker,
   };
 };

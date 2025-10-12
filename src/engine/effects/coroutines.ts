@@ -1,24 +1,24 @@
-import {onNextFrame} from "../tags/Application.tsx";
-import {lerp} from "../libs/Math.ts";
-import {createSignal} from "solid-custom-renderer/patched-types.ts";
-import {unreachable} from "../../utility-types.ts";
+import { onNextFrame } from "../tags/Application.tsx";
+import { lerp } from "../libs/Math.ts";
+import { createSignal } from "solid-custom-renderer/patched-types.ts";
+import { unreachable } from "../../utility-types.ts";
 
 export type GeneratorYieldResult =
-    | GeneratorStop
-    | GeneratorWaitForMs
-    | GeneratorWaitForFrames
-    | GeneratorContinue
+  | GeneratorStop
+  | GeneratorWaitForMs
+  | GeneratorWaitForFrames
+  | GeneratorContinue;
 
-type GeneratorStop = {type: "GeneratorStop"};
-type GeneratorContinue = {type: "GeneratorContinue"};
-type GeneratorWaitForMs = {type: "GeneratorWaitMs", ms: number};
-type GeneratorWaitForFrames = {type: "GeneratorWaitFrames", frames: number};
+type GeneratorStop = { type: "GeneratorStop" };
+type GeneratorContinue = { type: "GeneratorContinue" };
+type GeneratorWaitForMs = { type: "GeneratorWaitMs"; ms: number };
+type GeneratorWaitForFrames = { type: "GeneratorWaitFrames"; frames: number };
 
 export type CoroutineFn = () => Generator<GeneratorYieldResult, void, number>;
 
 export type AsyncCoroutineFn = () => AsyncGenerator<unknown, void, number>;
 
-type TimestampState = { timeStamp: number, duration: number };
+type TimestampState = { timeStamp: number; duration: number };
 
 /**
  * Signals the coroutine executor to terminate the coroutine immediately.
@@ -37,7 +37,7 @@ type TimestampState = { timeStamp: number, duration: number };
  * }
  */
 export const stop = (): GeneratorStop => ({
-    type: "GeneratorStop"
+  type: "GeneratorStop",
 });
 
 /**
@@ -55,8 +55,8 @@ export const stop = (): GeneratorStop => ({
  * }
  */
 export const waitMs = (ms: number): GeneratorWaitForMs => ({
-    type: "GeneratorWaitMs",
-    ms
+  type: "GeneratorWaitMs",
+  ms,
 });
 
 /**
@@ -74,8 +74,8 @@ export const waitMs = (ms: number): GeneratorWaitForMs => ({
  * }
  */
 export const waitFrames = (frames: number): GeneratorWaitForFrames => ({
-    type: "GeneratorWaitFrames",
-    frames
+  type: "GeneratorWaitFrames",
+  frames,
 });
 
 /**
@@ -97,9 +97,8 @@ export const waitFrames = (frames: number): GeneratorWaitForFrames => ({
  * }
  */
 export const generatorContinue = (): GeneratorContinue => ({
-    type: "GeneratorContinue"
-})
-
+  type: "GeneratorContinue",
+});
 
 /**
  * Namespace object containing all coroutine control functions.
@@ -119,11 +118,11 @@ export const generatorContinue = (): GeneratorContinue => ({
  * }
  */
 export const CoroutineControl = {
-    waitMs,
-    waitFrames,
-    stop,
-    continue: generatorContinue,
-}
+  waitMs,
+  waitFrames,
+  stop,
+  continue: generatorContinue,
+};
 
 /**
  * Checks if a time-based wait state has completed by comparing elapsed time against duration.
@@ -133,12 +132,15 @@ export const CoroutineControl = {
  * @returns {TimestampState | null} Returns null when wait is complete, otherwise returns the state
  * @private
  */
-const getNextTimeStampState = (state: TimestampState | null, elapsedMsSinceLastFrame: number): TimestampState|null => {
-    if(state === null) return state;
-    state.timeStamp += elapsedMsSinceLastFrame;
-    if(state.timeStamp >= state.duration) return null;
-    return state;
-}
+const getNextTimeStampState = (
+  state: TimestampState | null,
+  elapsedMsSinceLastFrame: number,
+): TimestampState | null => {
+  if (state === null) return state;
+  state.timeStamp += elapsedMsSinceLastFrame;
+  if (state.timeStamp >= state.duration) return null;
+  return state;
+};
 
 /**
  * Creates initial state for a millisecond-based wait operation.
@@ -149,8 +151,8 @@ const getNextTimeStampState = (state: TimestampState | null, elapsedMsSinceLastF
  * @private
  */
 const initializeTimeStampState = (duration: number): TimestampState => ({
-    duration,
-    timeStamp: 0
+  duration,
+  timeStamp: 0,
 });
 
 /**
@@ -161,10 +163,8 @@ const initializeTimeStampState = (duration: number): TimestampState => ({
  * @returns {number | null} Returns null when counter reaches 0, otherwise returns decremented count
  * @private
  */
-const getNextCounterState = (frames: number|null) =>
-    frames === null || frames === 0
-        ? null
-        : frames-1;
+const getNextCounterState = (frames: number | null) =>
+  frames === null || frames === 0 ? null : frames - 1;
 
 /**
  * Creates initial state for a frame-based wait operation.
@@ -185,8 +185,10 @@ const initializeCounterState = (frames: number) => frames - 1;
  * @returns {boolean} True if any wait is active, false if ready to execute
  * @private
  */
-const isInWaitingState = (timeStampState: TimestampState|null, counterState: number|null) =>
-    timeStampState !== null || counterState !== null;
+const isInWaitingState = (
+  timeStampState: TimestampState | null,
+  counterState: number | null,
+) => timeStampState !== null || counterState !== null;
 
 /**
  * Factory function that creates a stateful coroutine wait manager.
@@ -200,23 +202,26 @@ const isInWaitingState = (timeStampState: TimestampState|null, counterState: num
  * @private
  */
 const createCoroutineState = () => {
-    let timeStampState: TimestampState|null = null;
-    let frameCounter: number|null = null;
-    return {
-        waitMs: (ms: number) => {
-            timeStampState = initializeTimeStampState(ms);
-        },
-        waitFrames: (frames: number) => {
-            frameCounter = initializeCounterState(frames);
-        },
-        isWaitingOnNextTick: (elapsedMsSinceLastFrame: number) => {
-            timeStampState = getNextTimeStampState(timeStampState, elapsedMsSinceLastFrame);
-            console.log(timeStampState);
-            frameCounter = getNextCounterState(frameCounter);
-            return isInWaitingState(timeStampState, frameCounter);
-        }
-    }
-}
+  let timeStampState: TimestampState | null = null;
+  let frameCounter: number | null = null;
+  return {
+    waitMs: (ms: number) => {
+      timeStampState = initializeTimeStampState(ms);
+    },
+    waitFrames: (frames: number) => {
+      frameCounter = initializeCounterState(frames);
+    },
+    isWaitingOnNextTick: (elapsedMsSinceLastFrame: number) => {
+      timeStampState = getNextTimeStampState(
+        timeStampState,
+        elapsedMsSinceLastFrame,
+      );
+      console.log(timeStampState);
+      frameCounter = getNextCounterState(frameCounter);
+      return isInWaitingState(timeStampState, frameCounter);
+    },
+  };
+};
 
 /**
  * Starts a frame-synchronized coroutine that executes a generator function over multiple frames.
@@ -291,37 +296,42 @@ const createCoroutineState = () => {
  * }
  */
 export const startCoroutine = (fn: CoroutineFn) => {
-    const iterator = fn();
-    const coroutineState = createCoroutineState();
-    const [stopped, setStopped] = createSignal(false);
+  const iterator = fn();
+  const coroutineState = createCoroutineState();
+  const [stopped, setStopped] = createSignal(false);
 
-    const onCoroutineDone = () => {
-        setStopped(true);
-        dispose();
-    }
+  const onCoroutineDone = () => {
+    setStopped(true);
+    dispose();
+  };
 
-    const dispose = onNextFrame({
-        query: (applicationState) => applicationState.time.elapsedMsSinceLastFrame(),
-        tick: (elapsedMs) => {
-            if(coroutineState.isWaitingOnNextTick(elapsedMs)) return;
+  const dispose = onNextFrame({
+    query: (applicationState) =>
+      applicationState.time.elapsedMsSinceLastFrame(),
+    tick: (elapsedMs) => {
+      if (coroutineState.isWaitingOnNextTick(elapsedMs)) return;
 
-            const result = iterator.next(Math.floor(elapsedMs));
+      const result = iterator.next(Math.floor(elapsedMs));
 
-            if(result.done) return onCoroutineDone();
+      if (result.done) return onCoroutineDone();
 
-            switch(result.value.type){
-                case "GeneratorContinue": return;
-                case "GeneratorStop":  return onCoroutineDone();
-                case "GeneratorWaitMs": return coroutineState.waitMs(result.value.ms);
-                case "GeneratorWaitFrames": return coroutineState.waitFrames(result.value.frames)
-                default: return unreachable(result.value)
-            }
-        }
-    })
+      switch (result.value.type) {
+        case "GeneratorContinue":
+          return;
+        case "GeneratorStop":
+          return onCoroutineDone();
+        case "GeneratorWaitMs":
+          return coroutineState.waitMs(result.value.ms);
+        case "GeneratorWaitFrames":
+          return coroutineState.waitFrames(result.value.frames);
+        default:
+          return unreachable(result.value);
+      }
+    },
+  });
 
-    return {dispose, stopped};
-}
-
+  return { dispose, stopped };
+};
 
 /**
  * Creates a specialized coroutine for smooth, eased animations over a fixed duration.
@@ -407,19 +417,17 @@ export const startCoroutine = (fn: CoroutineFn) => {
  * }
  */
 export const createEasingCoroutine = (
-    cb: (fn: (a: number, b: number) => number) => void,
-    easingFn: (x: number) => number,
-    duration: number
+  cb: (fn: (a: number, b: number) => number) => void,
+  easingFn: (x: number) => number,
+  duration: number,
 ): CoroutineFn => {
-
-    return function* (){
-        let elapsed = 0;
-        while(true){
-            const progress = Math.min(elapsed / duration, 1);
-            cb((a, b) => lerp(a, b, easingFn(progress)));
-            if(elapsed >= duration) break;
-            elapsed += yield CoroutineControl.continue();
-        }
-
+  return function* () {
+    let elapsed = 0;
+    while (true) {
+      const progress = Math.min(elapsed / duration, 1);
+      cb((a, b) => lerp(a, b, easingFn(progress)));
+      if (elapsed >= duration) break;
+      elapsed += yield CoroutineControl.continue();
     }
-}
+  };
+};

@@ -26,7 +26,7 @@ describe("nested reactivity", () => {
     expect(level3.width).toBe(10);
 
     setValue(50);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(level1.x).toBe(50);
     expect(level2.y).toBe(50);
@@ -52,7 +52,7 @@ describe("nested reactivity", () => {
     expect(child.x).toBe(100);
 
     setParentX(200);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(parent.x).toBe(200);
     expect(child.x).toBe(100);
@@ -81,13 +81,13 @@ describe("nested reactivity", () => {
     expect(sibling2.x).toBe(0);
 
     setX1(100);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(sibling1.x).toBe(100);
     expect(sibling2.x).toBe(0);
 
     setX2(200);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(sibling1.x).toBe(100);
     expect(sibling2.x).toBe(200);
@@ -108,7 +108,7 @@ describe("nested reactivity", () => {
     expect(container.x).toBe(30);
 
     setBase(20);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.x).toBe(60);
   });
 
@@ -128,7 +128,7 @@ describe("nested reactivity", () => {
     expect(container.height).toBeCloseTo(78.54, 2);
 
     setRadius(10);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.width).toBe(20);
     expect(container.height).toBeCloseTo(314.16, 2);
   });
@@ -152,12 +152,12 @@ describe("nested reactivity", () => {
     expect(inner.alpha).toBe(1);
 
     setOuterAlpha(0.5);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(outer.alpha).toBe(0.5);
     expect(inner.alpha).toBe(1);
 
     setInnerAlpha(0.3);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(outer.alpha).toBe(0.5);
     expect(inner.alpha).toBe(0.3);
   });

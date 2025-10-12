@@ -29,7 +29,9 @@ describe("PixiExternalContainer", () => {
   });
 
   test("reactively swaps containers", async () => {
-    const [container, setContainer] = createSignal<Container | undefined>(undefined);
+    const [container, setContainer] = createSignal<Container | undefined>(
+      undefined,
+    );
 
     const stage = await renderApplicationNode(() => (
       <PixiExternalContainer container={container()} />
@@ -41,7 +43,7 @@ describe("PixiExternalContainer", () => {
     const firstContainer = new Container();
     firstContainer.label = "first";
     setContainer(firstContainer);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(wrapperContainer.children.length).toBe(1);
     expect((wrapperContainer.children[0] as Container).label).toBe("first");
@@ -49,7 +51,7 @@ describe("PixiExternalContainer", () => {
     const secondContainer = new Container();
     secondContainer.label = "second";
     setContainer(secondContainer);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(wrapperContainer.children.length).toBe(1);
     expect((wrapperContainer.children[0] as Container).label).toBe("second");
@@ -58,7 +60,9 @@ describe("PixiExternalContainer", () => {
 
   test("removes external container when swapped to undefined", async () => {
     const externalContainer = new Container();
-    const [container, setContainer] = createSignal<Container | undefined>(externalContainer);
+    const [container, setContainer] = createSignal<Container | undefined>(
+      externalContainer,
+    );
 
     const stage = await renderApplicationNode(() => (
       <PixiExternalContainer container={container()} />
@@ -68,7 +72,7 @@ describe("PixiExternalContainer", () => {
     expect(wrapperContainer.children.length).toBe(1);
 
     setContainer(undefined);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(wrapperContainer.children.length).toBe(0);
   });
@@ -86,12 +90,14 @@ describe("PixiExternalContainer", () => {
     const wrapperContainer = stage.children[0] as Container;
     expect(wrapperContainer.children.length).toBe(2);
 
-    const trackedText = wrapperContainer.children.find(child => child instanceof Text) as Text;
+    const trackedText = wrapperContainer.children.find(
+      (child) => child instanceof Text,
+    ) as Text;
     expect(trackedText).toBeDefined();
     expect(trackedText.text).toBe("Tracked Child");
 
     const untrackedContainer = wrapperContainer.children.find(
-      child => child instanceof Container && child.label === "external"
+      (child) => child instanceof Container && child.label === "external",
     ) as Container;
     expect(untrackedContainer).toBeDefined();
     expect(untrackedContainer).toBe(externalContainer);
@@ -100,7 +106,9 @@ describe("PixiExternalContainer", () => {
   test("swapping external container preserves JSX children", async () => {
     const firstContainer = new Container();
     firstContainer.label = "first";
-    const [container, setContainer] = createSignal<Container | undefined>(firstContainer);
+    const [container, setContainer] = createSignal<Container | undefined>(
+      firstContainer,
+    );
 
     const stage = await renderApplicationNode(() => (
       <PixiExternalContainer container={container()}>
@@ -114,11 +122,13 @@ describe("PixiExternalContainer", () => {
     const secondContainer = new Container();
     secondContainer.label = "second";
     setContainer(secondContainer);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(wrapperContainer.children.length).toBe(2);
 
-    const trackedText = wrapperContainer.children.find(child => child instanceof Text) as Text;
+    const trackedText = wrapperContainer.children.find(
+      (child) => child instanceof Text,
+    ) as Text;
     expect(trackedText).toBeDefined();
     expect(trackedText.text).toBe("Tracked Child");
 
@@ -155,7 +165,12 @@ describe("PixiExternalContainer", () => {
     const externalContainer = new Container();
 
     const stage = await renderApplicationNode(() => (
-      <PixiExternalContainer container={externalContainer} x={100} y={200} alpha={0.5} />
+      <PixiExternalContainer
+        container={externalContainer}
+        x={100}
+        y={200}
+        alpha={0.5}
+      />
     ));
 
     const wrapperContainer = stage.children[0] as Container;
@@ -178,11 +193,11 @@ describe("PixiExternalContainer", () => {
     expect(wrapperContainer.y).toBe(0);
 
     setX(100);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(wrapperContainer.x).toBe(100);
 
     setY(200);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(wrapperContainer.y).toBe(200);
   });
 
@@ -209,7 +224,9 @@ describe("PixiExternalContainer", () => {
   });
 
   test("swapping does not affect external container internal state", async () => {
-    const [container, setContainer] = createSignal<Container | undefined>(undefined);
+    const [container, setContainer] = createSignal<Container | undefined>(
+      undefined,
+    );
     const firstContainer = new Container();
     const nestedChild = new Container();
     nestedChild.label = "nested";
@@ -220,21 +237,23 @@ describe("PixiExternalContainer", () => {
     ));
 
     setContainer(firstContainer);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(firstContainer.children.length).toBe(1);
     expect((firstContainer.children[0] as Container).label).toBe("nested");
 
     const secondContainer = new Container();
     setContainer(secondContainer);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(firstContainer.children.length).toBe(1);
     expect((firstContainer.children[0] as Container).label).toBe("nested");
   });
 
   test("multiple sequential swaps maintain correct state", async () => {
-    const [container, setContainer] = createSignal<Container | undefined>(undefined);
+    const [container, setContainer] = createSignal<Container | undefined>(
+      undefined,
+    );
 
     const stage = await renderApplicationNode(() => (
       <PixiExternalContainer container={container()} />
@@ -250,10 +269,12 @@ describe("PixiExternalContainer", () => {
 
     for (let i = 0; i < containers.length; i++) {
       setContainer(containers[i]);
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(wrapperContainer.children.length).toBe(1);
-      expect((wrapperContainer.children[0] as Container).label).toBe(`container${i}`);
+      expect((wrapperContainer.children[0] as Container).label).toBe(
+        `container${i}`,
+      );
 
       for (let j = 0; j < i; j++) {
         expect(wrapperContainer.children).not.toContain(containers[j]);
@@ -290,13 +311,15 @@ describe("PixiExternalContainer", () => {
     ));
 
     const wrapperContainer = stage.children[0] as Container;
-    const textNode = wrapperContainer.children.find(child => child instanceof Text) as Text;
+    const textNode = wrapperContainer.children.find(
+      (child) => child instanceof Text,
+    ) as Text;
 
     expect(textNode.text).toBe("Initial");
     expect(wrapperContainer.children).toContain(externalContainer);
 
     setText("Updated");
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(textNode.text).toBe("Updated");
     expect(wrapperContainer.children).toContain(externalContainer);

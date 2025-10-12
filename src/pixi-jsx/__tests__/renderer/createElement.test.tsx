@@ -4,33 +4,25 @@ import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.
 
 describe("element creation through JSX", () => {
   test("renders text element", async () => {
-    const stage = await renderApplicationNode(() => (
-      <text>Hello</text>
-    ));
+    const stage = await renderApplicationNode(() => <text>Hello</text>);
 
     expect(stage.children[0]).toBeInstanceOf(Text);
   });
 
   test("renders container element", async () => {
-    const stage = await renderApplicationNode(() => (
-      <container />
-    ));
+    const stage = await renderApplicationNode(() => <container />);
 
     expect(stage.children[0]).toBeInstanceOf(Container);
   });
 
   test("renders sprite element", async () => {
-    const stage = await renderApplicationNode(() => (
-      <sprite />
-    ));
+    const stage = await renderApplicationNode(() => <sprite />);
 
     expect(stage.children[0]).toBeInstanceOf(Sprite);
   });
 
   test("renders graphics element", async () => {
-    const stage = await renderApplicationNode(() => (
-      <graphics />
-    ));
+    const stage = await renderApplicationNode(() => <graphics />);
 
     expect(stage.children[0]).toBeInstanceOf(Graphics);
   });
@@ -70,9 +62,7 @@ describe("element creation through JSX", () => {
   });
 
   test("raw text nodes become Text elements under application", async () => {
-    const stage = await renderApplicationNode(() => (
-      <>Raw text content</>
-    ));
+    const stage = await renderApplicationNode(() => <>Raw text content</>);
 
     expect(stage.children[0]).toBeInstanceOf(Text);
     expect((stage.children[0] as Text).text).toBe("Raw text content");

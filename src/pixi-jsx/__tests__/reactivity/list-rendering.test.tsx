@@ -9,9 +9,7 @@ describe("list rendering", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -27,9 +25,7 @@ describe("list rendering", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -37,7 +33,7 @@ describe("list rendering", () => {
     expect(container.children.length).toBe(2);
 
     setItems(["A", "B", "C", "D"]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(4);
     expect((container.children[0] as Text).text).toBe("A");
     expect((container.children[1] as Text).text).toBe("B");
@@ -50,9 +46,7 @@ describe("list rendering", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -60,7 +54,7 @@ describe("list rendering", () => {
     expect(container.children.length).toBe(4);
 
     setItems(["A", "C"]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(2);
     expect((container.children[0] as Text).text).toBe("A");
     expect((container.children[1] as Text).text).toBe("C");
@@ -71,9 +65,7 @@ describe("list rendering", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
@@ -81,7 +73,7 @@ describe("list rendering", () => {
     expect(container.children.length).toBe(3);
 
     setItems([]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(0);
   });
 
@@ -90,16 +82,14 @@ describe("list rendering", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item}</text>}</For>
       </container>
     ));
 
     const container = stage.children[0] as Container;
 
     setItems(["C", "B", "A"]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(3);
     expect((container.children[0] as Text).text).toBe("C");
     expect((container.children[1] as Text).text).toBe("B");
@@ -128,7 +118,7 @@ describe("list rendering", () => {
     expect((firstChild.children[0] as Text).text).toBe("1");
 
     setItems([1, 2]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(parent.children.length).toBe(2);
   });
 
@@ -140,9 +130,7 @@ describe("list rendering", () => {
 
     const stage = await renderApplicationNode(() => (
       <container>
-        <For each={items()}>
-          {(item) => <text>{item.name}</text>}
-        </For>
+        <For each={items()}>{(item) => <text>{item.name}</text>}</For>
       </container>
     ));
 
@@ -155,7 +143,7 @@ describe("list rendering", () => {
       { id: 2, name: "Bob" },
       { id: 3, name: "Charlie" },
     ]);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(container.children.length).toBe(2);
     expect((container.children[0] as Text).text).toBe("Bob");
     expect((container.children[1] as Text).text).toBe("Charlie");
@@ -167,7 +155,11 @@ describe("list rendering", () => {
     const stage = await renderApplicationNode(() => (
       <container>
         <For each={items()}>
-          {(item, index) => <text>{index()}: {item}</text>}
+          {(item, index) => (
+            <text>
+              {index()}: {item}
+            </text>
+          )}
         </For>
       </container>
     ));

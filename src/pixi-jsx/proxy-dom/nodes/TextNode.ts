@@ -1,45 +1,44 @@
-import {expectNode, ProxyDomNode, ProxyNode} from "./Node.ts";
-import {Application, Text} from "pixi.js";
-import {invariant, isDefined} from "../../../utility-types.ts";
-import {RawNode} from "./RawNode.ts";
-
+import { expectNode, ProxyDomNode, ProxyNode } from "./Node.ts";
+import { Application, Text } from "pixi.js";
+import { invariant, isDefined } from "../../../utility-types.ts";
+import { RawNode } from "./RawNode.ts";
 
 export class TextNode extends ProxyNode<"text", Text, ProxyDomNode> {
-    static create() {
-        return new TextNode("text", new Text())
-    }
+  static create() {
+    return new TextNode("text", new Text());
+  }
 
-    static createFromRaw(...nodes: string[]){
-        const node = TextNode.create();
-        nodes.forEach((child) => node.addChild(RawNode.create(child)));
-        return node;
-    }
+  static createFromRaw(...nodes: string[]) {
+    const node = TextNode.create();
+    nodes.forEach((child) => node.addChild(RawNode.create(child)));
+    return node;
+  }
 
-    addChildProxy(node: ProxyDomNode, anchor?: ProxyDomNode): void {
-        expectNode(node, "raw", `unexpect tag for text`);
-    }
+  addChildProxy(node: ProxyDomNode, anchor?: ProxyDomNode): void {
+    expectNode(node, "raw", `unexpect tag for text`);
+  }
 
-    protected override recomputeProxy() {
-        this.container.text = this.children.reduce((acc, child) => `${acc}${child.container}`, ``);
-    }
+  protected override recomputeProxy() {
+    this.container.text = this.children.reduce(
+      (acc, child) => `${acc}${child.container}`,
+      ``,
+    );
+  }
 
-    override addChildProxyUntracked(_untracked: Text) {
-        throw new Error("cannot add untracked child to text")
-    }
+  override addChildProxyUntracked(_untracked: Text) {
+    throw new Error("cannot add untracked child to text");
+  }
 
-    override removeChildProxyUntracked(_untracked: Text) {
-        throw new Error("cannot remove an untracked child from Text")
-    }
+  override removeChildProxyUntracked(_untracked: Text) {
+    throw new Error("cannot remove an untracked child from Text");
+  }
 
-    removeChildProxy(proxied: ProxyDomNode) {
-        const nextText = this.children.reduce(
-            (acc, el) => {
-                if(proxied.id === el.id) return acc;
-                return `${acc}${el.container}`
-            },
-            ""
-        );
+  removeChildProxy(proxied: ProxyDomNode) {
+    const nextText = this.children.reduce((acc, el) => {
+      if (proxied.id === el.id) return acc;
+      return `${acc}${el.container}`;
+    }, "");
 
-        this.container.text = nextText;
-    }
+    this.container.text = nextText;
+  }
 }
