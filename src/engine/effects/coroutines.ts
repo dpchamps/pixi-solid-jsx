@@ -13,7 +13,6 @@ type GeneratorStop = {type: "GeneratorStop"};
 type GeneratorContinue = {type: "GeneratorContinue"};
 type GeneratorWaitForMs = {type: "GeneratorWaitMs", ms: number};
 type GeneratorWaitForFrames = {type: "GeneratorWaitFrames", frames: number};
-
 type GeneratorPromise = {type: "GeneratorPromise", promise: Promise<unknown>}
 
 export type CoroutineFn = () => Generator<GeneratorYieldResult, void, number>;
@@ -102,11 +101,46 @@ export const waitPromise = (promise: Promise<unknown>): GeneratorPromise => ({
 });
 
 
+/**
+ * Signals the coroutine to continue execution and proceed to the next frame.
+ * Returns the elapsed time in milliseconds since the last frame when yielded.
+ * You must explicitly yield this (or another control instruction) to continue -
+ * bare yields are no longer supported.
+ *
+ * @returns {GeneratorContinue} Control instruction to continue to next frame
+ * @example
+ * function* smoothAnimation() {
+ *     let elapsed = 0;
+ *     while(elapsed < 1000) {
+ *         // Must explicitly continue to get elapsed time
+ *         const deltaMs = yield generatorContinue();
+ *         elapsed += deltaMs;
+ *         sprite.x += (deltaMs / 1000) * 100; // Move 100px per second
+ *     }
+ * }
+ */
 export const generatorContinue = (): GeneratorContinue => ({
     type: "GeneratorContinue"
 })
 
 
+/**
+ * Namespace object containing all coroutine control functions.
+ * Provides a convenient way to access control instructions with dotted syntax.
+ *
+ * @example
+ * function* animation() {
+ *     sprite.x += 10;
+ *     yield CoroutineControl.continue();
+ *
+ *     yield CoroutineControl.waitMs(500);
+ *
+ *     sprite.x += 10;
+ *     yield CoroutineControl.waitFrames(30);
+ *
+ *     yield CoroutineControl.stop();
+ * }
+ */
 export const CoroutineControl = {
     waitMs,
     waitFrames,
@@ -177,6 +211,17 @@ const initializeCounterState = (frames: number) => frames - 1;
 const isInWaitingState = (timeStampState: TimestampState|null, counterState: number|null) =>
     timeStampState !== null || counterState !== null;
 
+/**
+ * Factory function that creates a stateful coroutine wait manager.
+ * Encapsulates both time-based and frame-based wait state tracking.
+ * Used internally by startCoroutine to manage wait operations.
+ *
+ * @returns {Object} State manager with methods for wait control:
+ *   - waitMs: Initializes a millisecond-based wait
+ *   - waitFrames: Initializes a frame-based wait
+ *   - isWaitingOnNextTick: Updates and checks if any wait is active
+ * @private
+ */
 const createCoroutineState = () => {
     let timeStampState: TimestampState|null = null;
     let frameCounter: number|null = null;
@@ -407,12 +452,7 @@ export const startAsyncCoroutine = (fn: AsyncCoroutineFn) => {
  * 3. Applies easing function to the percentage
  * 4. Provides a lerp function that uses the eased percentage
  * 5. Callback can use this lerp to interpolate any values
- *
- * **The Double-Yield Pattern:**
- * The function yields twice per iteration:
- * - First yield: Returns elapsed time for accurate time tracking
- * - Second yield: `waitFrames(1)` for consistent frame pacing
- * This ensures both accurate timing and predictable frame execution.
+ * 6. Yields elapsed time back to accumulate for next frame's progress calculation
  *
  * @param {Function} cb - Callback that receives a lerp function. Called once per frame.
  *                        The lerp function signature: (start, end) => number
