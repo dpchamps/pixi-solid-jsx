@@ -13,7 +13,6 @@ type GeneratorStop = {type: "GeneratorStop"};
 type GeneratorContinue = {type: "GeneratorContinue"};
 type GeneratorWaitForMs = {type: "GeneratorWaitMs", ms: number};
 type GeneratorWaitForFrames = {type: "GeneratorWaitFrames", frames: number};
-type GeneratorPromise = {type: "GeneratorPromise", promise: Promise<unknown>}
 
 export type CoroutineFn = () => Generator<GeneratorYieldResult, void, number>;
 
@@ -78,28 +77,6 @@ export const waitFrames = (frames: number): GeneratorWaitForFrames => ({
     type: "GeneratorWaitFrames",
     frames
 });
-
-
-
-/**
- * Creates a control instruction to wait for a Promise to resolve.
- * ⚠️ WARNING: This is currently NOT IMPLEMENTED in the executor and will be ignored.
- * Included for API completeness and future implementation.
- *
- * @param {Promise<unknown>} promise - Promise to wait for
- * @returns {GeneratorPromise} Control instruction to wait for promise
- * @example
- * // Theoretical usage (not currently functional)
- * function* loadAndDisplay() {
- *     const texture = yield waitPromise(Assets.load('boss.png'));
- *     boss.texture = texture;
- * }
- */
-export const waitPromise = (promise: Promise<unknown>): GeneratorPromise => ({
-    type: "GeneratorPromise",
-    promise
-});
-
 
 /**
  * Signals the coroutine to continue execution and proceed to the next frame.
@@ -225,7 +202,6 @@ const isInWaitingState = (timeStampState: TimestampState|null, counterState: num
 const createCoroutineState = () => {
     let timeStampState: TimestampState|null = null;
     let frameCounter: number|null = null;
-
     return {
         waitMs: (ms: number) => {
             timeStampState = initializeTimeStampState(ms);
@@ -236,7 +212,7 @@ const createCoroutineState = () => {
         isWaitingOnNextTick: () => {
             timeStampState = getNextTimeStampState(timeStampState);
             frameCounter = getNextCounterState(frameCounter);
-            return isInWaitingState(timeStampState, frameCounter)
+            return isInWaitingState(timeStampState, frameCounter);
         }
     }
 }
@@ -345,96 +321,6 @@ export const startCoroutine = (fn: CoroutineFn) => {
     return {dispose, stopped};
 }
 
-/**
- * Starts an async coroutine that executes an async generator function over multiple frames.
- * Unlike `startCoroutine`, this variant works with async/await but doesn't provide timing information.
- *
- * **When to use:**
- * - Loading sequences that involve async asset fetching
- * - Network-dependent animations or game logic
- * - When you need async/await syntax within coroutine logic
- * - Sequential async operations that should be frame-synchronized
- *
- * **How it differs from startCoroutine:**
- * - Uses async generators (`async function*`) instead of regular generators
- * - No elapsed time information passed to generator
- * - No built-in wait state handlers (use regular async/await)
- * - Each yield simply waits for next frame
- *
- * **Limitations:**
- * - Cannot use waitMs(), waitFrames(), or stop() - these are for sync coroutines only
- * - Less precise timing control compared to sync coroutines
- * - Each async operation may span multiple frames unpredictably
- *
- * @param {AsyncCoroutineFn} fn - Async generator function to execute
- * @returns {{dispose: () => void, stopped: Accessor<boolean>}} Object with disposal function and stopped signal
- *
- * @example
- * // Loading sequence with async operations
- * async function* loadLevel() {
- *     // Show loading screen
- *     loadingScreen.visible = true;
- *     yield; // Let it render
- *
- *     // Fetch level data from server
- *     const levelData = await fetch('/api/level/1').then(r => r.json());
- *     yield; // Process next frame
- *
- *     // Load textures
- *     const textures = await Assets.load(['bg.png', 'tiles.png']);
- *     yield; // Process next frame
- *
- *     // Build level from data
- *     buildLevel(levelData, textures);
- *     yield;
- *
- *     // Hide loading screen
- *     loadingScreen.visible = false;
- * }
- * const {dispose} = startAsyncCoroutine(loadLevel);
- *
- * @example
- * // Mixing async operations with frame-by-frame updates
- * async function* fetchAndAnimate() {
- *     const data = await fetch('/api/animation-data');
- *     const frames = await data.json();
- *
- *     // Now animate through the frames
- *     for(const frame of frames) {
- *         sprite.texture = frame.texture;
- *         sprite.x = frame.x;
- *         sprite.y = frame.y;
- *         yield; // Wait one frame before next
- *     }
- * }
- */
-export const startAsyncCoroutine = (fn: AsyncCoroutineFn) => {
-    const iterator = fn();
-
-    let [stopped, setStopped] = createSignal(false);
-    let [result, setResult] = createSignal<IteratorResult<void, void>>();
-    const onCoroutineDone = () => {
-        setStopped(true);
-        dispose();
-    }
-
-    const dispose = onNextFrame({
-        query: () => {
-            return result()
-        },
-        tick: (lastResult) => {
-            if(lastResult){
-                if(lastResult.done){
-                    onCoroutineDone();
-                    return
-                }
-            }
-            iterator.next().then(setResult);
-        }
-    })
-
-    return {dispose, stopped};
-}
 
 /**
  * Creates a specialized coroutine for smooth, eased animations over a fixed duration.
