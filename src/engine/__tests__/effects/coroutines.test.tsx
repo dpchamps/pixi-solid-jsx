@@ -1,6 +1,13 @@
 import { describe, test, expect } from "vitest";
 import { createSignal } from "../../../pixi-jsx/solidjs-universal-renderer";
-import {startCoroutine, waitFrames, stop, createEasingCoroutine, CoroutineControl} from "../../effects/coroutines";
+import {
+  startCoroutine,
+  waitFrames,
+  stop,
+  createEasingCoroutine,
+  CoroutineControl,
+  waitMs
+} from "../../effects/coroutines";
 import {Sprite, Text} from "pixi.js";
 
 import {renderApplicationWithFakeTicker} from "../../../__tests__/test-utils/test-utils.tsx";
@@ -92,6 +99,68 @@ describe("startCoroutine", () => {
       expect(sprite.x).toBe(30);
       await ticker.tickFrames(1);
       expect(sprite.x).toBe(30); // Coroutine stopped, no more changes
+    });
+  });
+
+  describe("waitMs", () => {
+    test("pauses execution for at least the number of specified ms", async () => {
+      const TestComponent = () => {
+        const [status, setStatus] = createSignal("start");
+        const frameMs = 17;
+
+        startCoroutine(function* () {
+          setStatus("before-wait");
+          yield waitMs(frameMs*2);
+          setStatus("after-wait");
+        });
+
+        return <text>{status()}</text>;
+      };
+
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const textNode = stage.children[0]?.children[0];
+      invariant(textNode);
+      assert(textNode instanceof Text);
+
+      expect(textNode.text).toBe("start");
+      await ticker.tickFrames(1);
+      expect(textNode.text).toBe("before-wait");
+      // wait 2*17
+      await ticker.tickFrames(2);
+      expect(textNode.text).toBe("after-wait");
+    });
+
+    test("pauses execution for at least the number of specified ms but sometimes more than", async () => {
+      const TestComponent = () => {
+        const [status, setStatus] = createSignal("start");
+        const frameMs = 17;
+        // one more than 17*2,
+        const waitForMs = 35;
+
+        startCoroutine(function* () {
+          setStatus("before-wait");
+          yield waitMs(waitForMs);
+          setStatus("after-wait");
+        });
+
+        return <text>{status()}</text>;
+      };
+
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
+      const textNode = stage.children[0]?.children[0];
+      invariant(textNode);
+      assert(textNode instanceof Text);
+
+      expect(textNode.text).toBe("start");
+      await ticker.tickFrames(1);
+      expect(textNode.text).toBe("before-wait");
+      // wait 2*17
+      await ticker.tickFrames(2);
+      // we still haven't waited 35ms (34ms have elapsed)
+      expect(textNode.text).toBe("before-wait");
+      // we need to wait one more frame
+      await ticker.tickFrames(1);
+      expect(textNode.text).toBe("after-wait");
     });
   });
 
@@ -296,67 +365,8 @@ describe("startCoroutine", () => {
     });
   });
 
-  describe("undefined yields", () => {
-    test("yielding undefined waits for next frame", async () => {
-      const TestComponent = () => {
-        const [text, setText] = createSignal("start");
-
-        startCoroutine(function* () {
-          setText("before-yield");
-          yield CoroutineControl.continue();
-          setText("after-yield");
-        });
-
-        return <text>{text()}</text>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
-      const textNode = stage.children[0]?.children[0];
-      invariant(textNode);
-      assert(textNode instanceof Text);
-
-      expect(textNode.text).toBe("start");
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("before-yield");
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("after-yield");
-    });
-
-    test("multiple undefined yields execute frame by frame", async () => {
-      const TestComponent = () => {
-        const [count, setCount] = createSignal(0);
-
-        startCoroutine(function* () {
-          for(let i = 0; i < 5; i++) {
-            setCount(prev => prev + 1);
-            yield CoroutineControl.continue();
-          }
-        });
-
-        return <text>{count()}</text>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => <TestComponent />);
-      const textNode = stage.children[0]?.children[0];
-      invariant(textNode);
-      assert(textNode instanceof Text);
-
-      expect(textNode.text).toBe("0");
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("1");
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("2");
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("3");
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("4");
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("5");
-    });
-  });
-
   describe("complex patterns", () => {
-    test("mixing undefined yields with waitFrames", async () => {
+    test("mixing continue yields with waitFrames", async () => {
       const TestComponent = () => {
         const [step, setStep] = createSignal(0);
 
@@ -431,8 +441,6 @@ describe("startCoroutine", () => {
   });
 });
 
-// Note: these are skipped because they are performing non-deterministically during test runs.
-// something to investigate but not existential.
 describe("createEasingCoroutine", () => {
   test("interpolates sprite position with linear easing", async () => {
     const TestComponent = () => {

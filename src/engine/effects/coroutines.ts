@@ -133,10 +133,10 @@ export const CoroutineControl = {
  * @returns {TimestampState | null} Returns null when wait is complete, otherwise returns the state
  * @private
  */
-const getNextTimeStampState = (state: TimestampState | null): TimestampState|null => {
+const getNextTimeStampState = (state: TimestampState | null, elapsedMsSinceLastFrame: number): TimestampState|null => {
     if(state === null) return state;
-    const elapsedTime = performance.now() - state.timeStamp;
-    if(elapsedTime >= state.duration) return null;
+    state.timeStamp += elapsedMsSinceLastFrame;
+    if(state.timeStamp >= state.duration) return null;
     return state;
 }
 
@@ -150,7 +150,7 @@ const getNextTimeStampState = (state: TimestampState | null): TimestampState|nul
  */
 const initializeTimeStampState = (duration: number): TimestampState => ({
     duration,
-    timeStamp: performance.now()
+    timeStamp: 0
 });
 
 /**
@@ -209,8 +209,9 @@ const createCoroutineState = () => {
         waitFrames: (frames: number) => {
             frameCounter = initializeCounterState(frames);
         },
-        isWaitingOnNextTick: () => {
-            timeStampState = getNextTimeStampState(timeStampState);
+        isWaitingOnNextTick: (elapsedMsSinceLastFrame: number) => {
+            timeStampState = getNextTimeStampState(timeStampState, elapsedMsSinceLastFrame);
+            console.log(timeStampState);
             frameCounter = getNextCounterState(frameCounter);
             return isInWaitingState(timeStampState, frameCounter);
         }
@@ -302,7 +303,7 @@ export const startCoroutine = (fn: CoroutineFn) => {
     const dispose = onNextFrame({
         query: (applicationState) => applicationState.time.elapsedMsSinceLastFrame(),
         tick: (elapsedMs) => {
-            if(coroutineState.isWaitingOnNextTick()) return;
+            if(coroutineState.isWaitingOnNextTick(elapsedMs)) return;
 
             const result = iterator.next(Math.floor(elapsedMs));
 
