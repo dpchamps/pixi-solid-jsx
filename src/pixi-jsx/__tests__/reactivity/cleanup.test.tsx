@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { createSignal, Show, For, onCleanup } from "../../solidjs-universal-renderer";
 import { Text, Container } from "pixi.js";
-import { renderApplicationNode } from "../test-utils";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
 describe("cleanup and memory management", () => {
   test("removed nodes no longer appear in scene", async () => {

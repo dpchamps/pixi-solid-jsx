@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "VITE_STAGE=DEV vitest",
-    "dev": "vite",
+    "test": "vitest",
+    "dev": "VITE_STAGE=DEV vite",
     "build": "npm run build:core && npm run build:runtime",
     "build:core": "vite build",
     "build:runtime": "tsc -b ./tsconfig.jsx-runtime.json",

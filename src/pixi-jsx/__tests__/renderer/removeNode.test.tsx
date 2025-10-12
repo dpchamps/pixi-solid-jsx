@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { createSignal, Show, For } from "../../solidjs-universal-renderer";
 import { Text, Container } from "pixi.js";
-import { renderApplicationNode } from "../test-utils";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
 describe("removeNode", () => {
   test("conditional removal removes node from scene", async () => {

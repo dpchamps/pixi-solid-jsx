@@ -1,51 +1,57 @@
-import {batch, createStore, onCleanup} from "solid-custom-renderer/patched-types.ts";
+import {batch, createSignal, createStore, onCleanup} from "solid-custom-renderer/patched-types.ts";
 import {Ticker} from "pixi.js";
+import {Maybe} from "../../utility-types.ts";
 
 export type Timer = ReturnType<typeof createTimer>;
 
 type CreateTimerArgs = {
     nextFrameFns: {
         forEach: (cb: (value: () => void ) => void) => void
-    }
+    },
+    createTicker?: Maybe<() => Ticker>
 }
 
 export const createTicker = () => {
     const ticker = new Ticker();
     ticker.maxFPS = 60;
     ticker.minFPS = 30;
+    ticker.autoStart = false;
 
     return ticker;
 }
 
+
 export const createTimer = (args: CreateTimerArgs) => {
-    const [timerData, setTimerData] = createStore({
-        deltaTime: 1,
-        currentFps: 0,
-        elapsedMsSinceLastFrame: 0
-    });
+    // we want to ensure that each are updated regardless of value.
+    // this needs to accurately represent a single tick
+    const [deltaTime, setDeltaTime] = createSignal(1, {equals: false});
+    const [currentFps, setCurrentFps] = createSignal(0, {equals: false});
+    const [elapsedMsSinceLastFrame, setElapsedMsSinceLastFrame] = createSignal(0, {equals: false});
 
     function frameTick(ticker: Ticker){
         batch(() => {
-            setTimerData({
-                deltaTime: ticker.deltaTime,
-                currentFps: ticker.FPS,
-                elapsedMsSinceLastFrame: ticker.elapsedMS
-            });
+            setDeltaTime(ticker.deltaTime);
+            setCurrentFps(ticker.FPS);
+            setElapsedMsSinceLastFrame(ticker.elapsedMS);
+
             args.nextFrameFns.forEach((x) => x());
         })
     }
 
-    const ticker = createTicker();
+    const ticker = args.createTicker? args.createTicker() : createTicker();
 
     ticker.add(frameTick);
     onCleanup(() => ticker.remove(frameTick))
-    ticker.start();
 
     return {
         time: {
-            deltaTime: () => timerData.deltaTime,
-            fps: () => timerData.currentFps,
-            elapsedMsSinceLastFrame: () => timerData.elapsedMsSinceLastFrame
+            deltaTime: () => deltaTime(),
+            fps: () => currentFps(),
+            elapsedMsSinceLastFrame: () => elapsedMsSinceLastFrame()
+        },
+        start: () => {
+            ticker.start();
+            ticker.lastTime = performance.now()
         },
         ticker
     }

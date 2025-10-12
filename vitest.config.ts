@@ -6,7 +6,7 @@ import dts from "vite-plugin-dts";
 export default defineConfig({
     test: {
         include: ["src/**/*/__tests__/**/*"],
-        exclude: ["src/pixi-jsx/__tests__/test-utils.tsx"],
+        exclude: ["src/__tests__/test-utils/**/*"],
         coverage: {
             provider: "v8",
             enabled: true,

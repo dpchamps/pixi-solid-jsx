@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { createSignal } from "../../solidjs-universal-renderer";
 import { Text } from "pixi.js";
-import { renderApplicationNode } from "../test-utils";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
 describe("text replacement", () => {
   test("replacing text content with signal", async () => {

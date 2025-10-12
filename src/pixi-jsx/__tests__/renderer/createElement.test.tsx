@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { Text, Container, Sprite, Graphics } from "pixi.js";
-import { renderApplicationNode } from "../test-utils";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
 describe("element creation through JSX", () => {
   test("renders text element", async () => {

@@ -10,7 +10,7 @@ import {createController} from "../example-1/createController.ts";
 import {ContainerNode} from "../../src/pixi-jsx/proxy-dom";
 import {invariant} from "../../src/utility-types.ts";
 import {Box} from "./BackgroundContainer.tsx";
-import {FlexBox} from "../../src/engine/tags/FlexBox/FlexBox.tsx";
+import {FlexBox} from "../../src/engine/tags/deprecated/FlexBox/FlexBox.tsx";
 
 type HorizontalSpacingProps = {
     x?: number,

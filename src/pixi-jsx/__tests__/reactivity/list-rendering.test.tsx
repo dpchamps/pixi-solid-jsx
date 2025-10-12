@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { createSignal, For } from "../../solidjs-universal-renderer";
 import { Text, Container } from "pixi.js";
-import { renderApplicationNode } from "../test-utils";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
 describe("list rendering", () => {
   test("For renders initial list", async () => {

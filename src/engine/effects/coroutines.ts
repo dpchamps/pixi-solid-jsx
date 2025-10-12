@@ -1,44 +1,127 @@
 import {onNextFrame} from "../tags/Application.tsx";
 import {lerp} from "../libs/Math.ts";
 import {createSignal} from "solid-custom-renderer/patched-types.ts";
+import {unreachable} from "../../utility-types.ts";
 
 export type GeneratorYieldResult =
     | GeneratorStop
     | GeneratorWaitForMs
     | GeneratorWaitForFrames
-    | GeneratorPromise
+    | GeneratorContinue
 
 type GeneratorStop = {type: "GeneratorStop"};
+type GeneratorContinue = {type: "GeneratorContinue"};
 type GeneratorWaitForMs = {type: "GeneratorWaitMs", ms: number};
 type GeneratorWaitForFrames = {type: "GeneratorWaitFrames", frames: number};
 
 type GeneratorPromise = {type: "GeneratorPromise", promise: Promise<unknown>}
 
-export type CoroutineFn = () => Generator<GeneratorYieldResult|undefined, void, number>;
+export type CoroutineFn = () => Generator<GeneratorYieldResult, void, number>;
 
 export type AsyncCoroutineFn = () => AsyncGenerator<unknown, void, number>;
 
 type TimestampState = { timeStamp: number, duration: number };
 
+/**
+ * Signals the coroutine executor to terminate the coroutine immediately.
+ * Use this to cleanly exit from infinite loops or cancel animations on user interaction.
+ *
+ * @returns {GeneratorStop} Control instruction to stop the coroutine
+ * @example
+ * function* followMouse() {
+ *     while(true) {
+ *         sprite.x = mouse.x;
+ *         if(userClickedStop()) {
+ *             yield stop(); // Terminate coroutine
+ *         }
+ *         yield; // Wait one frame
+ *     }
+ * }
+ */
 export const stop = (): GeneratorStop => ({
     type: "GeneratorStop"
 });
 
+/**
+ * Pauses coroutine execution for a specified duration in milliseconds.
+ * The coroutine will resume after the time has elapsed, synchronized with the next frame.
+ * Note: Actual pause time is frame-aligned, so may be slightly longer than specified.
+ *
+ * @param {number} ms - Duration to wait in milliseconds
+ * @returns {GeneratorWaitForMs} Control instruction to wait for specified milliseconds
+ * @example
+ * function* showNotification() {
+ *     notification.visible = true;
+ *     yield waitMs(3000); // Show for 3 seconds
+ *     notification.visible = false;
+ * }
+ */
 export const waitMs = (ms: number): GeneratorWaitForMs => ({
     type: "GeneratorWaitMs",
     ms
 });
 
+/**
+ * Pauses coroutine execution for an exact number of frames.
+ * Use for frame-perfect timing requirements like fighting game combos or particle effects.
+ * Duration depends on framerate: at 60fps, 60 frames = 1 second.
+ *
+ * @param {number} frames - Number of frames to wait
+ * @returns {GeneratorWaitForFrames} Control instruction to wait for specified frames
+ * @example
+ * function* comboAttack() {
+ *     performPunch();
+ *     yield waitFrames(5); // Exact 5-frame window
+ *     performKick();
+ * }
+ */
 export const waitFrames = (frames: number): GeneratorWaitForFrames => ({
     type: "GeneratorWaitFrames",
     frames
 });
 
+
+
+/**
+ * Creates a control instruction to wait for a Promise to resolve.
+ * ⚠️ WARNING: This is currently NOT IMPLEMENTED in the executor and will be ignored.
+ * Included for API completeness and future implementation.
+ *
+ * @param {Promise<unknown>} promise - Promise to wait for
+ * @returns {GeneratorPromise} Control instruction to wait for promise
+ * @example
+ * // Theoretical usage (not currently functional)
+ * function* loadAndDisplay() {
+ *     const texture = yield waitPromise(Assets.load('boss.png'));
+ *     boss.texture = texture;
+ * }
+ */
 export const waitPromise = (promise: Promise<unknown>): GeneratorPromise => ({
     type: "GeneratorPromise",
     promise
+});
+
+
+export const generatorContinue = (): GeneratorContinue => ({
+    type: "GeneratorContinue"
 })
 
+
+export const CoroutineControl = {
+    waitMs,
+    waitFrames,
+    stop,
+    continue: generatorContinue,
+}
+
+/**
+ * Checks if a time-based wait state has completed by comparing elapsed time against duration.
+ * Called every frame to determine if a `waitMs()` pause has finished.
+ *
+ * @param {TimestampState | null} state - Current timestamp state or null if not waiting
+ * @returns {TimestampState | null} Returns null when wait is complete, otherwise returns the state
+ * @private
+ */
 const getNextTimeStampState = (state: TimestampState | null): TimestampState|null => {
     if(state === null) return state;
     const elapsedTime = performance.now() - state.timeStamp;
@@ -46,61 +129,170 @@ const getNextTimeStampState = (state: TimestampState | null): TimestampState|nul
     return state;
 }
 
+/**
+ * Creates initial state for a millisecond-based wait operation.
+ * Captures the current timestamp to track elapsed time.
+ *
+ * @param {number} duration - Duration to wait in milliseconds
+ * @returns {TimestampState} State object with start timestamp and duration
+ * @private
+ */
 const initializeTimeStampState = (duration: number): TimestampState => ({
     duration,
     timeStamp: performance.now()
 });
 
+/**
+ * Decrements the frame counter for frame-based waits.
+ * Called every frame to count down `waitFrames()` operations.
+ *
+ * @param {number | null} frames - Current frame count or null if not waiting
+ * @returns {number | null} Returns null when counter reaches 0, otherwise returns decremented count
+ * @private
+ */
 const getNextCounterState = (frames: number|null) =>
     frames === null || frames === 0
         ? null
         : frames-1;
 
-const initializeCounterState = (frames: number) => frames;
+/**
+ * Creates initial state for a frame-based wait operation.
+ * Returns frames-1 to account for the decrement that happens before the waiting check.
+ *
+ * @param {number} frames - Number of frames to wait
+ * @returns {number} The frame count minus 1
+ * @private
+ */
+const initializeCounterState = (frames: number) => frames - 1;
 
+/**
+ * Determines if the coroutine is currently in any waiting state.
+ * Used to skip generator execution while waiting for time or frames.
+ *
+ * @param {TimestampState | null} timeStampState - Current time-based wait state
+ * @param {number | null} counterState - Current frame-based wait state
+ * @returns {boolean} True if any wait is active, false if ready to execute
+ * @private
+ */
 const isInWaitingState = (timeStampState: TimestampState|null, counterState: number|null) =>
     timeStampState !== null || counterState !== null;
 
+const createCoroutineState = () => {
+    let timeStampState: TimestampState|null = null;
+    let frameCounter: number|null = null;
+
+    return {
+        waitMs: (ms: number) => {
+            timeStampState = initializeTimeStampState(ms);
+        },
+        waitFrames: (frames: number) => {
+            frameCounter = initializeCounterState(frames);
+        },
+        isWaitingOnNextTick: () => {
+            timeStampState = getNextTimeStampState(timeStampState);
+            frameCounter = getNextCounterState(frameCounter);
+            return isInWaitingState(timeStampState, frameCounter)
+        }
+    }
+}
+
+/**
+ * Starts a frame-synchronized coroutine that executes a generator function over multiple frames.
+ * The coroutine automatically handles timing, frame synchronization, and wait states.
+ *
+ * **When to use:**
+ * - Complex sequential animations that span multiple frames
+ * - Game entity behaviors and AI state machines
+ * - Any logic requiring local state preservation across frames
+ * - Movement patterns, attack sequences, cutscenes
+ *
+ * **How it works:**
+ * 1. Executes generator function one yield at a time
+ * 2. Each frame, passes elapsed milliseconds since last frame to generator
+ * 3. Handles wait instructions (waitMs, waitFrames, stop)
+ * 4. Continues until generator completes or explicitly stopped
+ *
+ *
+ * @param {CoroutineFn} fn - Generator function to execute. Receives elapsed ms as input on each yield.
+ * @returns {{dispose: () => void, stopped: Accessor<boolean>}} Object with disposal function and stopped signal
+ *
+ * @example
+ * // Simple movement coroutine
+ * const moveRight = function* () {
+ *     for(let i = 0; i < 100; i++) {
+ *         sprite.x += 2;
+ *         yield; // Wait one frame
+ *     }
+ * };
+ * const {dispose} = startCoroutine(moveRight);
+ *
+ * @example
+ * // Complex animation sequence with timing
+ * function* attackSequence() {
+ *     // Wind up
+ *     yield* chargeAnimation();
+ *     yield waitMs(500);
+ *
+ *     // Attack
+ *     performAttack();
+ *     yield waitFrames(5); // Frame-perfect timing
+ *
+ *     // Recovery
+ *     yield waitMs(1000);
+ * }
+ *
+ * @example
+ * // Using elapsed time for smooth movement
+ * function* smoothMove() {
+ *     let totalTime = 0;
+ *     while(totalTime < 2000) {
+ *         const elapsed = yield; // Get elapsed ms
+ *         sprite.x += (100 * elapsed) / 1000; // Move 100px per second
+ *         totalTime += elapsed;
+ *     }
+ * }
+ *
+ * @example
+ * // Cleanup on component unmount
+ * const Component = () => {
+ *     const {dispose, stopped} = startCoroutine(myCoroutine);
+ *
+ *     onCleanup(() => {
+ *         dispose(); // Prevent memory leak
+ *     });
+ *
+ *     createEffect(() => {
+ *         if(stopped()) {
+ *             console.log("Animation complete");
+ *         }
+ *     });
+ * }
+ */
 export const startCoroutine = (fn: CoroutineFn) => {
     const iterator = fn();
-    let timeStampState: TimestampState|null = null;
-    let counter: number|null = null;
-    let [stopped, setStopped] = createSignal(false);
-    let [paused, setPaused] = createSignal(false);
+    const coroutineState = createCoroutineState();
+    const [stopped, setStopped] = createSignal(false);
+
     const onCoroutineDone = () => {
         setStopped(true);
         dispose();
     }
 
     const dispose = onNextFrame({
-        query: (applicationState) => {
-            return applicationState.time.elapsedMsSinceLastFrame()
-        },
+        query: (applicationState) => applicationState.time.elapsedMsSinceLastFrame(),
         tick: (elapsedMs) => {
-            timeStampState = getNextTimeStampState(timeStampState);
-            counter = getNextCounterState(counter);
-            if(isInWaitingState(timeStampState, counter) || paused()) return;
+            if(coroutineState.isWaitingOnNextTick()) return;
 
-            const result = iterator.next(elapsedMs);
+            const result = iterator.next(Math.floor(elapsedMs));
 
-            if(result.done || !result.value){
-                result.done && onCoroutineDone();
-                return
-            }
+            if(result.done) return onCoroutineDone();
 
             switch(result.value.type){
-                case "GeneratorStop": {
-                    onCoroutineDone();
-                    break;
-                }
-                case "GeneratorWaitMs":{
-                    timeStampState = initializeTimeStampState(result.value.ms);
-                    break;
-                }
-                case "GeneratorWaitFrames": {
-                    counter = initializeCounterState(result.value.frames);
-                    break;
-                }
+                case "GeneratorContinue": return;
+                case "GeneratorStop":  return onCoroutineDone();
+                case "GeneratorWaitMs": return coroutineState.waitMs(result.value.ms);
+                case "GeneratorWaitFrames": return coroutineState.waitFrames(result.value.frames)
+                default: return unreachable(result.value)
             }
         }
     })
@@ -108,6 +300,69 @@ export const startCoroutine = (fn: CoroutineFn) => {
     return {dispose, stopped};
 }
 
+/**
+ * Starts an async coroutine that executes an async generator function over multiple frames.
+ * Unlike `startCoroutine`, this variant works with async/await but doesn't provide timing information.
+ *
+ * **When to use:**
+ * - Loading sequences that involve async asset fetching
+ * - Network-dependent animations or game logic
+ * - When you need async/await syntax within coroutine logic
+ * - Sequential async operations that should be frame-synchronized
+ *
+ * **How it differs from startCoroutine:**
+ * - Uses async generators (`async function*`) instead of regular generators
+ * - No elapsed time information passed to generator
+ * - No built-in wait state handlers (use regular async/await)
+ * - Each yield simply waits for next frame
+ *
+ * **Limitations:**
+ * - Cannot use waitMs(), waitFrames(), or stop() - these are for sync coroutines only
+ * - Less precise timing control compared to sync coroutines
+ * - Each async operation may span multiple frames unpredictably
+ *
+ * @param {AsyncCoroutineFn} fn - Async generator function to execute
+ * @returns {{dispose: () => void, stopped: Accessor<boolean>}} Object with disposal function and stopped signal
+ *
+ * @example
+ * // Loading sequence with async operations
+ * async function* loadLevel() {
+ *     // Show loading screen
+ *     loadingScreen.visible = true;
+ *     yield; // Let it render
+ *
+ *     // Fetch level data from server
+ *     const levelData = await fetch('/api/level/1').then(r => r.json());
+ *     yield; // Process next frame
+ *
+ *     // Load textures
+ *     const textures = await Assets.load(['bg.png', 'tiles.png']);
+ *     yield; // Process next frame
+ *
+ *     // Build level from data
+ *     buildLevel(levelData, textures);
+ *     yield;
+ *
+ *     // Hide loading screen
+ *     loadingScreen.visible = false;
+ * }
+ * const {dispose} = startAsyncCoroutine(loadLevel);
+ *
+ * @example
+ * // Mixing async operations with frame-by-frame updates
+ * async function* fetchAndAnimate() {
+ *     const data = await fetch('/api/animation-data');
+ *     const frames = await data.json();
+ *
+ *     // Now animate through the frames
+ *     for(const frame of frames) {
+ *         sprite.texture = frame.texture;
+ *         sprite.x = frame.x;
+ *         sprite.y = frame.y;
+ *         yield; // Wait one frame before next
+ *     }
+ * }
+ */
 export const startAsyncCoroutine = (fn: AsyncCoroutineFn) => {
     const iterator = fn();
 
@@ -137,11 +392,92 @@ export const startAsyncCoroutine = (fn: AsyncCoroutineFn) => {
 }
 
 /**
- * Creates a coroutine that is specialized for easing functions
+ * Creates a specialized coroutine for smooth, eased animations over a fixed duration.
+ * Provides a lerp function with pre-applied easing to animate any numeric properties.
  *
- * @param cb
- * @param easingFn
- * @param duration
+ * **When to use:**
+ * - Smooth transitions between two values (position, scale, opacity, etc.)
+ * - UI animations with acceleration/deceleration curves
+ * - Camera movements with cinematic easing
+ * - Any property animation requiring non-linear interpolation
+ *
+ * **How it works:**
+ * 1. Runs for exactly the specified duration in milliseconds
+ * 2. Each frame, calculates progress percentage (0 to 1)
+ * 3. Applies easing function to the percentage
+ * 4. Provides a lerp function that uses the eased percentage
+ * 5. Callback can use this lerp to interpolate any values
+ *
+ * **The Double-Yield Pattern:**
+ * The function yields twice per iteration:
+ * - First yield: Returns elapsed time for accurate time tracking
+ * - Second yield: `waitFrames(1)` for consistent frame pacing
+ * This ensures both accurate timing and predictable frame execution.
+ *
+ * @param {Function} cb - Callback that receives a lerp function. Called once per frame.
+ *                        The lerp function signature: (start, end) => number
+ * @param {Function} easingFn - Easing function that takes progress (0-1) and returns eased value (0-1)
+ * @param {number} duration - Total animation duration in milliseconds
+ * @returns {CoroutineFn} Generator function ready to be passed to startCoroutine
+ *
+ * @example
+ * // Simple position animation with ease-in-out
+ * const moveToTarget = createEasingCoroutine(
+ *     (lerp) => {
+ *         sprite.x = lerp(startX, targetX);
+ *         sprite.y = lerp(startY, targetY);
+ *     },
+ *     easeInOut,  // Slow start and end
+ *     1000        // 1 second duration
+ * );
+ * const {dispose} = startCoroutine(moveToTarget);
+ *
+ * @example
+ * // Complex multi-property animation
+ * const explodeEffect = createEasingCoroutine(
+ *     (lerp) => {
+ *         sprite.scale.x = lerp(1, 3);      // Grow 3x
+ *         sprite.scale.y = lerp(1, 3);
+ *         sprite.alpha = lerp(1, 0);        // Fade out
+ *         sprite.rotation = lerp(0, Math.PI * 2); // Full rotation
+ *     },
+ *     circularIn,  // Accelerating curve
+ *     500          // Half second
+ * );
+ *
+ * @example
+ * // Custom easing function
+ * const bounce = (t) => {
+ *     if (t < 0.5) return 4 * t * t * t;
+ *     const p = 2 * t - 2;
+ *     return 1 + p * p * p / 2;
+ * };
+ *
+ * const bounceAnimation = createEasingCoroutine(
+ *     (lerp) => {
+ *         enemy.y = lerp(groundY, groundY - 100);
+ *     },
+ *     bounce,
+ *     750
+ * );
+ *
+ * @example
+ * // Chaining easing coroutines
+ * function* complexSequence() {
+ *     // Move to position
+ *     yield* createEasingCoroutine(
+ *         (lerp) => sprite.x = lerp(0, 400),
+ *         easeOut,
+ *         1000
+ *     )();
+ *
+ *     // Then scale up
+ *     yield* createEasingCoroutine(
+ *         (lerp) => sprite.scale.x = sprite.scale.y = lerp(1, 2),
+ *         elasticIn(1),
+ *         500
+ *     )();
+ * }
  */
 export const createEasingCoroutine = (
     cb: (fn: (a: number, b: number) => number) => void,
@@ -151,11 +487,12 @@ export const createEasingCoroutine = (
 
     return function* (){
         let elapsed = 0;
-        while(elapsed <= duration){
-            cb((a: number, b: number) => lerp(a, b, easingFn(elapsed/duration)));
-            const elapsedSinceLastFrame = yield;
-            elapsed += elapsedSinceLastFrame;
-            yield waitFrames(1);
+        while(true){
+            const progress = Math.min(elapsed / duration, 1);
+            cb((a, b) => lerp(a, b, easingFn(progress)));
+            if(elapsed >= duration) break;
+            elapsed += yield CoroutineControl.continue();
         }
+
     }
 }

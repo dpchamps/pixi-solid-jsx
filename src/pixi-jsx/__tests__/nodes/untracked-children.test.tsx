@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { Container } from "pixi.js";
-import { renderApplicationNode } from "../test-utils";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 import { ContainerNode } from "../../proxy-dom";
 import { invariant } from "../../../utility-types";
 

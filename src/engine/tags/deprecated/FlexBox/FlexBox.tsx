@@ -1,8 +1,8 @@
 import {JSX} from "jsx-runtime/jsx-runtime.ts";
 import {mergeProps} from "solid-js";
 import {children, createEffect} from "solid-custom-renderer/patched-types.ts";
-import {unreachable} from "../../../utility-types.ts";
-import {ProxyNode} from "../../../pixi-jsx/proxy-dom/nodes/Node.ts";
+import {unreachable} from "../../../../utility-types.ts";
+import {ProxyNode} from "../../../../pixi-jsx/proxy-dom/nodes/Node.ts";
 import {AnyProxyNode, BoxModel, FlexBoxOrientation, FlexBoxProps, SpacingFnState} from "./types.ts";
 import {childWithHorizontalSpacing} from "./horizontal-spacing.ts";
 import {childWithVerticalSpacing} from "./vertical-spacing.ts";

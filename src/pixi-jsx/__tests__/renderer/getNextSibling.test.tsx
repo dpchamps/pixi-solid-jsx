@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { Text, Container } from "pixi.js";
-import { renderApplicationNode } from "../test-utils";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
 describe("getNextSibling traversal", () => {
   test("siblings render in correct order", async () => {

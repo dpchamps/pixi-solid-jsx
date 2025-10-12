@@ -186,17 +186,18 @@ export const Scene1 = () => {
 
     return (
         <>
-            <container zIndex={10000}>
-                <sprite texture={Texture.WHITE} width={270} height={75}/>
-                <FpsCounter zIndex={10_000}/>
-                <text y={25} zIndex={10000}>Entity Count: {`${entityList.entities().length}`}</text>
-            </container>
+
             {/*<text>Helos</text>*/}
             <Index each={entityList.entities()}>
                 {
                     (props) => <Entity {...props()}/>
                 }
             </Index>
+            <container zIndex={10000}>
+                <sprite texture={Texture.WHITE} width={270} height={75}/>
+                <FpsCounter zIndex={10_000}/>
+                <text y={25} zIndex={10000}>Entity Count: {`${entityList.entities().length}`}</text>
+            </container>
         </>
     )
 }
