@@ -15,6 +15,7 @@ import { Application as PixiApplication } from "pixi.js";
 import { invariant, Maybe } from "../../utility-types.ts";
 import { ApplicationNode } from "../../pixi-jsx/proxy-dom";
 import { createTimer } from "../core/time.ts";
+import {GameLoopContextProvider} from "./GameLoopContextProvider.tsx";
 
 export type ApplicationState = {
   time: {
@@ -39,6 +40,9 @@ export type OnNextFrameQuery<QueryResult> = {
   tick: (queryResult: QueryResult) => void;
 };
 
+/**
+ * @deprecated Use {@link createSynchronizedEffect} from "engine/core/query-fns" instead.
+ */
 export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
   const appState = useApplicationState();
   const [cancel, setCancel] = createSignal(false);
@@ -113,13 +117,15 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
   return (
     <application {...props} ref={setApplication}>
       <container>
-        <ApplicationContext.Provider
-          value={applicationState as ApplicationState}
-        >
-          <Show when={applicationReady()} fallback={fallback}>
-            {props.children}
-          </Show>
-        </ApplicationContext.Provider>
+        <GameLoopContextProvider gameLoopContext={applicationState}>
+          <ApplicationContext.Provider
+              value={applicationState as ApplicationState}
+          >
+            <Show when={applicationReady()} fallback={fallback}>
+              {props.children}
+            </Show>
+          </ApplicationContext.Provider>
+        </GameLoopContextProvider>
       </container>
     </application>
   );

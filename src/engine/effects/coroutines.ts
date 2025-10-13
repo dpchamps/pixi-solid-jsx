@@ -2,6 +2,7 @@ import { onNextFrame } from "../tags/Application.tsx";
 import { lerp } from "../libs/Math.ts";
 import { createSignal } from "solid-custom-renderer/patched-types.ts";
 import { unreachable } from "../../utility-types.ts";
+import {createSynchronizedEffect, onEveryFrame} from "../core/query-fns.ts";
 
 export type GeneratorYieldResult =
   | GeneratorStop
@@ -129,6 +130,7 @@ export const CoroutineControl = {
  * Called every frame to determine if a `waitMs()` pause has finished.
  *
  * @param {TimestampState | null} state - Current timestamp state or null if not waiting
+ * @param elapsedMsSinceLastFrame {number}
  * @returns {TimestampState | null} Returns null when wait is complete, otherwise returns the state
  * @private
  */
@@ -216,7 +218,6 @@ const createCoroutineState = () => {
         timeStampState,
         elapsedMsSinceLastFrame,
       );
-      console.log(timeStampState);
       frameCounter = getNextCounterState(frameCounter);
       return isInWaitingState(timeStampState, frameCounter);
     },
@@ -305,29 +306,25 @@ export const startCoroutine = (fn: CoroutineFn) => {
     dispose();
   };
 
-  const dispose = onNextFrame({
-    query: (applicationState) =>
-      applicationState.time.elapsedMsSinceLastFrame(),
-    tick: (elapsedMs) => {
-      if (coroutineState.isWaitingOnNextTick(elapsedMs)) return;
+  const dispose = onEveryFrame( (time) => {
+    if (coroutineState.isWaitingOnNextTick(time.elapsedMsSinceLastFrame)) return;
 
-      const result = iterator.next(Math.floor(elapsedMs));
+    const result = iterator.next(Math.floor(time.elapsedMsSinceLastFrame));
 
-      if (result.done) return onCoroutineDone();
+    if (result.done) return onCoroutineDone();
 
-      switch (result.value.type) {
-        case "GeneratorContinue":
-          return;
-        case "GeneratorStop":
-          return onCoroutineDone();
-        case "GeneratorWaitMs":
-          return coroutineState.waitMs(result.value.ms);
-        case "GeneratorWaitFrames":
-          return coroutineState.waitFrames(result.value.frames);
-        default:
-          return unreachable(result.value);
-      }
-    },
+    switch (result.value.type) {
+      case "GeneratorContinue":
+        return;
+      case "GeneratorStop":
+        return onCoroutineDone();
+      case "GeneratorWaitMs":
+        return coroutineState.waitMs(result.value.ms);
+      case "GeneratorWaitFrames":
+        return coroutineState.waitFrames(result.value.frames);
+      default:
+        return unreachable(result.value);
+    }
   });
 
   return { dispose, stopped };
