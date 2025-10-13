@@ -117,7 +117,7 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
   return (
     <application {...props} ref={setApplication}>
       <container>
-        <GameLoopContextProvider gameLoopContext={applicationState}>
+        <GameLoopContextProvider gameLoopContext={{frameCount: timer.frameCount, onNextTick: applicationState.onNextTick}}>
           <ApplicationContext.Provider
             value={applicationState as ApplicationState}
           >

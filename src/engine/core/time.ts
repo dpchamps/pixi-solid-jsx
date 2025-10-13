@@ -7,11 +7,9 @@ import {
 import { Ticker } from "pixi.js";
 import { Maybe } from "../../utility-types.ts";
 
-export type Timer = ReturnType<typeof createTimer>;
-
 type CreateTimerArgs = {
   nextFrameFns: {
-    forEach: (cb: (value: () => void) => void) => void;
+    forEach: (cb: (value: (ticker: Ticker) => void) => void) => void;
     clear: () => void;
   };
   createTicker?: Maybe<() => Ticker>;
@@ -34,14 +32,16 @@ export const createTimer = (args: CreateTimerArgs) => {
     0,
     { equals: false },
   );
+  const [frameCount, setFrameCount] = createSignal(0)
 
   function frameTick(ticker: Ticker) {
     batch(() => {
       setDeltaTime(ticker.deltaTime);
       setCurrentFps(ticker.FPS);
       setElapsedMsSinceLastFrame(ticker.elapsedMS);
+      setFrameCount((last) => last+1);
 
-      args.nextFrameFns.forEach((x) => x());
+      args.nextFrameFns.forEach((x) => x(ticker));
     });
   }
 
@@ -60,6 +60,7 @@ export const createTimer = (args: CreateTimerArgs) => {
       ticker.start();
       ticker.lastTime = performance.now();
     },
+    frameCount,
     ticker,
   };
 };

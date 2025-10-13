@@ -143,159 +143,6 @@ describe("createSynchronizedEffect", () => {
     });
   });
 
-  describe("time parameter access", () => {
-    test("query can access deltaTime from time parameter", async () => {
-      const TestComponent = () => {
-        const [deltaValue, setDeltaValue] = createSignal(0);
-
-        createSynchronizedEffect(
-          (time) => time.deltaTime(),
-          (delta) => {
-            setDeltaValue(delta);
-          },
-        );
-
-        return <text>{deltaValue().toFixed(2)}</text>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent />
-      ));
-
-      const textNode = stage.children[0]?.children[0];
-      invariant(textNode);
-      assert(textNode instanceof Text);
-
-      expect(textNode.text).toBe("0.00");
-
-      await ticker.tickFrames(1);
-      expect(parseFloat(textNode.text)).toBeGreaterThan(0);
-    });
-
-    test("query can access elapsedMsSinceLastFrame", async () => {
-      const TestComponent = () => {
-        const [elapsed, setElapsed] = createSignal(0);
-
-        createSynchronizedEffect(
-          (time) => time.elapsedMsSinceLastFrame(),
-          (ms) => {
-            setElapsed(ms);
-          },
-        );
-
-        return <text>{elapsed()}</text>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent />
-      ));
-
-      const textNode = stage.children[0]?.children[0];
-      invariant(textNode);
-      assert(textNode instanceof Text);
-
-      expect(textNode.text).toBe("0");
-
-      await ticker.tickFrames(2);
-      expect(parseFloat(textNode.text)).toBe(17);
-    });
-
-    test("query can access fps", async () => {
-      const TestComponent = () => {
-        const [fpsValue, setFpsValue] = createSignal(0);
-
-        createSynchronizedEffect(
-          (time) => time.fps(),
-          (fps) => {
-            setFpsValue(fps);
-          },
-        );
-
-        return <text>{fpsValue()}</text>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent />
-      ));
-
-      const textNode = stage.children[0]?.children[0];
-      invariant(textNode);
-      assert(textNode instanceof Text);
-
-      expect(textNode.text).toBe("0");
-
-      await ticker.tickFrames(2);
-      expect(parseFloat(textNode.text)).toBeGreaterThan(0);
-    });
-
-    test("query can combine time with component signals", async () => {
-      const [velocity, setVelocity] = createSignal(5);
-      const TestComponent = () => {
-        const [distance, setDistance] = createSignal(0);
-
-        createSynchronizedEffect(
-          (time) => ({
-            dt: time.deltaTime(),
-            vel: velocity(),
-          }),
-          ({ dt, vel }) => {
-            setDistance((d) => d + vel * dt);
-          },
-        );
-
-        return <sprite x={distance()} />;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent />
-      ));
-
-      const sprite = stage.children[0]?.children[0];
-      invariant(sprite);
-      assert(sprite instanceof Sprite);
-
-      expect(sprite.x).toBe(0);
-
-      await ticker.tickFrames(1);
-      expect(sprite.x).toBeGreaterThan(0);
-      const firstX = sprite.x;
-
-      await ticker.tickFrames(1);
-      expect(sprite.x).toBeGreaterThan(firstX);
-
-      setVelocity(10);
-      await ticker.tickFrames(1);
-      const thirdX = sprite.x;
-
-      await ticker.tickFrames(1);
-      expect(sprite.x - thirdX).toBeGreaterThan(firstX);
-    });
-
-    test("time signals fire every frame", async () => {
-      const mockFn = vi.fn();
-      const TestComponent = () => {
-        createSynchronizedEffect(
-          (time) => ({
-            dt: time.deltaTime(),
-          }),
-          mockFn,
-        );
-
-        return <></>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent />
-      ));
-
-      expect(mockFn).toHaveBeenCalledTimes(0);
-      await ticker.tickFrames(1);
-      expect(mockFn).toHaveBeenCalledTimes(1);
-      await ticker.tickFrames(10);
-      expect(mockFn).toHaveBeenCalledTimes(11);
-    });
-  });
-
   describe("multiple signal tracking", () => {
     test("query tracks multiple signals", async () => {
       const [x, setX] = createSignal(0);
@@ -676,7 +523,7 @@ describe("onEveryFrame", () => {
         const [lastElapsed, setLastElapsed] = createSignal(0);
 
         onEveryFrame((time) => {
-          setLastElapsed(time.elapsedMsSinceLastFrame);
+          setLastElapsed(time.elapsedMS);
         });
 
         return <text>{lastElapsed()}</text>;
@@ -704,7 +551,7 @@ describe("onEveryFrame", () => {
         const [currentFps, setCurrentFps] = createSignal(0);
 
         onEveryFrame((time) => {
-          setCurrentFps(time.fps);
+          setCurrentFps(time.FPS);
         });
 
         return <text>{currentFps().toFixed(1)}</text>;

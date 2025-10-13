@@ -7,37 +7,42 @@ import {
   runWithOwner,
 } from "solid-custom-renderer/index.ts";
 import { GameLoopContext, useGameLoopContext } from "./game-loop-context.ts";
+import {Ticker} from "pixi.js";
+import {Accessor} from "solid-js";
 
 export type OnNextFrameQuery<QueryResult> = {
-  query: (time: GameLoopContext["time"]) => QueryResult;
-  effect: (queryResult: QueryResult) => void;
+  query: (frameCount: Accessor<number>) => QueryResult;
+  effect: (queryResult: QueryResult, ticker: Ticker) => void;
 };
 
 /**
  * Creates a reactive effect that executes on the next game loop frame.
  *
- * This is the core primitive for synchronizing SolidJS reactivity with the PixiJS game loop.
- * It implements a query-effect pattern that separates reactive dependency tracking from execution.
+ * Core primitive for synchronizing SolidJS reactivity with the PixiJS game loop.
+ * Separates reactive dependency tracking (query phase) from execution (effect phase).
  *
  * @internal
  *
- * ## How it works:
- * 1. **Query Phase**: Runs in a reactive context (`createComputed`), tracking any reactive dependencies
- *    accessed during the query. Re-runs whenever those dependencies change.
- * 2. **Scheduling**: Adds the effect to the game loop's next tick queue.
- * 3. **Effect Phase**: Executes the effect on the next frame with the queried value, outside reactive tracking.
- * 4. **Self-cleanup**: Removes itself from the tick queue after execution.
+ * ## Execution phases:
+ * 1. **Query**: Tracks reactive dependencies via `frameCount`. Reruns on dependency changes.
+ * 2. **Schedule**: Adds effect to next tick queue.
+ * 3. **Effect**: Executes with query result and current frame's ticker.
+ * 4. **Cleanup**: Self-removes from tick queue.
  *
- * ## Disposal Strategy:
- * - `_earlyDispose` flag: Guards against execution if disposed before root setup
- * - `cancel` signal: Provides reactive cancellation
- * - `dispose` function: Cleans up the createRoot scope
- * - `onCleanup`: Ensures removal from tick queue on component cleanup
+ * ## Timing correctness:
+ * - Query phase: Tracks frame changes only (no timing calculations)
+ * - Effect phase: Receives current ticker for accurate frame timing
  *
- * @param args - Object containing query and effect functions
- * @param args.query - Function that receives frame time and can query any reactive state. Runs in reactive context.
- * @param args.effect - Function that uses the queried value. Runs on next frame without reactive tracking.
- * @returns Disposal function that cancels the effect and cleans up resources
+ * ## Disposal:
+ * - `_earlyDispose`: Prevents execution if disposed before setup
+ * - `cancel`: Reactive cancellation signal
+ * - `dispose`: Cleans up root scope
+ * - `onCleanup`: Removes from tick queue on component cleanup
+ *
+ * @param args - Query and effect functions
+ * @param args.query - Tracks reactive state changes. Receives frameCount accessor.
+ * @param args.effect - Executes on next frame. Receives query result and current ticker.
+ * @returns Disposal function
  */
 function createEffectOnNextFrame<QueryResult>(
   args: OnNextFrameQuery<QueryResult>,
@@ -52,10 +57,10 @@ function createEffectOnNextFrame<QueryResult>(
     dispose = __dispose;
     createComputed(() => {
       if (_earlyDispose) return;
-      const queryResult = args.query(appState.time);
+      const queryResult = args.query(appState.frameCount);
       if (cancel()) return;
-      const execution = () => {
-        args.effect(queryResult);
+      const execution = (ticker: Ticker) => {
+        args.effect(queryResult, ticker);
         appState.onNextTick.delete(execution);
       };
       appState.onNextTick.add(execution);
@@ -76,163 +81,146 @@ function createEffectOnNextFrame<QueryResult>(
 }
 
 /**
- * Creates a frame-synchronized reactive effect that queries reactive state and executes on the next frame.
+ * Creates a frame-synchronized reactive effect.
  *
- * This is the primary API for synchronizing reactive state with the game loop. It ensures that:
- * - Reactive tracking happens cleanly in the query phase
- * - Effects execute on the next frame without creating reactive dependencies
- * - Component ownership is preserved across frame boundaries
+ * Primary API for synchronizing reactive state with the game loop.
  *
- * ## The query function:
- * The query receives the current frame time as a parameter but can access ANY reactive state:
- * - Component signals and stores
- * - Time values from the provided parameter
- * - Any other reactive dependencies in scope
+ * ## Key features:
+ * - Query phase tracks reactive dependencies
+ * - Effect phase executes on next frame with current ticker
+ * - Preserves component ownership across frame boundaries
  *
- * The time parameter is provided for convenience, but the query tracks all reactive
- * dependencies it accesses, re-running whenever any of them change.
+ * ## Query function:
+ * Accesses reactive state to determine when effects should re-run.
+ * Cannot perform timing calculations - reactive dependencies only.
  *
- * ## Ownership preservation:
- * Effects run on the next frame outside the original component context. This function
- * captures the current owner and wraps the effect with `runWithOwner` to ensure proper
- * cleanup and reactive tracking for any signals created inside the effect.
+ * ## Effect function:
+ * Receives the queried value and current frame's ticker.
+ * No reactive tracking occurs during execution.
+ * Ticker parameter is optional - use only when frame timing is needed.
  *
- * @template T - The type of value returned by the query
- * @param query - Function that receives time and can query any reactive state. Runs in reactive context.
- * @param effect - Function that receives the queried value. Executes on next frame.
- * @param owner - Optional owner context. Defaults to current owner via `getOwner()`.
- * @returns Disposal function that cancels the effect and cleans up resources
+ * ## Ownership:
+ * Captures current owner and wraps effect with `runWithOwner` for proper cleanup.
+ *
+ * @template T - Type returned by query
+ * @param query - Tracks reactive state. No timing calculations allowed.
+ * @param effect - Executes on next frame with query result and ticker.
+ * @param owner - Optional owner context. Defaults to `getOwner()`.
+ * @returns Disposal function
  *
  * @example
- * // Animate based on delta time
+ * // Track reactive state without timing
+ * const [visible, setVisible] = createSignal(true);
  * createSynchronizedEffect(
- *     (time) => time.deltaTime(),
- *     (dt) => {
- *         setPosition(p => ({ x: p.x + velocity * dt, y: p.y }));
+ *     () => visible(),
+ *     (isVisible) => {
+ *         sprite.visible = isVisible;
  *     }
  * );
  *
  * @example
- * // Combine time with component state
- * const [isPaused, setIsPaused] = createSignal(false);
+ * // Frame-independent movement with deltaTime
  * const [speed, setSpeed] = createSignal(5);
- *
  * createSynchronizedEffect(
- *     (time) => ({
- *         dt: time.deltaTime(),
- *         paused: isPaused(),
- *         velocity: speed()
- *     }),
- *     ({dt, paused, velocity}) => {
- *         if (!paused) {
- *             sprite.x += velocity * dt;
- *         }
+ *     () => speed(),
+ *     (currentSpeed, ticker) => {
+ *         sprite.x += currentSpeed * ticker.deltaTime;
  *     }
  * );
  *
  * @example
- * // Track multiple signals
- * const [x, setX] = createSignal(0);
- * const [y, setY] = createSignal(0);
+ * // Combine multiple signals with timing
+ * const [isPaused, setIsPaused] = createSignal(false);
+ * const [velocity, setVelocity] = createSignal(10);
  *
  * createSynchronizedEffect(
- *     (time) => ({
- *         pos: { x: x(), y: y() },
- *         elapsed: time.elapsedMsSinceLastFrame()
+ *     () => ({
+ *         paused: isPaused(),
+ *         vel: velocity()
  *     }),
- *     ({pos, elapsed}) => {
- *         updateSprite(pos, elapsed);
+ *     ({paused, vel}, ticker) => {
+ *         if (!paused) {
+ *             sprite.x += vel * ticker.deltaTime;
+ *         }
  *     }
  * );
  */
 export const createSynchronizedEffect = <T>(
-  query: (time: GameLoopContext["time"]) => T,
-  effect: (x: T) => void,
+  query: () => T,
+  effect: (queryResult: T, ticker: Ticker) => void,
   owner = getOwner(),
 ) =>
   createEffectOnNextFrame({
-    query,
-    effect: (x) => runWithOwner(owner, () => effect(x)),
+    query: () => query(),
+    effect: (queryResult, ticker) => runWithOwner(owner, () => effect(queryResult, ticker)),
   });
 
 /**
- * Executes a function on every single frame of the game loop.
+ * Executes a function every frame with current ticker values.
  *
- * @warn **Performance Warning**: This function will execute EVERY FRAME (~60 times per second).
- * Only use for logic that must run continuously. For conditional or reactive updates,
- * use `createSynchronizedEffect` instead.
+ * @warn Runs ~60 times per second. Use only for continuous updates.
+ * For reactive/conditional updates, use `createSynchronizedEffect`.
  *
- * ## When to use:
- * - Physics simulations that must step every frame
- * - Continuous animations (rotation, oscillation, particles)
- * - Time accumulators and counters
- * - Debug overlays and performance monitoring
+ * ## Use cases:
+ * - Physics simulations requiring fixed time steps
+ * - Continuous animations (rotation, oscillation)
+ * - Time accumulation
+ * - Performance monitoring
  *
- * ## When NOT to use:
+ * ## Avoid for:
  * - State-dependent updates (use `createSynchronizedEffect`)
  * - Event-driven changes (use event handlers)
- * - One-time or periodic updates (use `createTimeout`/`createInterval`)
+ * - Periodic updates (use `createTimeout`/`createInterval`)
  *
- * @param fn - Function to execute every frame, receives current frame timing data
- * @param fn.time - Object containing frame timing information
- * @param fn.time.deltaTime - Time scaling factor for frame-independent movement (typically ~1 at 60fps)
- * @param fn.time.elapsedMsSinceLastFrame - Actual milliseconds since last frame
- * @param fn.time.fps - Current frames per second
- * @returns Disposal function to stop the frame updates
+ * @param fn - Receives PIXI Ticker with current frame timing
+ * @returns Disposal function
  *
  * @example
  * // Continuous rotation
- * onEveryFrame((time) => {
- *     sprite.rotation += rotationSpeed * time.deltaTime;
+ * onEveryFrame((ticker) => {
+ *     sprite.rotation += rotationSpeed * ticker.deltaTime;
  * });
  *
  * @example
  * // Physics simulation
- * onEveryFrame((time) => {
- *     physicsWorld.step(time.elapsedMsSinceLastFrame / 1000);
+ * onEveryFrame((ticker) => {
+ *     physicsWorld.step(ticker.elapsedMS / 1000);
  *     updatePhysicsSprites();
  * });
  *
  * @example
- * // Particle system update
- * const dispose = onEveryFrame((time) => {
+ * // Particle system
+ * const dispose = onEveryFrame((ticker) => {
  *     particles.forEach(p => {
- *         p.life -= time.elapsedMsSinceLastFrame;
- *         p.y += p.velocity * time.deltaTime;
+ *         p.life -= ticker.elapsedMS;
+ *         p.y += p.velocity * ticker.deltaTime;
  *         if (p.life <= 0) removeParticle(p);
  *     });
  * });
- * // Later: dispose() to stop updates
  *
  * @example
- * // BAD: Conditional logic that doesn't need to run every frame
- * onEveryFrame((time) => {
- *     if (isAnimating()) {  // This check runs 60 times/second even when false!
- *         updateAnimation(time.deltaTime);
+ * // BAD: Conditional check runs every frame
+ * onEveryFrame((ticker) => {
+ *     if (isAnimating()) {  // Checked 60x/second
+ *         updateAnimation(ticker.deltaTime);
  *     }
  * });
  *
  * @example
- *
- * // GOOD: Use createSynchronizedEffect for conditional updates
+ * // GOOD: Reactive conditional
  * createSynchronizedEffect(
- *     (time) => ({ animating: isAnimating(), dt: time.deltaTime() }),
- *     ({ animating, dt }) => {
- *         if (animating) updateAnimation(dt);
+ *     () => isAnimating(),
+ *     (animating) => {
+ *         if (animating) updateAnimation();
  *     }
  * );
  */
 export const onEveryFrame = (
-  fn: (time: {
-    deltaTime: number;
-    elapsedMsSinceLastFrame: number;
-    fps: number;
-  }) => void,
+  fn: (ticker: Ticker) => void,
 ) =>
-  createSynchronizedEffect((time) => {
-    return {
-      deltaTime: time.deltaTime(),
-      elapsedMsSinceLastFrame: time.elapsedMsSinceLastFrame(),
-      fps: time.fps(),
-    };
-  }, fn);
+    createEffectOnNextFrame({
+      query: (frameCount) => {
+        frameCount()
+      },
+      effect: (_, ticker) => fn(ticker)
+    });

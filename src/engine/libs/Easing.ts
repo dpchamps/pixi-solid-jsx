@@ -1,5 +1,7 @@
 import { lerp } from "./Math.ts";
 
+export const linear = (t: number) => t;
+
 export const easeIn = (t: number) => t * t;
 
 export const flip = (t: number) => 1 - t;
