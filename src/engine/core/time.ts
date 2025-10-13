@@ -19,7 +19,6 @@ type CreateTimerArgs = {
 
 export const createTicker = () => {
   const ticker = new Ticker();
-  ticker.maxFPS = 60;
   ticker.minFPS = 30;
   ticker.autoStart = false;
 
