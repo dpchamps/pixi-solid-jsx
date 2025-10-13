@@ -1,16 +1,16 @@
 import {
-    createComputed,
-    createRoot,
-    createSignal,
-    getOwner,
-    onCleanup,
-    runWithOwner
+  createComputed,
+  createRoot,
+  createSignal,
+  getOwner,
+  onCleanup,
+  runWithOwner,
 } from "solid-custom-renderer/index.ts";
-import {GameLoopContext, useGameLoopContext} from "./game-loop-context.ts";
+import { GameLoopContext, useGameLoopContext } from "./game-loop-context.ts";
 
 export type OnNextFrameQuery<QueryResult> = {
-    query: (time: GameLoopContext['time']) => QueryResult;
-    effect: (queryResult: QueryResult) => void;
+  query: (time: GameLoopContext["time"]) => QueryResult;
+  effect: (queryResult: QueryResult) => void;
 };
 
 /**
@@ -39,40 +39,41 @@ export type OnNextFrameQuery<QueryResult> = {
  * @param args.effect - Function that uses the queried value. Runs on next frame without reactive tracking.
  * @returns Disposal function that cancels the effect and cleans up resources
  */
-function createEffectOnNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
-    const appState = useGameLoopContext();
-    const [cancel, setCancel] = createSignal(false);
-    let _earlyDispose = false;
-    let dispose = () => {
-        _earlyDispose = true
-    };
-    createRoot((__dispose) => {
-        dispose = __dispose;
-        createComputed(() => {
-            if(_earlyDispose) return;
-            const queryResult = args.query(appState.time);
-            if (cancel()) return;
-            const execution = () => {
-                args.effect(queryResult);
-                appState.onNextTick.delete(execution);
-            };
-            appState.onNextTick.add(execution);
-            onCleanup(() => {
-                appState.onNextTick.delete(execution);
-            });
-        });
+function createEffectOnNextFrame<QueryResult>(
+  args: OnNextFrameQuery<QueryResult>,
+) {
+  const appState = useGameLoopContext();
+  const [cancel, setCancel] = createSignal(false);
+  let _earlyDispose = false;
+  let dispose = () => {
+    _earlyDispose = true;
+  };
+  createRoot((__dispose) => {
+    dispose = __dispose;
+    createComputed(() => {
+      if (_earlyDispose) return;
+      const queryResult = args.query(appState.time);
+      if (cancel()) return;
+      const execution = () => {
+        args.effect(queryResult);
+        appState.onNextTick.delete(execution);
+      };
+      appState.onNextTick.add(execution);
+      onCleanup(() => {
+        appState.onNextTick.delete(execution);
+      });
     });
+  });
 
-    onCleanup(() => {
-        dispose();
-    });
+  onCleanup(() => {
+    dispose();
+  });
 
-    return () => {
-        dispose();
-        setCancel(true);
-    };
+  return () => {
+    dispose();
+    setCancel(true);
+  };
 }
-
 
 /**
  * Creates a frame-synchronized reactive effect that queries reactive state and executes on the next frame.
@@ -145,13 +146,14 @@ function createEffectOnNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult
  * );
  */
 export const createSynchronizedEffect = <T>(
-    query: (time: GameLoopContext['time']) => T,
-    effect: (x: T) => void,
-    owner = getOwner()
-) => createEffectOnNextFrame({
+  query: (time: GameLoopContext["time"]) => T,
+  effect: (x: T) => void,
+  owner = getOwner(),
+) =>
+  createEffectOnNextFrame({
     query,
-    effect: (x) => runWithOwner(owner, () => effect(x))
-});
+    effect: (x) => runWithOwner(owner, () => effect(x)),
+  });
 
 /**
  * Executes a function on every single frame of the game loop.
@@ -220,13 +222,17 @@ export const createSynchronizedEffect = <T>(
  *     }
  * );
  */
-export const onEveryFrame = (fn: (time: { deltaTime: number, elapsedMsSinceLastFrame: number, fps: number }) => void) => createSynchronizedEffect(
-    (time) => {
-        return {
-            deltaTime: time.deltaTime(),
-            elapsedMsSinceLastFrame: time.elapsedMsSinceLastFrame(),
-            fps: time.fps()
-        }
-    },
-    fn
-)
+export const onEveryFrame = (
+  fn: (time: {
+    deltaTime: number;
+    elapsedMsSinceLastFrame: number;
+    fps: number;
+  }) => void,
+) =>
+  createSynchronizedEffect((time) => {
+    return {
+      deltaTime: time.deltaTime(),
+      elapsedMsSinceLastFrame: time.elapsedMsSinceLastFrame(),
+      fps: time.fps(),
+    };
+  }, fn);

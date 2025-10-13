@@ -15,7 +15,7 @@ import { Application as PixiApplication } from "pixi.js";
 import { invariant, Maybe } from "../../utility-types.ts";
 import { ApplicationNode } from "../../pixi-jsx/proxy-dom";
 import { createTimer } from "../core/time.ts";
-import {GameLoopContextProvider} from "./GameLoopContextProvider.tsx";
+import { GameLoopContextProvider } from "./GameLoopContextProvider.tsx";
 
 export type ApplicationState = {
   time: {
@@ -119,7 +119,7 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
       <container>
         <GameLoopContextProvider gameLoopContext={applicationState}>
           <ApplicationContext.Provider
-              value={applicationState as ApplicationState}
+            value={applicationState as ApplicationState}
           >
             <Show when={applicationReady()} fallback={fallback}>
               {props.children}

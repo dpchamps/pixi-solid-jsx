@@ -12,6 +12,7 @@ import {createEntityList, EntityList} from "./createEntityList.ts";
 import {overlaps, randomBetween} from "./position.ts";
 import {FpsCounter} from "./FpsCounter.tsx";
 import {Texture} from "pixi.js";
+import {onEveryFrame} from "../../src/engine/core/query-fns.ts";
 
 const createPlayerEntity = (entityList: EntityList, gameState: GameState) => {
     const playerId = "player";
@@ -33,8 +34,8 @@ const createPlayerEntity = (entityList: EntityList, gameState: GameState) => {
             const {x, y} = {x: controllerDirection.x(), y: controllerDirection.y()};
 
             return {
-                x: x*3*deltaTime,
-                y: y*3*deltaTime
+                x: x*4*deltaTime,
+                y: y*4*deltaTime
             }
         },
         tick: (nextPosition) => {
@@ -61,6 +62,12 @@ const createOtherEntity = (entityList: EntityList) => {
         tint: "grey",
         zIndex: 400
     });
+
+    onEveryFrame((time) => {
+        entityList.updateEntity("other", ({rotation}) => ({
+            rotation: (rotation||0) - (0.05 * time.deltaTime)
+        }));
+    })
 
     return otherId;
 }
@@ -175,14 +182,14 @@ export const Scene1 = () => {
         }
     });
 
-    onNextFrame({
-        query: (applicationState) => {
-            return applicationState.time.deltaTime()
-        },
-        tick: () => {
-            runWithOwner(owner, () => createWanderingEntity(entityList, applicationState))
-        }
-    })
+    // onNextFrame({
+    //     query: (applicationState) => {
+    //         return applicationState.time.deltaTime()
+    //     },
+    //     tick: () => {
+    //         runWithOwner(owner, () => createWanderingEntity(entityList, applicationState))
+    //     }
+    // })
 
     return (
         <>

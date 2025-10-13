@@ -4,7 +4,7 @@ import { createSynchronizedEffect, onEveryFrame } from "../../core/query-fns";
 import { Text, Sprite, Container } from "pixi.js";
 import { renderApplicationWithFakeTicker } from "../../../__tests__/test-utils/test-utils.tsx";
 import { invariant, assert } from "../../../utility-types.ts";
-import {vi} from "vitest";
+import { vi } from "vitest";
 
 describe("createSynchronizedEffect", () => {
   describe("basic reactivity", () => {
@@ -17,7 +17,7 @@ describe("createSynchronizedEffect", () => {
           () => x(),
           (value) => {
             setEffectRan(true);
-          }
+          },
         );
 
         return (
@@ -50,12 +50,9 @@ describe("createSynchronizedEffect", () => {
       const TestComponent = () => {
         const [receivedValue, setReceivedValue] = createSignal(0);
 
-        createSynchronizedEffect(
-          x,
-          (value) => {
-            setReceivedValue(value);
-          }
-        );
+        createSynchronizedEffect(x, (value) => {
+          setReceivedValue(value);
+        });
 
         return <text>{receivedValue()}</text>;
       };
@@ -83,12 +80,9 @@ describe("createSynchronizedEffect", () => {
       const TestComponent = () => {
         const [spriteX, setSpriteX] = createSignal(0);
 
-        createSynchronizedEffect(
-          targetX,
-          (x) => {
-            setSpriteX(x);
-          }
-        );
+        createSynchronizedEffect(targetX, (x) => {
+          setSpriteX(x);
+        });
 
         return <sprite x={spriteX()} />;
       };
@@ -121,19 +115,16 @@ describe("createSynchronizedEffect", () => {
       const TestComponent = () => {
         const [receivedValue, setReceivedValue] = createSignal(0);
 
-        createSynchronizedEffect(
-            x,
-            (value) => {
-              setReceivedValue(value);
-              mockFn();
-            }
-        );
+        createSynchronizedEffect(x, (value) => {
+          setReceivedValue(value);
+          mockFn();
+        });
 
         return <text>{receivedValue()}</text>;
       };
 
       const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-          <TestComponent />
+        <TestComponent />
       ));
 
       const textNode = stage.children[0]?.children[0];
@@ -145,12 +136,11 @@ describe("createSynchronizedEffect", () => {
 
       await ticker.tickFrames(1);
       expect(textNode.text).toBe("100");
-      expect(mockFn).toHaveBeenCalledTimes(1)
+      expect(mockFn).toHaveBeenCalledTimes(1);
 
       await ticker.tickFrames(10);
       expect(mockFn).toHaveBeenCalledTimes(1);
-
-    })
+    });
   });
 
   describe("time parameter access", () => {
@@ -162,7 +152,7 @@ describe("createSynchronizedEffect", () => {
           (time) => time.deltaTime(),
           (delta) => {
             setDeltaValue(delta);
-          }
+          },
         );
 
         return <text>{deltaValue().toFixed(2)}</text>;
@@ -190,7 +180,7 @@ describe("createSynchronizedEffect", () => {
           (time) => time.elapsedMsSinceLastFrame(),
           (ms) => {
             setElapsed(ms);
-          }
+          },
         );
 
         return <text>{elapsed()}</text>;
@@ -218,7 +208,7 @@ describe("createSynchronizedEffect", () => {
           (time) => time.fps(),
           (fps) => {
             setFpsValue(fps);
-          }
+          },
         );
 
         return <text>{fpsValue()}</text>;
@@ -250,7 +240,7 @@ describe("createSynchronizedEffect", () => {
           }),
           ({ dt, vel }) => {
             setDistance((d) => d + vel * dt);
-          }
+          },
         );
 
         return <sprite x={distance()} />;
@@ -285,23 +275,23 @@ describe("createSynchronizedEffect", () => {
       const mockFn = vi.fn();
       const TestComponent = () => {
         createSynchronizedEffect(
-            (time) => ({
-              dt: time.deltaTime(),
-            }),
-            mockFn
+          (time) => ({
+            dt: time.deltaTime(),
+          }),
+          mockFn,
         );
 
         return <></>;
       };
 
       const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-          <TestComponent />
+        <TestComponent />
       ));
 
       expect(mockFn).toHaveBeenCalledTimes(0);
       await ticker.tickFrames(1);
       expect(mockFn).toHaveBeenCalledTimes(1);
-      await ticker.tickFrames(10)
+      await ticker.tickFrames(10);
       expect(mockFn).toHaveBeenCalledTimes(11);
     });
   });
@@ -312,14 +302,13 @@ describe("createSynchronizedEffect", () => {
       const [y, setY] = createSignal(0);
 
       const TestComponent = () => {
-
         const [text, setText] = createSignal("");
 
         createSynchronizedEffect(
           () => ({ x: x(), y: y() }),
           ({ x, y }) => {
             setText(`${x},${y}`);
-          }
+          },
         );
 
         return <text>{text()}</text>;
@@ -350,7 +339,6 @@ describe("createSynchronizedEffect", () => {
       setY(75);
       await ticker.tickFrames(1);
       expect(textNode.text).toBe("50,75");
-
     });
 
     test("effect only runs when tracked signals change", async () => {
@@ -363,7 +351,7 @@ describe("createSynchronizedEffect", () => {
           () => tracked(),
           () => {
             setRunCount((c) => c + 1);
-          }
+          },
         );
 
         return (
@@ -403,7 +391,7 @@ describe("createSynchronizedEffect", () => {
   describe("disposal", () => {
     test("dispose function stops effect execution", async () => {
       const [counter, setCounter] = createSignal(0);
-      let dispose: (() => void) = () => {};
+      let dispose: () => void = () => {};
 
       const TestComponent = () => {
         const [effectCounter, setEffectCounter] = createSignal(0);
@@ -412,7 +400,7 @@ describe("createSynchronizedEffect", () => {
           () => counter(),
           () => {
             setEffectCounter((c) => c + 1);
-          }
+          },
         );
 
         return <text>{effectCounter()}</text>;
@@ -454,7 +442,7 @@ describe("createSynchronizedEffect", () => {
           () => ({}),
           () => {
             setExecuted(true);
-          }
+          },
         );
 
         dispose();
@@ -488,12 +476,12 @@ describe("createSynchronizedEffect", () => {
 
         createSynchronizedEffect(
           () => a(),
-          (val) => setResultA(val * 2)
+          (val) => setResultA(val * 2),
         );
 
         createSynchronizedEffect(
           () => b(),
-          (val) => setResultB(val * 3)
+          (val) => setResultB(val * 3),
         );
 
         return (
@@ -549,7 +537,7 @@ describe("createSynchronizedEffect", () => {
               x: position.x * scale,
               y: position.y * scale,
             });
-          }
+          },
         );
 
         return <sprite x={spritePos().x} y={spritePos().y} />;
@@ -811,7 +799,7 @@ describe("onEveryFrame", () => {
 
   describe("disposal", () => {
     test("dispose stops execution", async () => {
-      let dispose: (() => void) = () => {};
+      let dispose: () => void = () => {};
 
       const TestComponent = () => {
         const [count, setCount] = createSignal(0);
@@ -885,7 +873,7 @@ describe("edge cases", () => {
           () => ({}),
           () => {
             setCounter((c) => c + 1);
-          }
+          },
         );
 
         return <text>{counter()}</text>;
@@ -964,7 +952,7 @@ describe("edge cases", () => {
           () => trigger(),
           () => {
             setExecCount((c) => c + 1);
-          }
+          },
         );
 
         return <text>{execCount()}</text>;

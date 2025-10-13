@@ -2,7 +2,7 @@ import { onNextFrame } from "../tags/Application.tsx";
 import { lerp } from "../libs/Math.ts";
 import { createSignal } from "solid-custom-renderer/patched-types.ts";
 import { unreachable } from "../../utility-types.ts";
-import {createSynchronizedEffect, onEveryFrame} from "../core/query-fns.ts";
+import { createSynchronizedEffect, onEveryFrame } from "../core/query-fns.ts";
 
 export type GeneratorYieldResult =
   | GeneratorStop
@@ -306,8 +306,9 @@ export const startCoroutine = (fn: CoroutineFn) => {
     dispose();
   };
 
-  const dispose = onEveryFrame( (time) => {
-    if (coroutineState.isWaitingOnNextTick(time.elapsedMsSinceLastFrame)) return;
+  const dispose = onEveryFrame((time) => {
+    if (coroutineState.isWaitingOnNextTick(time.elapsedMsSinceLastFrame))
+      return;
 
     const result = iterator.next(Math.floor(time.elapsedMsSinceLastFrame));
 

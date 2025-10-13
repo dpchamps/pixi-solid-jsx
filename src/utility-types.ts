@@ -7,8 +7,14 @@ export function invariant<T>(x: Maybe<T>, message?: string): asserts x {
   }
 }
 
-export function invariantUseContext<T>(x: Maybe<T>, contextType: string): asserts x {
-  invariant(x, `Expected ${contextType}, but was undefined. Did you remember to use the provider?`);
+export function invariantUseContext<T>(
+  x: Maybe<T>,
+  contextType: string,
+): asserts x {
+  invariant(
+    x,
+    `Expected ${contextType}, but was undefined. Did you remember to use the provider?`,
+  );
 }
 
 export const unimplemented = (..._: unknown[]): never => {

@@ -12,6 +12,7 @@ export type Timer = ReturnType<typeof createTimer>;
 type CreateTimerArgs = {
   nextFrameFns: {
     forEach: (cb: (value: () => void) => void) => void;
+    clear: () => void;
   };
   createTicker?: Maybe<() => Ticker>;
 };

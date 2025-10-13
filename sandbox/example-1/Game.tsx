@@ -3,6 +3,7 @@ import {Scene1} from "./Scene1.tsx";
 import {Controller, createController} from "./createController.ts";
 import {invariant} from "../../src/utility-types.ts";
 import {Show, createContext, useContext, createEffect, createMemo} from "../../src/pixi-jsx/solidjs-universal-renderer";
+import {BasicTest} from "../BasicTest.tsx";
 
 export type GameState = {
     controller: Controller
@@ -40,7 +41,7 @@ export const Game = () => {
             <GameContext.Provider value={gameState}>
                 <container>
                     <Show when={sceneToggle()} fallback={<text>Scene 2</text>}>
-                        <Scene1/>
+                        <BasicTest/>
                     </Show>
                 </container>
 
