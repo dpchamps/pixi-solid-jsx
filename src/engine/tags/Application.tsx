@@ -88,9 +88,17 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
   const [applicationReady] = createResource(mount, async () => {
     const app = application();
     invariant(app);
+    /**
+     * @warn
+     * You must assign the ticker prior to intialization.
+     * Otherwise, another ticker will start and can cause (to the best of my knowledge)
+     * two stage renders simultaneously.
+     *
+     * This will cause FPS degradation and frame drop stuttering.
+     */
+    app.container.ticker = timer.ticker;
     await app.initialize();
     await props.appInitialize?.(app.container);
-    app.container.ticker = timer.ticker;
     timer.start();
     applicationState.application = app.container;
     return true;
