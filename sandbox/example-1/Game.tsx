@@ -41,7 +41,7 @@ export const Game = () => {
             <GameContext.Provider value={gameState}>
                 <container>
                     <Show when={sceneToggle()} fallback={<text>Scene 2</text>}>
-                        <BasicTest/>
+                        <Scene1/>
                     </Show>
                 </container>
 

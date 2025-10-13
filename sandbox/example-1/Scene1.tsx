@@ -182,14 +182,14 @@ export const Scene1 = () => {
         }
     });
 
-    // onNextFrame({
-    //     query: (applicationState) => {
-    //         return applicationState.time.deltaTime()
-    //     },
-    //     tick: () => {
-    //         runWithOwner(owner, () => createWanderingEntity(entityList, applicationState))
-    //     }
-    // })
+    onNextFrame({
+        query: (applicationState) => {
+            return applicationState.time.deltaTime()
+        },
+        tick: () => {
+            runWithOwner(owner, () => createWanderingEntity(entityList, applicationState))
+        }
+    })
 
     return (
         <>
