@@ -1,6 +1,7 @@
 import {createStore} from "solid-js/store";
 import {createComputed, createEffect, createSignal, onCleanup} from "solid-js";
 import {shallowEqual} from "shallow-equal";
+import {createSynchronizedEffect, onEveryFrame} from "../../src/engine/core/query-fns.ts";
 
 export type Controller = ReturnType<typeof createController>;
 export const createController = () => {
@@ -33,13 +34,50 @@ export const createController = () => {
 
     return {
         onKeyPress: (...keyCodes: string[]) => {
-            const [keyDown, setKeyDown] = createSignal<string[]>(
+            const [keyPress, setKeyPress] = createSignal<string[]>(
                 [],
                 {equals: (prev, next) => shallowEqual(prev, next)}
             );
-            createEffect(() => {
-                setKeyDown(keyCodes.filter((keyCode) => keyState.keyDown.has(keyCode)));
+            createEffect(
+                () => {
+                    setKeyPress(keyCodes.filter((keyCode) => keyState.keyDown.has(keyCode)))
+                },
+            )
+            return keyPress;
+        },
+        onKeyHold: (...keyCodes: string[]) => {
+            const [keyDown, setKeyDown] = createSignal<string[]>(
+                [],
+                {equals: false}
+            );
+            const [_, setDisposeLoop] = createSignal<() => void>();
+
+            createSynchronizedEffect(() => {
+                const nextDownCodes = keyCodes.filter((keyCode) => keyState.keyDown.has(keyCode));
+
+                return nextDownCodes
+            }, (downCodes) => {
+                setKeyDown(downCodes)
+                if(downCodes.length){
+                    const nextDisposeFunction = onEveryFrame(() => {
+                        setKeyDown(downCodes)
+                    });
+                    setDisposeLoop((last) => {
+                        if(last){
+                            last();
+                        }
+                        return nextDisposeFunction
+                    })
+                } else {
+                    setDisposeLoop((last) => {
+                        if(last){
+                            last()
+                        }
+                        return undefined;
+                    })
+                }
             })
+
             return keyDown;
         }
     }

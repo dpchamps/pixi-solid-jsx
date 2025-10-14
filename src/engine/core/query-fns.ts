@@ -6,11 +6,12 @@ import {
   onCleanup,
   runWithOwner,
 } from "solid-custom-renderer/index.ts";
-import { GameLoopContext, useGameLoopContext } from "./game-loop-context.ts";
+import { useGameLoopContext } from "./game-loop-context.ts";
 import {Ticker} from "pixi.js";
 import {Accessor} from "solid-js";
 
 export type OnNextFrameQuery<QueryResult> = {
+  id: string,
   query: (frameCount: Accessor<number>) => QueryResult;
   effect: (queryResult: QueryResult, ticker: Ticker) => void;
 };
@@ -47,25 +48,20 @@ export type OnNextFrameQuery<QueryResult> = {
 function createEffectOnNextFrame<QueryResult>(
   args: OnNextFrameQuery<QueryResult>,
 ) {
-  const appState = useGameLoopContext();
-  const [cancel, setCancel] = createSignal(false);
+  const gameLoopContext = useGameLoopContext();
   let _earlyDispose = false;
   let dispose = () => {
     _earlyDispose = true;
   };
-  createRoot((__dispose) => {
-    dispose = __dispose;
+  createRoot((_dispose) => {
+    dispose = _dispose;
     createComputed(() => {
       if (_earlyDispose) return;
-      const queryResult = args.query(appState.frameCount);
-      if (cancel()) return;
-      const execution = (ticker: Ticker) => {
-        args.effect(queryResult, ticker);
-        appState.onNextTick.delete(execution);
-      };
-      appState.onNextTick.add(execution);
+      const queryResult = args.query(gameLoopContext.frameCount);
+      const execution = (ticker: Ticker) => args.effect(queryResult, ticker);
+      gameLoopContext.scheduledEffects.set(args.id, execution);
       onCleanup(() => {
-        appState.onNextTick.delete(execution);
+        gameLoopContext.scheduledEffects.delete(args.id);
       });
     });
   });
@@ -74,10 +70,7 @@ function createEffectOnNextFrame<QueryResult>(
     dispose();
   });
 
-  return () => {
-    dispose();
-    setCancel(true);
-  };
+  return dispose
 }
 
 /**
@@ -146,14 +139,15 @@ function createEffectOnNextFrame<QueryResult>(
  * );
  */
 export const createSynchronizedEffect = <T>(
-  query: () => T,
-  effect: (queryResult: T, ticker: Ticker) => void,
-  owner = getOwner(),
+    query: () => T,
+    effect: (queryResult: T, ticker: Ticker) => void,
+    owner = getOwner(),
 ) =>
-  createEffectOnNextFrame({
-    query: () => query(),
-    effect: (queryResult, ticker) => runWithOwner(owner, () => effect(queryResult, ticker)),
-  });
+    createEffectOnNextFrame({
+      id: crypto.randomUUID(),
+      query: () => query(),
+      effect: (queryResult, ticker) => runWithOwner(owner, () => effect(queryResult, ticker)),
+    });
 
 /**
  * Executes a function every frame with current ticker values.
@@ -219,6 +213,7 @@ export const onEveryFrame = (
   fn: (ticker: Ticker) => void,
 ) =>
     createEffectOnNextFrame({
+      id: crypto.randomUUID(),
       query: (frameCount) => {
         frameCount()
       },

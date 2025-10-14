@@ -8,7 +8,7 @@ import {Ticker} from "pixi.js";
 
 export type GameLoopContext = {
   frameCount: Accessor<number>;
-  onNextTick: Set<(ticker: Ticker) => void>;
+  scheduledEffects: Map<string, (ticker: Ticker) => void>;
 };
 
 export const GameLoopContext = createContext<GameLoopContext>();

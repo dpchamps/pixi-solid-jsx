@@ -1,29 +1,19 @@
 import { JSX } from "../../pixi-jsx/jsx/jsx-runtime.ts";
 import {
-  Accessor,
-  createComputed,
   createContext,
   createSignal,
-  onCleanup,
   onMount,
   useContext,
   createResource,
   Show,
-  createRoot,
 } from "solid-custom-renderer/index.ts";
-import { Application as PixiApplication } from "pixi.js";
+import {Application as PixiApplication, Ticker} from "pixi.js";
 import { invariant, Maybe } from "../../utility-types.ts";
 import { ApplicationNode } from "../../pixi-jsx/proxy-dom";
 import { createTimer } from "../core/time.ts";
 import { GameLoopContextProvider } from "./GameLoopContextProvider.tsx";
 
 export type ApplicationState = {
-  time: {
-    deltaTime: Accessor<number>;
-    fps: Accessor<number>;
-    elapsedMsSinceLastFrame: Accessor<number>;
-  };
-  onNextTick: Set<() => void>;
   application: PixiApplication;
 };
 
@@ -35,6 +25,9 @@ export const useApplicationState = () => {
   return applicationState;
 };
 
+/**
+ * @deprecated Use {@link createSynchronizedEffect} from "engine/core/query-fns" instead.
+ */
 export type OnNextFrameQuery<QueryResult> = {
   query: (applicationState: ApplicationState) => QueryResult;
   tick: (queryResult: QueryResult) => void;
@@ -43,50 +36,20 @@ export type OnNextFrameQuery<QueryResult> = {
 /**
  * @deprecated Use {@link createSynchronizedEffect} from "engine/core/query-fns" instead.
  */
-export function onNextFrame<QueryResult>(args: OnNextFrameQuery<QueryResult>) {
-  const appState = useApplicationState();
-  const [cancel, setCancel] = createSignal(false);
-  let dispose = () => {};
-  createRoot((__dispose) => {
-    dispose = __dispose;
-    createComputed(() => {
-      const queryResult = args.query(appState);
-      if (cancel()) return;
-      const execution = () => {
-        args.tick(queryResult);
-        appState.onNextTick.delete(execution);
-      };
-      appState.onNextTick.add(execution);
-      onCleanup(() => {
-        appState.onNextTick.delete(execution);
-      });
-    });
-  });
-
-  onCleanup(() => {
-    dispose();
-  });
-
-  return () => {
-    dispose();
-    setCancel(true);
-  };
+export function onNextFrame<QueryResult>(_args: OnNextFrameQuery<QueryResult>) {
+  throw new Error('On Next Frame is deprecated')
 }
 
 export const Application = (props: JSX.IntrinsicElements["application"]) => {
   const [application, setApplication] = createSignal<ApplicationNode>();
   const [mount, setOnMount] = createSignal(false);
-  const nextFrameFns = new Set<() => void>();
+  const scheduledEffects = new Map<string, (ticker: Ticker) => void >();
   const timer = createTimer({
-    nextFrameFns: nextFrameFns,
+    nextFrameFns: scheduledEffects,
     createTicker: props.createTicker,
   });
   const applicationState = {
-    time: timer.time,
-    onNextTick: nextFrameFns,
     application: null as Maybe<ApplicationState["application"]>,
-  } satisfies Omit<ApplicationState, "application"> & {
-    application: Maybe<ApplicationState["application"]>;
   };
 
   const [applicationReady] = createResource(mount, async () => {
@@ -103,7 +66,7 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
     app.container.ticker = timer.ticker;
     await app.initialize();
     await props.appInitialize?.(app.container);
-    timer.start();
+    timer.ticker.start();
     applicationState.application = app.container;
     return true;
   });
@@ -117,7 +80,7 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
   return (
     <application {...props} ref={setApplication}>
       <container>
-        <GameLoopContextProvider gameLoopContext={{frameCount: timer.frameCount, onNextTick: applicationState.onNextTick}}>
+        <GameLoopContextProvider gameLoopContext={{frameCount: timer.frameCount, scheduledEffects}}>
           <ApplicationContext.Provider
             value={applicationState as ApplicationState}
           >

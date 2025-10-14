@@ -18,7 +18,7 @@ export const useGameState = () => {
     return gameState;
 }
 
-export const Game = () => {
+const MainStage = () => {
     const controller = createController();
     const gameState = {
         controller
@@ -36,16 +36,20 @@ export const Game = () => {
         console.log("Game Render", gameState)
     })
 
+    return (<GameContext.Provider value={gameState}>
+        <container>
+            <Show when={sceneToggle()} fallback={<text>Scene 2</text>}>
+                <Scene1/>
+            </Show>
+        </container>
+
+    </GameContext.Provider>)
+}
+
+export const Game = () => {
     return (
         <Application background={'#ecdddd'} width={window.innerWidth} height={window.innerHeight}>
-            <GameContext.Provider value={gameState}>
-                <container>
-                    <Show when={sceneToggle()} fallback={<text>Scene 2</text>}>
-                        <Scene1/>
-                    </Show>
-                </container>
-
-            </GameContext.Provider>
+            <MainStage/>
         </Application>
     )
 }

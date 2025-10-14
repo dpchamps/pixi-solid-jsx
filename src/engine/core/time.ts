@@ -11,6 +11,8 @@ type CreateTimerArgs = {
   nextFrameFns: {
     forEach: (cb: (value: (ticker: Ticker) => void) => void) => void;
     clear: () => void;
+    size: number;
+    values: () => IterableIterator<(ticker: Ticker) => void>
   };
   createTicker?: Maybe<() => Ticker>;
 };
@@ -23,26 +25,41 @@ export const createTicker = () => {
   return ticker;
 };
 
+const FRAME_BUDGET = 16.6;
+
 export const createTimer = (args: CreateTimerArgs) => {
-  // we want to ensure that each are updated regardless of value.
-  // this needs to accurately represent a single tick
-  const [deltaTime, setDeltaTime] = createSignal(1, { equals: false });
-  const [currentFps, setCurrentFps] = createSignal(0, { equals: false });
-  const [elapsedMsSinceLastFrame, setElapsedMsSinceLastFrame] = createSignal(
-    0,
-    { equals: false },
-  );
   const [frameCount, setFrameCount] = createSignal(0)
 
   function frameTick(ticker: Ticker) {
-    batch(() => {
-      setDeltaTime(ticker.deltaTime);
-      setCurrentFps(ticker.FPS);
-      setElapsedMsSinceLastFrame(ticker.elapsedMS);
-      setFrameCount((last) => last+1);
+    const frameStart = performance.now();
+    setFrameCount((last) => last+1);
 
-      args.nextFrameFns.forEach((x) => x(ticker));
-    });
+    /**
+     * Reactive Effect Cascade Processing
+     *
+     * Effects can trigger signal updates that schedule additional effects.
+     * Without this loop, each dependency layer would execute on separate frames,
+     * creating multi-frame input latency (e.g. input → state → render = 3 frames).
+     *
+     * By repeatedly flushing scheduled effects within a frame budget, all reactive
+     * layers collapse into a single frame:
+     *
+     * Frame N:
+     *   1. setFrameCount triggers all subscribed effects
+     *   2. Effects run → set signals → schedule new effects
+     *   3. Loop continues, executing newly scheduled effects
+     *   4. Repeat until no effects remain or budget exhausted
+     *
+     * Effects exceeding budget defer to next frame.
+     */
+    while(args.nextFrameFns.size && (performance.now()-frameStart) < FRAME_BUDGET){
+      const next = Array.from(args.nextFrameFns.values());
+      args.nextFrameFns.clear();
+
+      batch(() => {
+        next.forEach((x) => x(ticker));
+      });
+    }
   }
 
   const ticker = args.createTicker ? args.createTicker() : createTicker();
@@ -51,15 +68,6 @@ export const createTimer = (args: CreateTimerArgs) => {
   onCleanup(() => ticker.remove(frameTick));
 
   return {
-    time: {
-      deltaTime: () => deltaTime(),
-      fps: () => currentFps(),
-      elapsedMsSinceLastFrame: () => elapsedMsSinceLastFrame(),
-    },
-    start: () => {
-      ticker.start();
-      ticker.lastTime = performance.now();
-    },
     frameCount,
     ticker,
   };

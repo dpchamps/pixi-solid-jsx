@@ -12,7 +12,7 @@ import {createEntityList, EntityList} from "./createEntityList.ts";
 import {overlaps, randomBetween} from "./position.ts";
 import {FpsCounter} from "./FpsCounter.tsx";
 import {Texture} from "pixi.js";
-import {onEveryFrame} from "../../src/engine/core/query-fns.ts";
+import {createSynchronizedEffect, onEveryFrame} from "../../src/engine/core/query-fns.ts";
 
 const createPlayerEntity = (entityList: EntityList, gameState: GameState) => {
     const playerId = "player";
@@ -27,24 +27,42 @@ const createPlayerEntity = (entityList: EntityList, gameState: GameState) => {
         zIndex: 500,
     });
 
-    onNextFrame({
-        query: (appState) => {
-            // const deltaTime = untrack(appState.time.deltaTime);
-            const deltaTime = appState.time.deltaTime();
-            const {x, y} = {x: controllerDirection.x(), y: controllerDirection.y()};
-
-            return {
-                x: x*4*deltaTime,
-                y: y*4*deltaTime
-            }
-        },
-        tick: (nextPosition) => {
-            entityList.updateEntity("player", ({x, y}) => ({
-                x: x+nextPosition.x,
-                y: y+nextPosition.y
-            }));
-        }
+    createSynchronizedEffect(() => ({
+        dx: controllerDirection.x(),
+        dy: controllerDirection.y()
+    }), ({dx, dy}, ticker) => {
+        // console.log("reaction", {dx, dy})
+        entityList.updateEntity("player", ({x, y}) => ({
+            x: x + (dx * 4 * ticker.deltaTime),
+            y: y + (dy * 4 * ticker.deltaTime)
+        }));
     });
+
+    // onEveryFrame((ticker) => {
+    //     entityList.updateEntity("player", ({x, y}) => ({
+    //         x: x + (controllerDirection.x() * 4 * ticker.deltaTime),
+    //         y: y + (controllerDirection.y() * 4 * ticker.deltaTime)
+    //     }));
+    // });
+
+    // onNextFrame({
+    //     query: (appState) => {
+    //         // const deltaTime = untrack(appState.time.deltaTime);
+    //         const deltaTime = appState.time.deltaTime();
+    //         const {x, y} = {x: controllerDirection.x(), y: controllerDirection.y()};
+    //
+    //         return {
+    //             x: x*4*deltaTime,
+    //             y: y*4*deltaTime
+    //         }
+    //     },
+    //     tick: (nextPosition) => {
+    //         entityList.updateEntity("player", ({x, y}) => ({
+    //             x: x+nextPosition.x,
+    //             y: y+nextPosition.y
+    //         }));
+    //     }
+    // });
 
     return playerId;
 }
@@ -138,14 +156,14 @@ const createWanderingEntity = (entityList: EntityList, applicationState: Applica
         })
     }
 
-    onNextFrame({
-        query: (a) => {
-            return states[state()]().query(a);
-        },
-        tick: (x) => {
-            states[state()]().tick(x)
-        }
-    })
+    // createSynchronizedEffect(
+    //     () => {
+    //         return states[state()]().query();
+    //     },
+    //     (x) => {
+    //         states[state()]().tick(x)
+    //     }
+    // );
 
 
     return id;
@@ -163,33 +181,33 @@ export const Scene1 = () => {
         console.log("Scene1 Render")
     })
 
-    onNextFrame({
-        query: () => {
-            const player = entityList.expectEntity(playerId);
-            const other = entityList.expectEntity(otherId);
+    // onNextFrame({
+    //     query: () => {
+    //         const player = entityList.expectEntity(playerId);
+    //         const other = entityList.expectEntity(otherId);
+    //
+    //         return {player, other}
+    //     },
+    //     tick: (entities) => {
+    //         const tint = overlaps(entities.player, entities.other) ? "pink" : "white";
+    //         applicationState.application.renderer.background.color = overlaps(entities.player, entities.other) ? "grey" : "lightblue"
+    //         for(const entity of entityList.entities()){
+    //             entityList.updateEntity(entity.id, () => ({
+    //                 tint
+    //             }))
+    //         }
+    //
+    //     }
+    // });
 
-            return {player, other}
-        },
-        tick: (entities) => {
-            const tint = overlaps(entities.player, entities.other) ? "pink" : "white";
-            applicationState.application.renderer.background.color = overlaps(entities.player, entities.other) ? "grey" : "lightblue"
-            for(const entity of entityList.entities()){
-                entityList.updateEntity(entity.id, () => ({
-                    tint
-                }))
-            }
-
-        }
-    });
-
-    onNextFrame({
-        query: (applicationState) => {
-            return applicationState.time.deltaTime()
-        },
-        tick: () => {
-            runWithOwner(owner, () => createWanderingEntity(entityList, applicationState))
-        }
-    })
+    // onNextFrame({
+    //     query: (applicationState) => {
+    //         return applicationState.time.deltaTime()
+    //     },
+    //     tick: () => {
+    //         runWithOwner(owner, () => createWanderingEntity(entityList, applicationState))
+    //     }
+    // })
 
     return (
         <>
