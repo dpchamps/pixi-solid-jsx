@@ -676,6 +676,39 @@ describe("onEveryFrame", () => {
       await ticker.tickFrames(5);
       expect(textNode.text).toBe("3");
     });
+
+    test("early disposal prevents execution", async () => {
+      const effectSpy = vi.fn();
+      let dispose: () => void = () => {};
+      const [flag, updateFlag] = createSignal(false);
+
+
+      const TestComponent = () => {
+
+        dispose = createSynchronizedEffect(
+          () => flag(),
+          () => {
+            effectSpy();
+          },
+        );
+
+        return <container />;
+      };
+
+      const { ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent/>
+      ));
+
+      dispose();
+
+      await ticker.tickFrames(1);
+      expect(effectSpy).not.toHaveBeenCalled();
+
+      updateFlag(true);
+
+      await ticker.tickFrames(5);
+      expect(effectSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe("performance characteristics", () => {

@@ -1,7 +1,6 @@
 import {
   createComputed,
   createRoot,
-  createSignal,
   getOwner,
   onCleanup,
   runWithOwner,
@@ -35,7 +34,6 @@ export type OnNextFrameQuery<QueryResult> = {
  * - Effect phase: Receives current ticker for accurate frame timing
  *
  * ## Disposal:
- * - `_earlyDispose`: Prevents execution if disposed before setup
  * - `cancel`: Reactive cancellation signal
  * - `dispose`: Cleans up root scope
  * - `onCleanup`: Removes from tick queue on component cleanup
@@ -49,14 +47,14 @@ function createEffectOnNextFrame<QueryResult>(
   args: OnNextFrameQuery<QueryResult>,
 ) {
   const gameLoopContext = useGameLoopContext();
-  let _earlyDispose = false;
-  let dispose = () => {
-    _earlyDispose = true;
-  };
+  let dispose = () => {};
   createRoot((_dispose) => {
     dispose = _dispose;
     createComputed(() => {
-      if (_earlyDispose) return;
+        // Initially, I'd suspected that it might be possible for dispose to have been
+        // before this `createComputed callback is fired.
+        // However, after studying the solid code, I've convinced myself it's not possible
+        // Therefore, we do not need to preemptively check to see if it's already been disposed before scheduling
       const queryResult = args.query(gameLoopContext.frameCount);
       const execution = (ticker: Ticker) => args.effect(queryResult, ticker);
       gameLoopContext.scheduledEffects.set(args.id, execution);
