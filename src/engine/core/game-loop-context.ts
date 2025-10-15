@@ -4,7 +4,7 @@ import {
   useContext,
 } from "solid-custom-renderer/index.ts";
 import { invariantUseContext } from "../../utility-types.ts";
-import {Ticker} from "pixi.js";
+import { Ticker } from "pixi.js";
 
 export type GameLoopContext = {
   frameCount: Accessor<number>;

@@ -12,7 +12,7 @@ type CreateTimerArgs = {
     forEach: (cb: (value: (ticker: Ticker) => void) => void) => void;
     clear: () => void;
     size: number;
-    values: () => IterableIterator<(ticker: Ticker) => void>
+    values: () => IterableIterator<(ticker: Ticker) => void>;
   };
   createTicker?: Maybe<() => Ticker>;
 };
@@ -28,11 +28,11 @@ export const createTicker = () => {
 const FRAME_BUDGET = 16.6;
 
 export const createTimer = (args: CreateTimerArgs) => {
-  const [frameCount, setFrameCount] = createSignal(0)
+  const [frameCount, setFrameCount] = createSignal(0);
 
   function frameTick(ticker: Ticker) {
     const frameStart = performance.now();
-    setFrameCount((last) => last+1);
+    setFrameCount((last) => last + 1);
 
     /**
      * Reactive Effect Cascade Processing
@@ -52,7 +52,10 @@ export const createTimer = (args: CreateTimerArgs) => {
      *
      * Effects exceeding budget defer to next frame.
      */
-    while(args.nextFrameFns.size && (performance.now()-frameStart) < FRAME_BUDGET){
+    while (
+      args.nextFrameFns.size &&
+      performance.now() - frameStart < FRAME_BUDGET
+    ) {
       const next = Array.from(args.nextFrameFns.values());
       args.nextFrameFns.clear();
 

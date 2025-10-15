@@ -307,8 +307,7 @@ export const startCoroutine = (fn: CoroutineFn) => {
   };
 
   const dispose = onEveryFrame((time) => {
-    if (coroutineState.isWaitingOnNextTick(time.elapsedMS))
-      return;
+    if (coroutineState.isWaitingOnNextTick(time.elapsedMS)) return;
 
     const result = iterator.next(Math.floor(time.elapsedMS));
 

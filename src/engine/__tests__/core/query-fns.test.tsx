@@ -682,9 +682,7 @@ describe("onEveryFrame", () => {
       let dispose: () => void = () => {};
       const [flag, updateFlag] = createSignal(false);
 
-
       const TestComponent = () => {
-
         dispose = createSynchronizedEffect(
           () => flag(),
           () => {
@@ -696,7 +694,7 @@ describe("onEveryFrame", () => {
       };
 
       const { ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent/>
+        <TestComponent />
       ));
 
       dispose();

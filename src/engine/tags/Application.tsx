@@ -7,7 +7,7 @@ import {
   createResource,
   Show,
 } from "solid-custom-renderer/index.ts";
-import {Application as PixiApplication, Ticker} from "pixi.js";
+import { Application as PixiApplication, Ticker } from "pixi.js";
 import { invariant, Maybe } from "../../utility-types.ts";
 import { ApplicationNode } from "../../pixi-jsx/proxy-dom";
 import { createTimer } from "../core/time.ts";
@@ -37,13 +37,13 @@ export type OnNextFrameQuery<QueryResult> = {
  * @deprecated Use {@link createSynchronizedEffect} from "engine/core/query-fns" instead.
  */
 export function onNextFrame<QueryResult>(_args: OnNextFrameQuery<QueryResult>) {
-  throw new Error('On Next Frame is deprecated')
+  throw new Error("On Next Frame is deprecated");
 }
 
 export const Application = (props: JSX.IntrinsicElements["application"]) => {
   const [application, setApplication] = createSignal<ApplicationNode>();
   const [mount, setOnMount] = createSignal(false);
-  const scheduledEffects = new Map<string, (ticker: Ticker) => void >();
+  const scheduledEffects = new Map<string, (ticker: Ticker) => void>();
   const timer = createTimer({
     nextFrameFns: scheduledEffects,
     createTicker: props.createTicker,
@@ -80,7 +80,9 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
   return (
     <application {...props} ref={setApplication}>
       <container>
-        <GameLoopContextProvider gameLoopContext={{frameCount: timer.frameCount, scheduledEffects}}>
+        <GameLoopContextProvider
+          gameLoopContext={{ frameCount: timer.frameCount, scheduledEffects }}
+        >
           <ApplicationContext.Provider
             value={applicationState as ApplicationState}
           >

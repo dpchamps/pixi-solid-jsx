@@ -6,11 +6,11 @@ import {
   runWithOwner,
 } from "solid-custom-renderer/index.ts";
 import { useGameLoopContext } from "./game-loop-context.ts";
-import {Ticker} from "pixi.js";
-import {Accessor} from "solid-js";
+import { Ticker } from "pixi.js";
+import { Accessor } from "solid-js";
 
 export type OnNextFrameQuery<QueryResult> = {
-  id: string,
+  id: string;
   query: (frameCount: Accessor<number>) => QueryResult;
   effect: (queryResult: QueryResult, ticker: Ticker) => void;
 };
@@ -51,10 +51,10 @@ function createEffectOnNextFrame<QueryResult>(
   createRoot((_dispose) => {
     dispose = _dispose;
     createComputed(() => {
-        // Initially, I'd suspected that it might be possible for dispose to have been
-        // before this `createComputed callback is fired.
-        // However, after studying the solid code, I've convinced myself it's not possible
-        // Therefore, we do not need to preemptively check to see if it's already been disposed before scheduling
+      // Initially, I'd suspected that it might be possible for dispose to have been
+      // before this `createComputed callback is fired.
+      // However, after studying the solid code, I've convinced myself it's not possible
+      // Therefore, we do not need to preemptively check to see if it's already been disposed before scheduling
       const queryResult = args.query(gameLoopContext.frameCount);
       const execution = (ticker: Ticker) => args.effect(queryResult, ticker);
       gameLoopContext.scheduledEffects.set(args.id, execution);
@@ -68,7 +68,7 @@ function createEffectOnNextFrame<QueryResult>(
     dispose();
   });
 
-  return dispose
+  return dispose;
 }
 
 /**
@@ -137,15 +137,16 @@ function createEffectOnNextFrame<QueryResult>(
  * );
  */
 export const createSynchronizedEffect = <T>(
-    query: () => T,
-    effect: (queryResult: T, ticker: Ticker) => void,
-    owner = getOwner(),
+  query: () => T,
+  effect: (queryResult: T, ticker: Ticker) => void,
+  owner = getOwner(),
 ) =>
-    createEffectOnNextFrame({
-      id: crypto.randomUUID(),
-      query: () => query(),
-      effect: (queryResult, ticker) => runWithOwner(owner, () => effect(queryResult, ticker)),
-    });
+  createEffectOnNextFrame({
+    id: crypto.randomUUID(),
+    query: () => query(),
+    effect: (queryResult, ticker) =>
+      runWithOwner(owner, () => effect(queryResult, ticker)),
+  });
 
 /**
  * Executes a function every frame with current ticker values.
@@ -207,13 +208,11 @@ export const createSynchronizedEffect = <T>(
  *     }
  * );
  */
-export const onEveryFrame = (
-  fn: (ticker: Ticker) => void,
-) =>
-    createEffectOnNextFrame({
-      id: crypto.randomUUID(),
-      query: (frameCount) => {
-        frameCount()
-      },
-      effect: (_, ticker) => fn(ticker)
-    });
+export const onEveryFrame = (fn: (ticker: Ticker) => void) =>
+  createEffectOnNextFrame({
+    id: crypto.randomUUID(),
+    query: (frameCount) => {
+      frameCount();
+    },
+    effect: (_, ticker) => fn(ticker),
+  });
