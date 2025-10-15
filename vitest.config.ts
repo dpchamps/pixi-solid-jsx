@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig, configDefaults } from 'vitest/config'
 import tsconfigPaths from "vite-tsconfig-paths";
 import solidPlugin from "vite-plugin-solid";
 import dts from "vite-plugin-dts";
@@ -11,6 +11,9 @@ export default defineConfig({
             provider: "v8",
             enabled: true,
             exclude: ["src/__tests__/**/*", 'sandbox/**/*', "vitest.config.ts"]
+        },
+        fakeTimers: {
+            toFake: [...configDefaults.fakeTimers.toFake || [], 'performance']
         },
         environment: "jsdom",
         setupFiles: ['vitest-webgl-canvas-mock'],

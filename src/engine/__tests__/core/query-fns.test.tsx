@@ -4,7 +4,7 @@ import { createSynchronizedEffect, onEveryFrame } from "../../core/query-fns";
 import { Text, Sprite, Container } from "pixi.js";
 import { renderApplicationWithFakeTicker } from "../../../__tests__/test-utils/test-utils.tsx";
 import { invariant, assert } from "../../../utility-types.ts";
-import { vi } from "vitest";
+import { vi, beforeAll, afterEach, afterAll } from "vitest";
 
 describe("createSynchronizedEffect", () => {
   describe("basic reactivity", () => {
@@ -864,6 +864,273 @@ describe("edge cases", () => {
       setTrigger(1);
       await ticker.tickFrames(3);
       expect(textNode.text).toBe("6");
+    });
+  });
+
+  describe("effect cascades", () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.clearAllTimers();
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    test("a cascaded createSynchronizedEffect runs within the same frame", async () => {
+      const cascadeSpy = vi.fn();
+      const flagSpy = vi.fn();
+      let setFlag: ((value: boolean) => void) | undefined;
+
+      const TestComponent = (props: {
+        registerSetter: (setter: (value: boolean) => void) => void;
+      }) => {
+        const [flag, updateFlag] = createSignal(false);
+        const [cascade, setCascade] = createSignal(false);
+
+        props.registerSetter(updateFlag);
+
+        createSynchronizedEffect(
+          () => flag(),
+          (value) => {
+            flagSpy(value);
+            if (value) setCascade(true);
+          },
+        );
+
+        createSynchronizedEffect(
+          () => cascade(),
+          (value) => {
+            if (value) cascadeSpy(value);
+          },
+        );
+
+        return <container />;
+      };
+
+      const { ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent registerSetter={(setter) => (setFlag = setter)} />
+      ));
+
+      invariant(setFlag);
+
+      expect(flagSpy).toHaveBeenCalledTimes(0);
+      expect(cascadeSpy).toHaveBeenCalledTimes(0);
+
+      await ticker.tickFrames(1);
+      // effects are fired the first time after the first tick
+      expect(flagSpy).toHaveBeenCalledTimes(1);
+      // we conditionally call cascadeSpy only when `flag` is true
+      expect(cascadeSpy).toHaveBeenCalledTimes(0);
+
+      setFlag(true);
+
+      // we haven't ticked the timer yet, so nothing has changed from the last state,
+      // but because the `flag` signal has been set we've scheduled work for the next frame
+      expect(flagSpy).toHaveBeenCalledTimes(1);
+      expect(cascadeSpy).toHaveBeenCalledTimes(0);
+
+      //now, we capture a cascade in a single frame:
+      // 1. the effect depending on `flag` fires, which in turn updates `cascade`
+      // 2. the effect depending on `cascade` fires in the same frame
+      await ticker.tickFrames(1);
+      expect(flagSpy).toHaveBeenCalledTimes(2);
+      expect(cascadeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("three-level cascades flush within a single frame when within budget", async () => {
+      const firstSpy = vi.fn();
+      const secondSpy = vi.fn();
+      const thirdSpy = vi.fn();
+      let setFlag: ((value: boolean) => void) | undefined;
+
+      const TestComponent = (props: {
+        registerSetter: (setter: (value: boolean) => void) => void;
+      }) => {
+        const [flag, updateFlag] = createSignal(false);
+        const [mid, setMid] = createSignal(false);
+        const [final, setFinal] = createSignal(false);
+
+        props.registerSetter(updateFlag);
+
+        createSynchronizedEffect(
+          () => flag(),
+          (value) => {
+            firstSpy(value);
+            if (value) setMid(true);
+          },
+        );
+
+        createSynchronizedEffect(
+          () => mid(),
+          (value) => {
+            if (value) {
+              secondSpy(value);
+              setFinal(true);
+            }
+          },
+        );
+
+        createSynchronizedEffect(
+          () => final(),
+          (value) => {
+            if (value) thirdSpy(value);
+          },
+        );
+
+        return <container />;
+      };
+
+      const { ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent registerSetter={(setter) => (setFlag = setter)} />
+      ));
+
+      invariant(setFlag);
+
+      await ticker.tickFrames(1);
+      expect(firstSpy).toHaveBeenCalledTimes(1);
+      expect(secondSpy).toHaveBeenCalledTimes(0);
+      expect(thirdSpy).toHaveBeenCalledTimes(0);
+
+      setFlag(true);
+      await ticker.tickFrames(1);
+      expect(firstSpy).toHaveBeenCalledTimes(2);
+      expect(secondSpy).toHaveBeenCalledTimes(1);
+      expect(thirdSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("a heavy cascade defers until the following frame when the budget is exhausted", async () => {
+      const cascadeSpy = vi.fn();
+      const flagSpy = vi.fn();
+      let setFlag: ((value: boolean) => void) | undefined;
+
+      const TestComponent = (props: {
+        registerSetter: (setter: (value: boolean) => void) => void;
+      }) => {
+        const [flag, updateFlag] = createSignal(false);
+        const [cascade, setCascade] = createSignal(false);
+
+        props.registerSetter(updateFlag);
+
+        createSynchronizedEffect(
+          () => flag(),
+          (value) => {
+            flagSpy(value);
+            if (value) {
+              // intentionally make this effect take more than the budgeted frame window
+              vi.advanceTimersByTime(20);
+              setCascade(true);
+            }
+          },
+        );
+
+        createSynchronizedEffect(
+          () => cascade(),
+          (value) => {
+            if (value) cascadeSpy(value);
+          },
+        );
+
+        return <container />;
+      };
+
+      const { ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent registerSetter={(setter) => (setFlag = setter)} />
+      ));
+
+      invariant(setFlag);
+
+      await ticker.tickFrames(1);
+      // effects are fired the first time after the first tick
+      expect(flagSpy).toHaveBeenCalledTimes(1);
+      // we conditionally call cascadeSpy only when `flag` is true
+      expect(cascadeSpy).toHaveBeenCalledTimes(0);
+
+      setFlag(true);
+      await ticker.tickFrames(1);
+      // setting the flag spy effect was computationally expensive.
+      // this effect still fires...
+      expect(flagSpy).toHaveBeenCalledTimes(2);
+      // but this one didn't yet
+      expect(cascadeSpy).toHaveBeenCalledTimes(0);
+
+      await ticker.tickFrames(1);
+      // now one tick later, the flag effect is stable (it hasn't been run again)
+      expect(flagSpy).toHaveBeenCalledTimes(2);
+      // ...and the cascade spills over from last frame's computation
+      expect(cascadeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("downstream cascades defer when earlier stage exceeds budget", async () => {
+      const firstSpy = vi.fn();
+      const secondSpy = vi.fn();
+      const thirdSpy = vi.fn();
+      let setFlag: ((value: boolean) => void) | undefined;
+
+      const TestComponent = (props: {
+        registerSetter: (setter: (value: boolean) => void) => void;
+      }) => {
+        const [flag, updateFlag] = createSignal(false);
+        const [mid, setMid] = createSignal(false);
+        const [final, setFinal] = createSignal(false);
+
+        props.registerSetter(updateFlag);
+
+        createSynchronizedEffect(
+          () => flag(),
+          (value) => {
+            firstSpy(value);
+            if (value) {
+              vi.advanceTimersByTime(20);
+              setMid(true);
+            }
+          },
+        );
+
+        createSynchronizedEffect(
+          () => mid(),
+          (value) => {
+            if (value) {
+              secondSpy(value);
+              setFinal(true);
+            }
+          },
+        );
+
+        createSynchronizedEffect(
+          () => final(),
+          (value) => {
+            if (value) thirdSpy(value);
+          },
+        );
+
+        return <container />;
+      };
+
+      const { ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent registerSetter={(setter) => (setFlag = setter)} />
+      ));
+
+      invariant(setFlag);
+
+      await ticker.tickFrames(1);
+      expect(firstSpy).toHaveBeenCalledTimes(1);
+      expect(secondSpy).toHaveBeenCalledTimes(0);
+      expect(thirdSpy).toHaveBeenCalledTimes(0);
+
+      setFlag(true);
+      await ticker.tickFrames(1);
+      expect(firstSpy).toHaveBeenCalledTimes(2);
+      expect(secondSpy).toHaveBeenCalledTimes(0);
+      expect(thirdSpy).toHaveBeenCalledTimes(0);
+
+      await ticker.tickFrames(1);
+      expect(firstSpy).toHaveBeenCalledTimes(2);
+      expect(secondSpy).toHaveBeenCalledTimes(1);
+      expect(thirdSpy).toHaveBeenCalledTimes(1);
     });
   });
 });
