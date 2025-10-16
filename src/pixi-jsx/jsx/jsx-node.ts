@@ -6,7 +6,8 @@ import {
   SpriteOptions,
   GraphicsOptions,
   Application,
-  Ticker, RenderLayer,
+  Ticker,
+  RenderLayer,
 } from "pixi.js";
 import {
   ApplicationNode,
@@ -17,7 +18,7 @@ import {
 } from "../proxy-dom";
 import { Setter } from "../solidjs-universal-renderer";
 import { GraphicsNode } from "../proxy-dom/nodes/Graphics.ts";
-import {RenderLayerNode} from "../proxy-dom/nodes/RenderLayerNode.ts";
+import { RenderLayerNode } from "../proxy-dom/nodes/RenderLayerNode.ts";
 
 export type UnknownNodeProps = Record<string, unknown>;
 export type PixiNodeProps<
@@ -77,8 +78,8 @@ export type GraphicsIntrinsicProps = PixiNodeProps<
 >;
 
 export type RenderLayerIntrinsicProps = PixiNodeProps<
-    PixieOptionsProps<RenderLayer>,
-    RenderLayerNode
->
+  PixieOptionsProps<RenderLayer>,
+  RenderLayerNode
+>;
 
 export type JSXNode = ProxyDomNode | JSXNode[] | (() => JSXNode) | undefined;

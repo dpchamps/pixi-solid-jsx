@@ -1,6 +1,6 @@
 import { expectNodeNot, ProxyDomNode, ProxyNode } from "./Node.ts";
 import { Application, Container } from "pixi.js";
-import {invariant} from "../../../utility-types.ts";
+import { invariant } from "../../../utility-types.ts";
 
 export class ContainerNode extends ProxyNode<
   "container",
@@ -14,7 +14,7 @@ export class ContainerNode extends ProxyNode<
   addChildProxy(node: ProxyDomNode, anchor?: ProxyDomNode) {
     expectNodeNot(node, "unexpected child to container", "application", "html");
     if (node.tag === "raw") return;
-    if (node.tag === "render-layer")  {
+    if (node.tag === "render-layer") {
       const renderLayer = node.getRenderLayer();
       invariant(renderLayer, "Encountered RenderLayerNode with no RenderLayer");
       this.container.addChild(renderLayer);
@@ -41,7 +41,7 @@ export class ContainerNode extends ProxyNode<
 
     // RenderLayerNodes are ephemeral, it's possible this child is being attached
     // _from_ a RenderLayerNode, in which case, we don't want to move it.
-    if(!node.getRenderLayer()){
+    if (!node.getRenderLayer()) {
       this.getRenderLayer()?.attach(node.container);
     }
   }

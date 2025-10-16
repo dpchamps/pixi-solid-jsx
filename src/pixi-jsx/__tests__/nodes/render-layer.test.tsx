@@ -179,7 +179,6 @@ describe("RenderLayer node", () => {
 
     const container = stage.children[0] as Container;
 
-
     const layer1 = container.children[0] as RenderLayer;
     const layer2 = container.children[1] as RenderLayer;
     const text1 = container.children[2] as Text;
@@ -218,11 +217,11 @@ describe("RenderLayer node", () => {
     const stage = await renderApplicationNode(() => (
       <container>
         <render-layer>
+          <container>
             <container>
-              <container>
-                <text>Deep</text>
-              </container>
+              <text>Deep</text>
             </container>
+          </container>
         </render-layer>
       </container>
     ));

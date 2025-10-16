@@ -1,6 +1,7 @@
 import {
   assert,
-  invariant, isDefined,
+  invariant,
+  isDefined,
   Maybe,
   unimplemented,
 } from "../../../utility-types.ts";
@@ -39,8 +40,8 @@ export interface IProxyNode<
   replaceChild: (oldNode: NodeType, newNode: NodeType) => void;
   getParent: () => Maybe<NodeType>;
   getChildren: () => Array<NodeType>;
-  addChildProxy: (child: NodeType, anchor?: NodeType) => NodeType|void;
-  removeChildProxy: (child: NodeType) => void
+  addChildProxy: (child: NodeType, anchor?: NodeType) => NodeType | void;
+  removeChildProxy: (child: NodeType) => void;
   setParent: (parent: NodeType) => void;
   getRenderLayer: () => Maybe<RenderLayer>;
   setRenderLayer: (layer: Maybe<RenderLayer>) => void;
@@ -189,7 +190,7 @@ export abstract class ProxyNode<
     if (typeof this.container === "object" && this.container !== null) {
       Reflect.set(this.container, name, value);
     } else if (this.tag === "render-layer" && isDefined(this.renderLayer)) {
-      Reflect.set(this.renderLayer, name, value)
+      Reflect.set(this.renderLayer, name, value);
     }
   }
 
