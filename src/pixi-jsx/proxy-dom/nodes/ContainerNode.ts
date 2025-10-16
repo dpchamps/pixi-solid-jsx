@@ -1,5 +1,6 @@
 import { expectNodeNot, ProxyDomNode, ProxyNode } from "./Node.ts";
 import { Application, Container } from "pixi.js";
+import {invariant} from "../../../utility-types.ts";
 
 export class ContainerNode extends ProxyNode<
   "container",
@@ -13,6 +14,13 @@ export class ContainerNode extends ProxyNode<
   addChildProxy(node: ProxyDomNode, anchor?: ProxyDomNode) {
     expectNodeNot(node, "unexpected child to container", "application", "html");
     if (node.tag === "raw") return;
+    if (node.tag === "render-layer")  {
+      const renderLayer = node.getRenderLayer();
+      invariant(renderLayer, "Encountered RenderLayerNode with no RenderLayer");
+      this.container.addChild(renderLayer);
+      return;
+    }
+
     // find the index of the next nonraw node from anchor
     const anchorIndex = anchor
       ? this.children.findIndex((childNode) => childNode.id === anchor.id)
@@ -30,6 +38,12 @@ export class ContainerNode extends ProxyNode<
           : insertIndex;
 
     this.container.addChildAt(node.container, finalIndex);
+
+    // RenderLayerNodes are ephemeral, it's possible this child is being attached
+    // _from_ a RenderLayerNode, in which case, we don't want to move it.
+    if(!node.getRenderLayer()){
+      this.getRenderLayer()?.attach(node.container);
+    }
   }
 
   removeChildProxy(proxied: ProxyDomNode) {
@@ -39,7 +53,7 @@ export class ContainerNode extends ProxyNode<
       "application",
       "html",
     );
-    if (proxied.tag === "raw") return;
+    if (proxied.tag === "raw" || proxied.tag === "render-layer") return;
     this.container.removeChild(proxied.container);
   }
 

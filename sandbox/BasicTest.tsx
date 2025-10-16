@@ -20,15 +20,18 @@ export const BasicTest = () => {
 
     return (
         <container>
-            <sprite
-                texture={texture()!}
-                scale={1}
-                x={windowDimensions().innerWidth/2+200}
-                y={windowDimensions().innerHeight/2}
-                tint={"white"}
-                rotation={rotation()}
-                pivot={{x: (texture!()?.width || 0)/2, y:(texture!()?.width || 0)/2}}
-            />
+            <render-layer>
+                <sprite
+                    texture={texture()!}
+                    scale={1}
+                    x={windowDimensions().innerWidth/2+200}
+                    y={windowDimensions().innerHeight/2}
+                    tint={"white"}
+                    rotation={rotation()}
+                    pivot={{x: (texture!()?.width || 0)/2, y:(texture!()?.width || 0)/2}}
+                />
+            </render-layer>
+
             <sprite
                 texture={texture()!}
                 scale={1}

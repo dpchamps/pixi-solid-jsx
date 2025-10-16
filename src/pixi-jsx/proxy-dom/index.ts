@@ -3,6 +3,7 @@ import { ContainerNode } from "./nodes/ContainerNode.ts";
 import { ApplicationNode } from "./nodes/ApplicationNode.ts";
 import { SpriteNode } from "./nodes/SpriteNode.ts";
 import { GraphicsNode } from "./nodes/Graphics.ts";
+import { RenderLayerNode } from "./nodes/RenderLayerNode.ts";
 
 export { RawNode } from "./nodes/RawNode.ts";
 export { HtmlElementNode } from "./nodes/HtmlElementNode.ts";
@@ -12,6 +13,7 @@ export * from "./nodes/TextNode.ts";
 export * from "./nodes/ContainerNode.ts";
 export * from "./nodes/ApplicationNode.ts";
 export * from "./nodes/SpriteNode.ts";
+export * from "./nodes/RenderLayerNode.ts";
 
 export const createProxiedPixieContainerNode = (tag: string) => {
   switch (tag) {
@@ -25,6 +27,8 @@ export const createProxiedPixieContainerNode = (tag: string) => {
       return SpriteNode.create();
     case "graphics":
       return GraphicsNode.create();
+    case "render-layer":
+      return RenderLayerNode.create();
     default: {
       throw new Error(`Received Invalid Tag ${tag}`);
     }

@@ -1,16 +1,24 @@
 import {
   assert,
-  invariant,
+  invariant, isDefined,
   Maybe,
   unimplemented,
 } from "../../../utility-types.ts";
-import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
+import {
+  Application,
+  Container,
+  Graphics,
+  RenderLayer,
+  Sprite,
+  Text,
+} from "pixi.js";
 
 export type ProxyDomNode =
   | IProxyNode<"application", Application, ProxyDomNode>
   | IProxyNode<"html", HTMLElement, ProxyDomNode>
   | IProxyNode<"text", Text, ProxyDomNode>
   | IProxyNode<"container", Container, ProxyDomNode>
+  | IProxyNode<"render-layer", null, ProxyDomNode>
   | IProxyNode<"raw", string, ProxyDomNode>
   | IProxyNode<"sprite", Sprite, ProxyDomNode>
   | IProxyNode<"graphics", Graphics, ProxyDomNode>;
@@ -31,7 +39,11 @@ export interface IProxyNode<
   replaceChild: (oldNode: NodeType, newNode: NodeType) => void;
   getParent: () => Maybe<NodeType>;
   getChildren: () => Array<NodeType>;
+  addChildProxy: (child: NodeType, anchor?: NodeType) => NodeType|void;
+  removeChildProxy: (child: NodeType) => void
   setParent: (parent: NodeType) => void;
+  getRenderLayer: () => Maybe<RenderLayer>;
+  setRenderLayer: (layer: Maybe<RenderLayer>) => void;
   setProp: <PropType>(
     name: string,
     value: PropType,
@@ -86,6 +98,7 @@ export abstract class ProxyNode<
   protected children: NodeType[] = [];
   protected proxiedChildren: NodeType[] = [];
   protected untrackedChildren: Container[] = [];
+  protected renderLayer: Maybe<RenderLayer> = null;
 
   protected constructor(tag: Tag, container: Container) {
     this.tag = tag;
@@ -131,6 +144,10 @@ export abstract class ProxyNode<
     return this.parent;
   }
 
+  getRenderLayer() {
+    return this.renderLayer;
+  }
+
   private removeChildBase(node: NodeType) {
     const index = this.children.findIndex((child) => child.id === node.id);
     assert(
@@ -159,11 +176,20 @@ export abstract class ProxyNode<
 
   setParent(parent: NodeType): void {
     this.parent = parent;
+    if (!this.renderLayer) {
+      this.renderLayer = parent.getRenderLayer();
+    }
+  }
+
+  setRenderLayer(layer: Maybe<RenderLayer>) {
+    this.renderLayer = layer ?? null;
   }
 
   setProp<T>(name: string, value: T, _prev: Maybe<T>): void {
     if (typeof this.container === "object" && this.container !== null) {
       Reflect.set(this.container, name, value);
+    } else if (this.tag === "render-layer" && isDefined(this.renderLayer)) {
+      Reflect.set(this.renderLayer, name, value)
     }
   }
 

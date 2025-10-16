@@ -17,6 +17,7 @@ import {createSynchronizedEffect, onEveryFrame} from "../../src/engine/core/quer
 const createPlayerEntity = (entityList: EntityList, gameState: GameState) => {
     const playerId = "player";
     const controllerDirection = createControllerDirection(gameState.controller);
+    const zIndexControls = gameState.controller.onKeyHold("Digit1", "Digit2");
     entityList.createEntity({
         id: playerId,
         x: 0 - (50/2),
@@ -37,6 +38,23 @@ const createPlayerEntity = (entityList: EntityList, gameState: GameState) => {
             y: y + (dy * 4 * ticker.deltaTime)
         }));
     });
+
+    createSynchronizedEffect(zIndexControls, (pressed) => {
+        let zIndexDelta = 0;
+        if(pressed.includes("Digit1")){
+            zIndexDelta = 1;
+        } else if (pressed.includes("Digit2")){
+            zIndexDelta = -1;
+        }
+
+        entityList.updateEntity('player', ({zIndex}) => {
+            const nextZIndex = (zIndex||0) + zIndexDelta;
+            console.log(nextZIndex)
+
+            return {zIndex: nextZIndex}
+        })
+
+    })
 
     // onEveryFrame((ticker) => {
     //     entityList.updateEntity("player", ({x, y}) => ({
@@ -210,19 +228,25 @@ export const Scene1 = () => {
     // })
 
     return (
-        <>
+        <container>
 
             {/*<text>Helos</text>*/}
-            <Index each={entityList.entities()}>
-                {
-                    (props) => <Entity {...props()}/>
-                }
-            </Index>
+            <render-layer sortableChildren={true}>
+                <Index each={entityList.entities()}>
+                    {
+                        (props) => {
+                            debugger
+                            return <container><Entity {...props()}/></container>
+                        }
+                    }
+                </Index>
+            </render-layer>
+
             <container zIndex={10000}>
                 <sprite texture={Texture.WHITE} width={270} height={75}/>
                 <FpsCounter zIndex={10_000}/>
                 <text y={25} zIndex={10000}>Entity Count: {`${entityList.entities().length}`}</text>
             </container>
-        </>
+        </container>
     )
 }
