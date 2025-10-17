@@ -20,10 +20,22 @@ export class ApplicationNode extends ProxyNode<
       node.tag !== "application" && node.tag !== "html",
       `unexpected node as child to application: ${node.tag}`,
     );
-    const child =
-      node.tag === "raw" ? TextNode.createFromRaw(node.container) : node;
-    this.container.stage.addChild(child.container);
-    return child;
+
+    if (node.tag === "raw") {
+      const child = TextNode.createFromRaw(node.container);
+      this.container.stage.addChild(child.container);
+      return child;
+    }
+
+    if (node.tag === "render-layer") {
+      const renderLayer = node.getRenderLayer();
+      invariant(renderLayer, "Encountered RenderLayerNode with no RenderLayer");
+      this.container.stage.addChild(renderLayer);
+      return;
+    }
+
+    this.container.stage.addChild(node.container);
+    return node;
   }
 
   override removeChildProxy(proxied: ProxyDomNode) {
@@ -34,6 +46,14 @@ export class ApplicationNode extends ProxyNode<
       "html",
       "application",
     );
+
+    if (proxied.tag === "render-layer") {
+      const renderLayer = proxied.getRenderLayer();
+      invariant(renderLayer, "Encountered RenderLayerNode with no RenderLayer");
+      this.container.stage.removeChild(renderLayer);
+      return;
+    }
+
     this.container.stage.removeChild(proxied.container);
   }
 

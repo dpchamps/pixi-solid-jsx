@@ -12,7 +12,7 @@ import { invariant, Maybe } from "../../utility-types.ts";
 import { ApplicationNode } from "../../pixi-jsx/proxy-dom";
 import { createTimer } from "../core/time.ts";
 import { GameLoopContextProvider } from "./GameLoopContextProvider.tsx";
-
+import { initDevtools } from "@pixi/devtools";
 export type ApplicationState = {
   application: PixiApplication;
 };
@@ -55,9 +55,10 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
   const [applicationReady] = createResource(mount, async () => {
     const app = application();
     invariant(app);
+    await initDevtools({ app: app.container });
     /**
      * @warn
-     * You must assign the ticker prior to intialization.
+     * You must assign the ticker prior to initialization.
      * Otherwise, another ticker will start and can cause (to the best of my knowledge)
      * two stage renders simultaneously.
      *

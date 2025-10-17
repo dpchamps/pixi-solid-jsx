@@ -107,6 +107,23 @@ export abstract class ProxyNode<
     this.id = getId();
   }
 
+  static attachRenderLayer(node: ProxyDomNode, renderLayer: RenderLayer) {
+    if (
+      node.tag === "container" ||
+      node.tag === "text" ||
+      node.tag === "sprite" ||
+      node.tag === "graphics"
+    ) {
+      renderLayer.attach(node.container);
+    }
+
+    for (const child of node.getChildren()) {
+      if (!child.getRenderLayer()) {
+        child.setRenderLayer(renderLayer);
+      }
+    }
+  }
+
   private addChildWithProxy(
     child: NodeType,
     proxiedChild: NodeType,
@@ -178,12 +195,15 @@ export abstract class ProxyNode<
   setParent(parent: NodeType): void {
     this.parent = parent;
     if (!this.renderLayer) {
-      this.renderLayer = parent.getRenderLayer();
+      this.setRenderLayer(parent.getRenderLayer());
     }
   }
 
   setRenderLayer(layer: Maybe<RenderLayer>) {
     this.renderLayer = layer ?? null;
+    if (layer) {
+      ProxyNode.attachRenderLayer(this as unknown as ProxyDomNode, layer);
+    }
   }
 
   setProp<T>(name: string, value: T, _prev: Maybe<T>): void {

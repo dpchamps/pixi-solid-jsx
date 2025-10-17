@@ -41,7 +41,6 @@ export const renderApplicationNode = async (
   ));
 
   const appNode = htmlNode.getChildren()[0] as ApplicationNode;
-  await appNode.initialize();
 
   return appNode.container.stage;
 };

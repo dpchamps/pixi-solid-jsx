@@ -228,14 +228,13 @@ export const Scene1 = () => {
     // })
 
     return (
-        <container>
+        <>
 
-            {/*<text>Helos</text>*/}
+            <text>Helos</text>
             <render-layer sortableChildren={true}>
                 <Index each={entityList.entities()}>
                     {
                         (props) => {
-                            debugger
                             return <container><Entity {...props()}/></container>
                         }
                     }
@@ -247,6 +246,6 @@ export const Scene1 = () => {
                 <FpsCounter zIndex={10_000}/>
                 <text y={25} zIndex={10000}>Entity Count: {`${entityList.entities().length}`}</text>
             </container>
-        </container>
+        </>
     )
 }

@@ -1,5 +1,6 @@
 import { expectNode, ProxyDomNode, ProxyNode } from "./Node.ts";
 import { RenderLayer } from "pixi.js";
+import { invariant } from "../../../utility-types.ts";
 
 export class RenderLayerNode extends ProxyNode<
   "render-layer",
@@ -7,6 +8,11 @@ export class RenderLayerNode extends ProxyNode<
   ProxyDomNode
 > {
   override renderLayer: RenderLayer;
+  private pendingChildren: Array<{
+    child: ProxyDomNode;
+    anchor: ProxyDomNode | undefined;
+  }> = [];
+
   static create() {
     return new RenderLayerNode(new RenderLayer());
   }
@@ -16,26 +22,33 @@ export class RenderLayerNode extends ProxyNode<
     this.renderLayer = renderLayer;
   }
 
+  override setParent(parent: ProxyDomNode): void {
+    super.setParent(parent);
+    invariant(this.parent, "parent cannot be undefined");
+
+    for (const { child, anchor } of this.pendingChildren) {
+      this.parent.addChildProxy(child, anchor);
+    }
+
+    this.pendingChildren = [];
+  }
+
   addChildProxy(
     child: ProxyDomNode,
     anchor: ProxyDomNode | undefined,
   ): void | ProxyDomNode {
-    if (
-      child.tag !== "render-layer" &&
-      child.tag !== "raw" &&
-      child.tag !== "application" &&
-      child.tag !== "html"
-    ) {
-      this.renderLayer.attach(child.container);
-    }
     child.setRenderLayer(this.renderLayer);
-    return this.parent?.addChildProxy(child, anchor);
+
+    if (!this.parent) {
+      this.pendingChildren.push({ child, anchor });
+      return;
+    }
+
+    return this.parent.addChildProxy(child, anchor);
   }
 
   addChildProxyUntracked(node: never): void {
-    throw new Error(
-      `RenderLayerNode Does not Support untracked children. Hint: use the parent container.`,
-    );
+    throw new Error(`RenderLayerNode Does not Support untracked children.`);
   }
 
   removeChildProxy(child: ProxyDomNode): void {

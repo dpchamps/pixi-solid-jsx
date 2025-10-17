@@ -53,7 +53,28 @@ export class ContainerNode extends ProxyNode<
       "application",
       "html",
     );
-    if (proxied.tag === "raw" || proxied.tag === "render-layer") return;
+    // Raw Nodes are transparent, there's nothing to remove from the pixi node
+    if (proxied.tag === "raw") return;
+    // RenderLayer nodes are also transparent, but their children propagate upwards
+    // So we need to remove all of their children from the parent container
+    if (proxied.tag === "render-layer") {
+      for (const child of proxied.getChildren()) {
+        if (
+          child.tag === "raw" ||
+          child.tag === "render-layer" ||
+          child.tag === "html" ||
+          child.tag === "application"
+        )
+          continue;
+        this.container.removeChild(child.container);
+      }
+      // We also need to be sure to remove the actual render layer
+      const renderLayer = proxied.getRenderLayer();
+      invariant(renderLayer);
+      this.container.removeChild(renderLayer);
+      return;
+    }
+    // Otherwise, this container is a candidate for removal
     this.container.removeChild(proxied.container);
   }
 

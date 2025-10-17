@@ -1,5 +1,10 @@
 import { describe, test, expect } from "vitest";
-import { createSignal, Show, For } from "../../solidjs-universal-renderer";
+import {
+  createSignal,
+  Show,
+  For,
+  Index,
+} from "../../solidjs-universal-renderer";
 import { Text, Container, RenderLayer, Sprite } from "pixi.js";
 import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
@@ -382,5 +387,43 @@ describe("RenderLayer node", () => {
     expect(container.children[1]).toBeInstanceOf(RenderLayer);
     expect((container.children[2] as Text).text).toBe("After Layer");
     expect((container.children[3] as Text).text).toBe("In Layer");
+  });
+
+  test("Regression: render layer not propagating", async () => {
+    const [items] = createSignal([
+      { id: "1", value: "A" },
+      { id: "2", value: "B" },
+    ]);
+
+    const EntityComponent = (props: { id: string; value: string }) => (
+      <container>
+        <text>{props.value}</text>
+      </container>
+    );
+
+    const SceneComponent = () => (
+      <container>
+        <render-layer sortableChildren={true}>
+          <Index each={items()}>
+            {(item) => (
+              <container>
+                <EntityComponent {...item()} />
+              </container>
+            )}
+          </Index>
+        </render-layer>
+      </container>
+    );
+
+    const stage = await renderApplicationNode(() => (
+      <container>
+        <SceneComponent />
+      </container>
+    ));
+
+    const outerContainer = stage.children[0] as Container;
+    const layer = outerContainer.children[0]?.children[0] as RenderLayer;
+
+    expect(layer.renderLayerChildren).toHaveLength(6);
   });
 });

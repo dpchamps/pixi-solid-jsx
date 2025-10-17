@@ -37,12 +37,9 @@ const MainStage = () => {
     })
 
     return (<GameContext.Provider value={gameState}>
-        <container>
             <Show when={sceneToggle()} fallback={<text>Scene 2</text>}>
                 <Scene1/>
             </Show>
-        </container>
-
     </GameContext.Provider>)
 }
 
