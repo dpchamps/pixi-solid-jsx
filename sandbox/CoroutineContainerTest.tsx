@@ -8,17 +8,17 @@ export const CoroutineContainerTest = () => {
     const easingFns = [linear, easeIn, easeOut, easeInOut, flip, circularIn, elasticIn]
 
     return (
-        <For each={[0, 250, 500, 750, 1000, 1250, 1500]}>
+        <For each={Array(25).fill(0).map((_, i) => i*250)}>
             {(xPos, index) =>
                     <CoroutineContainer
                         from={0.1}
                         to={0.5}
-                        easingFn={easingFns[index()]!}
-                        duration={1000}
+                        easingFn={easingFns[index()%easingFns.length]!}
+                        duration={2000}
                         replay={true}
                         delay={500}
                     >
-                        {(scale) => <sprite x={100+(xPos % 500)*2} y={Math.floor(xPos/500)*200} eventMode={'static'} texture={texture()} scale={scale()}/>}
+                        {(scale) => <sprite x={(xPos % 1000)} y={Math.floor(xPos/1000)*100} eventMode={'static'} texture={texture()} scale={scale()}/>}
                     </CoroutineContainer>
             }
         </For>

@@ -1,7 +1,7 @@
 import { onNextFrame } from "../tags/Application.tsx";
 import { lerp } from "../libs/Math.ts";
 import { createSignal } from "solid-custom-renderer/patched-types.ts";
-import { unreachable } from "../../utility-types.ts";
+import {isDefined, unreachable} from "../../utility-types.ts";
 import { createSynchronizedEffect, onEveryFrame } from "../core/query-fns.ts";
 
 export type GeneratorYieldResult =
@@ -15,7 +15,7 @@ type GeneratorContinue = { type: "GeneratorContinue" };
 type GeneratorWaitForMs = { type: "GeneratorWaitMs"; ms: number };
 type GeneratorWaitForFrames = { type: "GeneratorWaitFrames"; frames: number };
 
-export type CoroutineFn = () => Generator<GeneratorYieldResult, void, number>;
+export type CoroutineFn = () => Generator<GeneratorYieldResult, void|GeneratorYieldResult, number>;
 
 export type AsyncCoroutineFn = () => AsyncGenerator<unknown, void, number>;
 
@@ -330,6 +330,12 @@ export const startCoroutine = (fn: CoroutineFn) => {
   return { dispose, stopped };
 };
 
+type CoroutineEasingFunction = (
+    onStepCallback: (fn: (a: number, b: number) => number) => void,
+    easingFn: (x: number) => number,
+    duration: number,
+) => CoroutineFn;
+
 /**
  * Creates a specialized coroutine for smooth, eased animations over a fixed duration.
  * Provides a lerp function with pre-applied easing to animate any numeric properties.
@@ -413,7 +419,7 @@ export const startCoroutine = (fn: CoroutineFn) => {
  *     )();
  * }
  */
-export const createEasingCoroutine = (
+export const createEasingCoroutine: CoroutineEasingFunction = (
   cb: (fn: (a: number, b: number) => number) => void,
   easingFn: (x: number) => number,
   duration: number,
@@ -428,3 +434,79 @@ export const createEasingCoroutine = (
     }
   };
 };
+
+/**
+ * Creates a coroutine that automatically repeats when it completes.
+ * Each iteration creates a fresh coroutine instance, allowing for clean state resets.
+ * The repeatable coroutine transparently propagates control instructions to its executor.
+ *
+ * **When to use:**
+ * - Looping behaviors like enemy patrols or idle animations
+ * - Repeating effects like pulsing UI elements or particle emitters
+ * - State machines that cycle through states indefinitely
+ * - Any animation or behavior that should restart after completion
+ *
+ * **How it works:**
+ * 1. Calls the constructor to create a new coroutine instance
+ * 2. Executes the coroutine to completion using yield*
+ * 3. If the coroutine returns a control instruction, propagates it to the outer executor
+ * 4. If no control instruction returned, immediately starts next iteration
+ * 5. Stops only when inner coroutine explicitly returns stop() or another control instruction
+ *
+ * @param {() => CoroutineFn} constructor - Factory function that creates a fresh coroutine instance for each iteration
+ * @returns {CoroutineFn} A repeating coroutine generator function
+ *
+ * @example
+ * // Simple repeating patrol
+ * const enemyPatrol = createRepeatableCoroutine(() => function*() {
+ *     yield* moveToPosition(pointA);
+ *     yield waitMs(1000);
+ *     yield* moveToPosition(pointB);
+ *     yield waitMs(1000);
+ *     // Automatically repeats from pointA
+ * });
+ * startCoroutine(enemyPatrol);
+ *
+ * @example
+ * // Stop after condition is met
+ * const attackLoop = createRepeatableCoroutine(() => function*() {
+ *     yield* playAttackAnimation();
+ *     dealDamage();
+ *
+ *     if(enemy.health <= 0) {
+ *         return CoroutineControl.stop(); // Breaks the repeat loop
+ *     }
+ *
+ *     yield waitMs(500); // Delay between attacks
+ * });
+ *
+ * @example
+ * // Pulsing UI element
+ * const pulse = createRepeatableCoroutine(() => createEasingCoroutine(
+ *     (lerp) => {
+ *         button.scale.x = button.scale.y = lerp(1, 1.2);
+ *     },
+ *     easeInOut,
+ *     800
+ * ));
+ *
+ * @example
+ * // Controlling from outside
+ * const {dispose, stopped} = startCoroutine(
+ *     createRepeatableCoroutine(() => function*() {
+ *         sprite.rotation += 0.1;
+ *         yield CoroutineControl.continue();
+ *     })
+ * );
+ *
+ * // Later: stop the infinite rotation
+ * dispose();
+ */
+export const createRepeatableCoroutine = (constructor: () => CoroutineFn): CoroutineFn => function*() {
+  while(true){
+    const iterator = constructor();
+    const result = yield * iterator();
+
+    if(result) yield result;
+  }
+}
