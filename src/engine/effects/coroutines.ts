@@ -33,7 +33,7 @@ type TimestampState = { timeStamp: number; duration: number };
  *         if(userClickedStop()) {
  *             yield stop(); // Terminate coroutine
  *         }
- *         yield; // Wait one frame
+ *         yield CoroutineControl.continue(); // Wait one frame
  *     }
  * }
  */
@@ -249,7 +249,7 @@ const createCoroutineState = () => {
  * const moveRight = function* () {
  *     for(let i = 0; i < 100; i++) {
  *         sprite.x += 2;
- *         yield; // Wait one frame
+ *         yield CoroutineControl.continue(); // Wait one frame
  *     }
  * };
  * const {dispose} = startCoroutine(moveRight);
@@ -274,7 +274,7 @@ const createCoroutineState = () => {
  * function* smoothMove() {
  *     let totalTime = 0;
  *     while(totalTime < 2000) {
- *         const elapsed = yield; // Get elapsed ms
+ *         const elapsed = yield CoroutineControl.continue(); // Get elapsed ms
  *         sprite.x += (100 * elapsed) / 1000; // Move 100px per second
  *         totalTime += elapsed;
  *     }
@@ -309,7 +309,7 @@ export const startCoroutine = (fn: CoroutineFn) => {
   const dispose = onEveryFrame((time) => {
     if (coroutineState.isWaitingOnNextTick(time.elapsedMS)) return;
 
-    const result = iterator.next(Math.floor(time.elapsedMS));
+    const result = iterator.next(time.elapsedMS);
 
     if (result.done) return onCoroutineDone();
 
@@ -321,7 +321,7 @@ export const startCoroutine = (fn: CoroutineFn) => {
       case "GeneratorWaitMs":
         return coroutineState.waitMs(result.value.ms);
       case "GeneratorWaitFrames":
-        return coroutineState.waitFrames(result.value.frames);
+        return coroutineState.waitFrames(Math.max(result.value.frames, 1));
       default:
         return unreachable(result.value);
     }
@@ -421,7 +421,7 @@ export const createEasingCoroutine = (
   return function* () {
     let elapsed = 0;
     while (true) {
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = duration === 0 ? 1 : Math.min(elapsed / duration, 1);
       cb((a, b) => lerp(a, b, easingFn(progress)));
       if (elapsed >= duration) break;
       elapsed += yield CoroutineControl.continue();

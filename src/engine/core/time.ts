@@ -1,7 +1,6 @@
 import {
   batch,
   createSignal,
-  createStore,
   onCleanup,
 } from "solid-custom-renderer/patched-types.ts";
 import { Ticker } from "pixi.js";
@@ -25,6 +24,7 @@ export const createTicker = () => {
   return ticker;
 };
 
+// TODO: this should be computed based off of timer on the fly, rather than assuming 60fps
 const FRAME_BUDGET = 16.6;
 
 export const createTimer = (args: CreateTimerArgs) => {

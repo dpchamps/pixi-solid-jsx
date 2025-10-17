@@ -43,17 +43,14 @@ Renders To PixiJs Sprite. Takes PixiJs `SpriteOptions` as props.
 
 ```tsx
 export const ClickSpriteExample = () => {
-    const texture = createTexture("fire.png");
+    const texture = createAsset<Texture>("fire.png");
     const [scale, setScale] = createSignal(0.4);
-    const [spriteRef, setSpriteRef] = createSignal<BuildableSpriteNode>();
     const onClick = () => setScale(scale() + 0.1);
-  
+
     return (
-        <Application background={'#ecdddd'} width={500} height={500}>
-            <container>
-                <sprite eventMode={'static'} texture={texture()} onclick={onClick} scale={scale()}/>
-            </container>
-         </Application>
+        <container>
+            <sprite eventMode={'static'} texture={texture()} onclick={onClick} scale={scale()}/>
+        </container>
     )
 }
 ```

@@ -205,6 +205,34 @@ describe("startCoroutine", () => {
       expect(textNode.text).toBe("after-wait"); // Exactly 3 frames later
     });
 
+    test("waitFrames(0) should resolve immediately but stalls indefinitely", async () => {
+      const TestComponent = () => {
+        const [status, setStatus] = createSignal("start");
+
+        startCoroutine(function* () {
+          setStatus("before-wait");
+          yield waitFrames(0);
+          setStatus("after-wait");
+        });
+
+        return <text>{status()}</text>;
+      };
+
+      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
+      const textNode = stage.children[0]?.children[0];
+      invariant(textNode);
+      assert(textNode instanceof Text);
+
+      expect(textNode.text).toBe("start");
+      await ticker.tickFrames(1);
+      expect(textNode.text).toBe("before-wait");
+      await ticker.tickFrames(5);
+      // BUG: waitFrames(0) never advances; assertion documents the broken behavior
+      expect(textNode.text).toBe("after-wait");
+    });
+
     test("waitFrames(1) waits exactly one frame", async () => {
       const TestComponent = () => {
         const [x, setX] = createSignal(0);
@@ -581,5 +609,34 @@ describe("createEasingCoroutine", () => {
     await ticker.tickFrames(30);
     expect(sprite.x).toBeCloseTo(100, 0);
     expect(sprite.y).toBeCloseTo(150, 0);
+  });
+
+  test("zero-duration easing should snap to target but currently yields NaN", async () => {
+    const TestComponent = () => {
+      const [x, setX] = createSignal(0);
+
+      startCoroutine(
+        createEasingCoroutine(
+          (lerp) => {
+            setX(lerp(0, 100));
+          },
+          (t) => t,
+          0,
+        ),
+      );
+
+      return <sprite x={x()} />;
+    };
+
+    const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+      <TestComponent />
+    ));
+    const sprite = stage.children[0]?.children[0];
+    invariant(sprite);
+    assert(sprite instanceof Sprite);
+
+    await ticker.tickFrames(1);
+    // BUG: createEasingCoroutine divides by duration; a 0 duration tween propagates NaN
+    expect(sprite.x).toBe(100);
   });
 });
