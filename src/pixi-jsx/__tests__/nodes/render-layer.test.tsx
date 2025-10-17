@@ -223,9 +223,7 @@ describe("RenderLayer node", () => {
 
     const stage = await renderApplicationNode(() => (
       <render-layer>
-        <Show when={text()}>
-          {(value) => value() as unknown as any}
-        </Show>
+        <Show when={text()}>{(value) => value() as unknown as any}</Show>
       </render-layer>
     ));
 

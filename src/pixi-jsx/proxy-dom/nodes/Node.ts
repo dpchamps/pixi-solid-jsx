@@ -1,12 +1,5 @@
-import {
-  assert,
-  invariant,
-  isDefined,
-  Maybe,
-} from "../../../utility-types.ts";
-import {
-  RenderLayer,
-} from "pixi.js";
+import { assert, invariant, isDefined, Maybe } from "../../../utility-types.ts";
+import { RenderLayer } from "pixi.js";
 import { isNodeWithPixiContainer } from "./utility-node.ts";
 import { ProxyDomNode, GenericNode } from "./types.ts";
 
