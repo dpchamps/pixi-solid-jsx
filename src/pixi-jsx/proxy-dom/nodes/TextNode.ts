@@ -1,4 +1,5 @@
-import { ProxyDomNode, ProxyNode } from "./Node.ts";
+import { ProxyNode } from "./Node.ts";
+import { ProxyDomNode } from "./types.ts";
 import { Text } from "pixi.js";
 import { RawNode } from "./RawNode.ts";
 import { expectNode } from "./utility-node.ts";

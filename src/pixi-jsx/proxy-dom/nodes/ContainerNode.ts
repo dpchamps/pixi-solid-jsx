@@ -1,7 +1,8 @@
-import { ProxyDomNode, ProxyNode } from "./Node.ts";
+import { ProxyNode } from "./Node.ts";
+import { ProxyDomNode } from "./types.ts";
 import { Container } from "pixi.js";
 import { invariant } from "../../../utility-types.ts";
-import {expectNodeNot, isNodeWithPixiContainer} from "./utility-node.ts";
+import { expectNodeNot, isNodeWithPixiContainer } from "./utility-node.ts";
 
 export class ContainerNode extends ProxyNode<
   "container",
@@ -17,7 +18,9 @@ export class ContainerNode extends ProxyNode<
     if (node.tag === "raw") return;
     if (node.tag === "render-layer") return this.addRenderLayer(node);
 
-    const insertIndex = anchor ? this.resolveInsertIndex(anchor) : this.container.children.length;
+    const insertIndex = anchor
+      ? this.resolveInsertIndex(anchor)
+      : this.container.children.length;
     this.container.addChildAt(node.container, insertIndex);
 
     // RenderLayerNodes are ephemeral, it's possible this child is being attached
@@ -77,32 +80,34 @@ export class ContainerNode extends ProxyNode<
   private resolveInsertIndex(anchor: ProxyDomNode) {
     let canSelectPosition = false;
 
-    for(let index = 0; index <= this.children.length-1; index +=1){
+    for (let index = 0; index <= this.children.length - 1; index += 1) {
       const child = this.children[index];
       invariant(child);
-      const isAnchor =  child.id === anchor.id
+      const isAnchor = child.id === anchor.id;
       canSelectPosition = canSelectPosition || isAnchor;
 
       // Anchor itself is non-raw: insert at its position
-      if(child.tag !== "raw" && canSelectPosition && isAnchor) return index
+      if (child.tag !== "raw" && canSelectPosition && isAnchor) return index;
       // Found non-raw node after anchor: insert before it
-      if(child.tag !== "raw" && canSelectPosition) return index-1
+      if (child.tag !== "raw" && canSelectPosition) return index - 1;
     }
 
     return this.container.children.length;
   }
 
-  private addRenderLayer(node: Extract<ProxyDomNode, {tag: "render-layer"}>) {
+  private addRenderLayer(node: Extract<ProxyDomNode, { tag: "render-layer" }>) {
     const renderLayer = node.getRenderLayer();
     invariant(renderLayer, "Encountered RenderLayerNode with no RenderLayer");
     this.container.addChild(renderLayer);
     return;
   }
 
-  private removeRenderLayer(node: Extract<ProxyDomNode, { tag: "render-layer" }>){
+  private removeRenderLayer(
+    node: Extract<ProxyDomNode, { tag: "render-layer" }>,
+  ) {
     // ...So we need to remove all of their children from the parent container
     for (const child of node.getChildren()) {
-      if(isNodeWithPixiContainer(child)){
+      if (isNodeWithPixiContainer(child)) {
         this.container.removeChild(child.container);
       }
     }

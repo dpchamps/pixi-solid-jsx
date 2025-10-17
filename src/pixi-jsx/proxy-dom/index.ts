@@ -7,7 +7,7 @@ import { RenderLayerNode } from "./nodes/RenderLayerNode.ts";
 
 export { RawNode } from "./nodes/RawNode.ts";
 export { HtmlElementNode } from "./nodes/HtmlElementNode.ts";
-export { type ProxyDomNode } from "./nodes/Node.ts";
+export { type ProxyDomNode } from "./nodes/types.ts";
 
 export * from "./nodes/TextNode.ts";
 export * from "./nodes/ContainerNode.ts";

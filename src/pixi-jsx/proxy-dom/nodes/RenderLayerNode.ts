@@ -1,7 +1,7 @@
-import { ProxyDomNode, ProxyNode } from "./Node.ts";
+import { ProxyNode } from "./Node.ts";
+import { ProxyDomNode } from "./types.ts";
 import { RenderLayer } from "pixi.js";
 import { invariant } from "../../../utility-types.ts";
-import {expectNode} from "./utility-node.ts";
 
 export class RenderLayerNode extends ProxyNode<
   "render-layer",

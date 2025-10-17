@@ -3,55 +3,12 @@ import {
   invariant,
   isDefined,
   Maybe,
-  unimplemented,
 } from "../../../utility-types.ts";
 import {
-  Application,
-  Container,
-  Graphics,
   RenderLayer,
-  Sprite,
-  Text,
 } from "pixi.js";
-import {isNodeWithPixiContainer} from "./utility-node.ts";
-
-export type ProxyDomNode =
-  | IProxyNode<"application", Application, ProxyDomNode>
-  | IProxyNode<"html", HTMLElement, ProxyDomNode>
-  | IProxyNode<"text", Text, ProxyDomNode>
-  | IProxyNode<"container", Container, ProxyDomNode>
-  | IProxyNode<"render-layer", null, ProxyDomNode>
-  | IProxyNode<"raw", string, ProxyDomNode>
-  | IProxyNode<"sprite", Sprite, ProxyDomNode>
-  | IProxyNode<"graphics", Graphics, ProxyDomNode>;
-
-interface GenericNode extends IProxyNode<any, any, any> {}
-
-export interface IProxyNode<
-  Tag extends string,
-  Container,
-  NodeType extends GenericNode,
-> {
-  id: number;
-  tag: Tag;
-  container: Container;
-
-  addChild: (node: NodeType, anchor?: NodeType) => void;
-  removeChild: (node: NodeType) => void;
-  replaceChild: (oldNode: NodeType, newNode: NodeType) => void;
-  getParent: () => Maybe<NodeType>;
-  getChildren: () => Array<NodeType>;
-  addChildProxy: (child: NodeType, anchor?: NodeType) => NodeType | void;
-  removeChildProxy: (child: NodeType) => void;
-  setParent: (parent: NodeType) => void;
-  getRenderLayer: () => Maybe<RenderLayer>;
-  setRenderLayer: (layer: Maybe<RenderLayer>) => void;
-  setProp: <PropType>(
-    name: string,
-    value: PropType,
-    prev: Maybe<PropType>,
-  ) => void;
-}
+import { isNodeWithPixiContainer } from "./utility-node.ts";
+import { ProxyDomNode, GenericNode } from "./types.ts";
 
 // Bad foo for now
 let _id = 0;
@@ -177,9 +134,9 @@ export abstract class ProxyNode<
     this.renderLayer = layer ?? null;
     if (layer) {
       ProxyNode.attachRenderLayerRecursive(
-          // this is never _not_ a proxydomnode.
-          // could think of a better pattern,
-          // but it works
+        // this is never _not_ a proxydomnode.
+        // could think of a better pattern,
+        // but it works
         this as unknown as ProxyDomNode,
         layer,
       );

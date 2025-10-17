@@ -1,4 +1,5 @@
-import { ProxyDomNode, ProxyNode } from "./Node.ts";
+import { ProxyNode } from "./Node.ts";
+import { ProxyDomNode } from "./types.ts";
 
 export class RawNode extends ProxyNode<"raw", string, ProxyDomNode> {
   static create(value: string) {

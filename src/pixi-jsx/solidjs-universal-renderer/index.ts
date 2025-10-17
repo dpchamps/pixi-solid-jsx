@@ -4,9 +4,7 @@ import {
   createProxiedPixieContainerNode,
   ProxyDomNode,
   RawNode,
-  TextNode,
 } from "../proxy-dom";
-import { expectNode } from "../proxy-dom/nodes/Node.ts";
 
 export const {
   render,

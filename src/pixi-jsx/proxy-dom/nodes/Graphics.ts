@@ -1,5 +1,6 @@
-import { ProxyDomNode, ProxyNode } from "./Node.ts";
-import { Application, Graphics } from "pixi.js";
+import { ProxyNode } from "./Node.ts";
+import { ProxyDomNode } from "./types.ts";
+import { Graphics } from "pixi.js";
 
 export class GraphicsNode extends ProxyNode<
   "graphics",

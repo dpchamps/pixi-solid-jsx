@@ -1,5 +1,6 @@
-import { ProxyDomNode, ProxyNode } from "./Node.ts";
-import {expectNode} from "./utility-node.ts";
+import { ProxyNode } from "./Node.ts";
+import { ProxyDomNode } from "./types.ts";
+import { expectNode } from "./utility-node.ts";
 
 export class HtmlElementNode extends ProxyNode<
   "html",
