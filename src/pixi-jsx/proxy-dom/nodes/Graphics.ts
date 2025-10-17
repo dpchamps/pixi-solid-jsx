@@ -13,13 +13,13 @@ export class GraphicsNode extends ProxyNode<
 
   addChildProxy(node: ProxyDomNode) {
     throw new Error(
-      `cannot add child to sprite node (id: ${this.id}), got: ${node.tag}`,
+      `cannot add child to graphics node (id: ${this.id}), got: ${node.tag}`,
     );
   }
 
   removeChildProxy(node: ProxyDomNode) {
     throw new Error(
-      `invariant state: cannot remove child from sprite node (id: ${this.id}), got: ${node.tag}`,
+      `invariant state: cannot remove child from graphics node (id: ${this.id}), got: ${node.tag}`,
     );
   }
 
