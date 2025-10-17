@@ -1,19 +1,14 @@
-import { onNextFrame, OnNextFrameQuery } from "../tags/Application.tsx";
+import {onEveryFrame} from "../core/query-fns.ts";
 
 export const createInterval = (fn: () => void, ms: number) => {
   let current = ms;
-  return onNextFrame({
-    query: (applicationState) => {
-      return applicationState.time.elapsedMsSinceLastFrame();
-    },
-    tick: (elapsed) => {
-      current -= elapsed;
-      if (current <= 0) {
-        fn();
-        current = ms;
-      }
-    },
-  });
+  return onEveryFrame((ticker) => {
+    current -= ticker.elapsedMS;
+    if (current <= 0) {
+      fn();
+      current = ms;
+    }
+  })
 };
 
 export const createTimeout = (fn: () => void, ms: number) => {
@@ -24,8 +19,3 @@ export const createTimeout = (fn: () => void, ms: number) => {
 
   return dispose;
 };
-
-export const createRequestFramesForDuration = <Q>(
-  duration: number,
-  query: OnNextFrameQuery<Q>,
-) => {};

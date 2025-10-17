@@ -12,7 +12,7 @@ export const easeInOut = (t: number) => lerp(easeIn(t), easeOut(t), t);
 
 export const circularIn = (t: number) => 1 - Math.sqrt(1 - easeIn(t));
 
-export const elasticIn = (magnitude: number) => (t: number) => {
+export const elasticIn = (t: number, magnitude = 10) => {
   if (t === 0) return 0;
   if (t === 1) return 1;
   return (
