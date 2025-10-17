@@ -38,6 +38,12 @@ export class RenderLayerNode extends ProxyNode<
     anchor: ProxyDomNode | undefined,
   ): void | ProxyDomNode {
     child.setRenderLayer(this.renderLayer);
+    // This is not strictly necessary,
+    // Because `attachRenderLayerRecursive` is called on setParent
+    // However, it's a performance optimization
+    // For non-detached component trees, we can propagate the render layer downward once
+    // without having to do a recursive computation
+    ProxyNode.attachRenderLayer(child, this.renderLayer);
 
     if (!this.parent) {
       this.pendingChildren.push({ child, anchor });

@@ -116,6 +116,10 @@ export abstract class ProxyNode<
     ) {
       renderLayer.attach(node.container);
     }
+  }
+
+  static attachRenderLayerRecursive(node: ProxyDomNode, renderLayer: RenderLayer) {
+    ProxyNode.attachRenderLayer(node, renderLayer);
 
     for (const child of node.getChildren()) {
       if (!child.getRenderLayer()) {
@@ -202,7 +206,7 @@ export abstract class ProxyNode<
   setRenderLayer(layer: Maybe<RenderLayer>) {
     this.renderLayer = layer ?? null;
     if (layer) {
-      ProxyNode.attachRenderLayer(this as unknown as ProxyDomNode, layer);
+      ProxyNode.attachRenderLayerRecursive(this as unknown as ProxyDomNode, layer);
     }
   }
 
