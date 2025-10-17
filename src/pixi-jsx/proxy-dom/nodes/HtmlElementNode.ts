@@ -1,5 +1,5 @@
-import { expectNode, ProxyDomNode, ProxyNode } from "./Node.ts";
-import { Application } from "pixi.js";
+import { ProxyDomNode, ProxyNode } from "./Node.ts";
+import {expectNode} from "./utility-node.ts";
 
 export class HtmlElementNode extends ProxyNode<
   "html",

@@ -13,6 +13,7 @@ import {
   Sprite,
   Text,
 } from "pixi.js";
+import {isNodeWithPixiContainer} from "./utility-node.ts";
 
 export type ProxyDomNode =
   | IProxyNode<"application", Application, ProxyDomNode>
@@ -52,35 +53,6 @@ export interface IProxyNode<
   ) => void;
 }
 
-export function expectNode<
-  Node extends ProxyDomNode,
-  Tag extends ProxyDomNode["tag"],
->(
-  node: Node,
-  tag: Tag,
-  context: string,
-): asserts node is Extract<Node, { tag: Tag }> {
-  assert(
-    node.tag === tag,
-    `${context}. unexpected node: expected ${tag}, got ${node.tag}`,
-  );
-}
-
-export function expectNodeNot<
-  Node extends ProxyDomNode,
-  Tag extends ProxyDomNode["tag"],
->(
-  node: Node,
-  context: string,
-  ...tags: Tag[]
-): asserts node is Exclude<Node, { tag: Tag }> {
-  if (tags.some((tag) => node.tag === tag)) {
-    throw new Error(
-      `${context}. unexpected node ${node.tag}. cannot be: ${tags.join(",")}`,
-    );
-  }
-}
-
 // Bad foo for now
 let _id = 0;
 const getId = () => ++_id;
@@ -108,12 +80,7 @@ export abstract class ProxyNode<
   }
 
   static attachRenderLayer(node: ProxyDomNode, renderLayer: RenderLayer) {
-    if (
-      node.tag === "container" ||
-      node.tag === "text" ||
-      node.tag === "sprite" ||
-      node.tag === "graphics"
-    ) {
+    if (isNodeWithPixiContainer(node)) {
       renderLayer.attach(node.container);
     }
   }
@@ -210,6 +177,9 @@ export abstract class ProxyNode<
     this.renderLayer = layer ?? null;
     if (layer) {
       ProxyNode.attachRenderLayerRecursive(
+          // this is never _not_ a proxydomnode.
+          // could think of a better pattern,
+          // but it works
         this as unknown as ProxyDomNode,
         layer,
       );

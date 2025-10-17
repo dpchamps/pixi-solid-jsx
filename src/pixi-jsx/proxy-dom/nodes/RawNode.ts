@@ -1,5 +1,4 @@
-import { expectNode, ProxyDomNode, ProxyNode } from "./Node.ts";
-import { invariant } from "../../../utility-types.ts";
+import { ProxyDomNode, ProxyNode } from "./Node.ts";
 
 export class RawNode extends ProxyNode<"raw", string, ProxyDomNode> {
   static create(value: string) {

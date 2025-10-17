@@ -1,8 +1,8 @@
-import { ProxyNode, ProxyDomNode, expectNode, expectNodeNot } from "./Node.ts";
+import { ProxyNode, ProxyDomNode } from "./Node.ts";
 import { Application } from "pixi.js";
 import { assert, invariant } from "../../../utility-types.ts";
 import { TextNode } from "./TextNode.ts";
-import { IProxyNode } from "./Node.ts";
+import {expectNodeNot, expectNode} from "./utility-node.ts";
 
 export class ApplicationNode extends ProxyNode<
   "application",
