@@ -218,6 +218,36 @@ describe("RenderLayer node", () => {
     expect(layer.renderLayerChildren).not.toContain(outsideText);
   });
 
+  test("BUG: removing raw text child proxied through render-layer does not throw", async () => {
+    const [text, setText] = createSignal("Hello");
+
+    const stage = await renderApplicationNode(() => (
+      <render-layer>
+        <Show when={text()}>
+          {(value) => value() as unknown as any}
+        </Show>
+      </render-layer>
+    ));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(stage.children.length).toBe(2);
+    expect(stage.children[0]).toBeInstanceOf(RenderLayer);
+    expect(stage.children[1]).toBeInstanceOf(Text);
+
+    let caught: unknown;
+    try {
+      setText("");
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeUndefined();
+    expect(stage.children.length).toBe(1);
+    expect(stage.children[0]).toBeInstanceOf(RenderLayer);
+  });
+
   test("deeply nested children all inherit and attach to layer", async () => {
     const stage = await renderApplicationNode(() => (
       <container>

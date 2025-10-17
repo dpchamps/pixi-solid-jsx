@@ -28,7 +28,7 @@ export class RenderLayerNode extends ProxyNode<
     invariant(this.parent, "parent cannot be undefined");
 
     for (const { child, anchor } of this.pendingChildren) {
-      this.parent.addChildProxy(child, anchor);
+      this.parent.addChild(child, anchor);
     }
 
     this.pendingChildren = [];
@@ -51,7 +51,11 @@ export class RenderLayerNode extends ProxyNode<
       return;
     }
 
-    return this.parent.addChildProxy(child, anchor);
+    return this.parent.addChild(child, anchor);
+  }
+
+  override addChild(node: ProxyDomNode, anchor?: ProxyDomNode) {
+    super.addChild(node, anchor);
   }
 
   addChildProxyUntracked(node: never): void {
@@ -60,7 +64,12 @@ export class RenderLayerNode extends ProxyNode<
 
   removeChildProxy(child: ProxyDomNode): void {
     child.setRenderLayer(undefined);
-    return this.parent?.removeChildProxy(child);
+    return this.parent?.removeChild(child);
+  }
+
+  override removeChild(node: ProxyDomNode) {
+    node.setRenderLayer(undefined);
+    super.removeChild(node);
   }
 
   removeChildProxyUntracked(node: never): void {
