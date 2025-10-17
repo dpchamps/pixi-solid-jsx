@@ -21,23 +21,8 @@ export class ContainerNode extends ProxyNode<
       return;
     }
 
-    // find the index of the next nonraw node from anchor
-    const anchorIndex = anchor
-      ? this.children.findIndex((childNode) => childNode.id === anchor.id)
-      : -1;
-    const insertIndex = anchor
-      ? this.children.findIndex(
-          (childNode, idx) => childNode.tag !== "raw" && idx >= anchorIndex,
-        )
-      : -1;
-    const finalIndex =
-      insertIndex === -1
-        ? this.container.children.length
-        : insertIndex !== anchorIndex
-          ? insertIndex - 1
-          : insertIndex;
-
-    this.container.addChildAt(node.container, finalIndex);
+    const insertIndex = anchor ? this.resolveInsertIndex(anchor) : this.container.children.length;
+    this.container.addChildAt(node.container, insertIndex);
 
     // RenderLayerNodes are ephemeral, it's possible this child is being attached
     // _from_ a RenderLayerNode, in which case, we don't want to move it.
@@ -96,5 +81,35 @@ export class ContainerNode extends ProxyNode<
         this.container.children.push(untracked);
       }
     }
+  }
+
+  /**
+   * Resolves the insertion index in the container for a new child, given an anchor node.
+   *
+   * Finds the first non-raw sibling at or after the anchor in this.children and returns
+   * the appropriate insertion index:
+   * - If the anchor itself is non-raw, returns its index
+   * - If a non-raw sibling exists after the anchor, returns (that sibling's index - 1)
+   * - If no non-raw sibling exists, returns the end of the container
+   *
+   * @param anchor - The reference node to insert relative to
+   * @returns The index to use with container.addChildAt()
+   */
+  private resolveInsertIndex(anchor: ProxyDomNode) {
+    let canSelectPosition = false;
+
+    for(let index = 0; index <= this.children.length-1; index +=1){
+      const child = this.children[index];
+      invariant(child);
+      const isAnchor =  child.id === anchor.id
+      canSelectPosition = canSelectPosition || isAnchor;
+
+      // Anchor itself is non-raw: insert at its position
+      if(child.tag !== "raw" && canSelectPosition && isAnchor) return index
+      // Found non-raw node after anchor: insert before it
+      if(child.tag !== "raw" && canSelectPosition) return index-1
+    }
+
+    return this.container.children.length;
   }
 }
