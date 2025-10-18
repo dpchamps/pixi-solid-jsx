@@ -15,7 +15,7 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "src/**/": "prettier --write"
+    "src/**/*": "prettier --write"
   },
   "type": "module",
   "files": [
