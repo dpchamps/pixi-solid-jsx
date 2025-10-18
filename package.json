@@ -1,5 +1,5 @@
 {
-  "name": "sylph",
+  "name": "sylph-jsx",
   "version": "0.1.0",
   "description": "A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences.",
   "main": "./dist/index.js",

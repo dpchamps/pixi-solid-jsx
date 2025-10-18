@@ -11,7 +11,7 @@ Sprites, Pixi.js's... A reactive framework that's lighter than air.
 ## Installation
 
 ```bash
-npm install sylph
+npm install sylph-jsx
 ```
 
 Peer dependencies:
