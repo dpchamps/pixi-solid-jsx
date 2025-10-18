@@ -1,5 +1,5 @@
 import { Texture, Assets } from "pixi.js";
-import { JSX } from "../../pixi-jsx/jsx/jsx-runtime.ts";
+import { JSX } from "../../../pixi-jsx/jsx/jsx-runtime.ts";
 import {
   createContext,
   createStore,
