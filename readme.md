@@ -19,6 +19,14 @@ Peer dependencies:
 - pixi.js@8.14.0
 - solid-js@1.9.4
 
+## Development
+
+```bash 
+npm install
+npm run test # run test suite with watch, show coverage
+npm run dev # run the sandbox app
+```
+
 ## Quick start
 
 ```tsx
