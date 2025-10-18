@@ -1,5 +1,11 @@
 import { lerp } from "./Math.ts";
 
+type BaseEasingFunction = (t: number) => number;
+
+type EasingFunctionMagnitude = (t: number, magnitude?: number) => number;
+
+export type EasingFunction = BaseEasingFunction|EasingFunctionMagnitude;
+
 export const linear = (t: number) => t;
 
 export const easeIn = (t: number) => t * t;
@@ -12,7 +18,7 @@ export const easeInOut = (t: number) => lerp(easeIn(t), easeOut(t), t);
 
 export const circularIn = (t: number) => 1 - Math.sqrt(1 - easeIn(t));
 
-export const elasticIn = (t: number, magnitude = 10) => {
+export const elasticIn = (t: number, magnitude = 5) => {
   if (t === 0) return 0;
   if (t === 1) return 1;
   return (

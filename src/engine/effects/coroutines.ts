@@ -8,12 +8,14 @@ export type GeneratorYieldResult =
   | GeneratorStop
   | GeneratorWaitForMs
   | GeneratorWaitForFrames
-  | GeneratorContinue;
+  | GeneratorContinue
+  | GeneratorPause;
 
 type GeneratorStop = { type: "GeneratorStop" };
 type GeneratorContinue = { type: "GeneratorContinue" };
 type GeneratorWaitForMs = { type: "GeneratorWaitMs"; ms: number };
 type GeneratorWaitForFrames = { type: "GeneratorWaitFrames"; frames: number };
+type GeneratorPause = {type: "GeneratorPause"};
 
 export type CoroutineFn = () => Generator<GeneratorYieldResult, void|GeneratorYieldResult, number>;
 
@@ -194,16 +196,18 @@ const isInWaitingState = (
 
 /**
  * Factory function that creates a stateful coroutine wait manager.
- * Encapsulates both time-based and frame-based wait state tracking.
- * Used internally by startCoroutine to manage wait operations.
+ * Encapsulates both time-based and frame-based wait state tracking, plus pause state.
+ * Used internally by startCoroutine to manage wait operations and pause/resume functionality.
  *
+ * @param {boolean} paused - Initial pause state
  * @returns {Object} State manager with methods for wait control:
  *   - waitMs: Initializes a millisecond-based wait
  *   - waitFrames: Initializes a frame-based wait
- *   - isWaitingOnNextTick: Updates and checks if any wait is active
+ *   - setPause: Sets the pause state (true = paused, false = running)
+ *   - isWaitingOnNextTick: Updates and checks if any wait is active or coroutine is paused
  * @private
  */
-const createCoroutineState = () => {
+const createCoroutineState = (paused: boolean) => {
   let timeStampState: TimestampState | null = null;
   let frameCounter: number | null = null;
   return {
@@ -213,13 +217,16 @@ const createCoroutineState = () => {
     waitFrames: (frames: number) => {
       frameCounter = initializeCounterState(frames);
     },
+    setPause: (nextPause: boolean) => {
+      paused = nextPause
+    },
     isWaitingOnNextTick: (elapsedMsSinceLastFrame: number) => {
       timeStampState = getNextTimeStampState(
         timeStampState,
         elapsedMsSinceLastFrame,
       );
       frameCounter = getNextCounterState(frameCounter);
-      return isInWaitingState(timeStampState, frameCounter);
+      return paused || isInWaitingState(timeStampState, frameCounter);
     },
   };
 };
@@ -239,10 +246,17 @@ const createCoroutineState = () => {
  * 2. Each frame, passes elapsed milliseconds since last frame to generator
  * 3. Handles wait instructions (waitMs, waitFrames, stop)
  * 4. Continues until generator completes or explicitly stopped
+ * 5. Can be paused and resumed without losing state
  *
  *
  * @param {CoroutineFn} fn - Generator function to execute. Receives elapsed ms as input on each yield.
- * @returns {{dispose: () => void, stopped: Accessor<boolean>}} Object with disposal function and stopped signal
+ * @param {boolean} [paused=false] - If true, coroutine starts in paused state and won't execute until resume() is called
+ * @returns {{dispose: () => void, stopped: Accessor<boolean>, pause: () => void, resume: () => void}}
+ *   Object with:
+ *   - dispose: Function to stop and cleanup the coroutine
+ *   - stopped: Reactive signal indicating if coroutine has completed
+ *   - pause: Function to pause coroutine execution
+ *   - resume: Function to resume a paused coroutine
  *
  * @example
  * // Simple movement coroutine
@@ -281,6 +295,25 @@ const createCoroutineState = () => {
  * }
  *
  * @example
+ * // Pause and resume control
+ * const {pause, resume, dispose} = startCoroutine(function*() {
+ *     while(true) {
+ *         sprite.rotation += 0.05;
+ *         yield CoroutineControl.continue();
+ *     }
+ * });
+ *
+ * // Pause on user input
+ * button.on('pointerdown', () => pause());
+ * button.on('pointerup', () => resume());
+ *
+ * @example
+ * // Start paused, resume later
+ * const animation = startCoroutine(complexAnimation, true);
+ * // ... later when ready
+ * animation.resume();
+ *
+ * @example
  * // Cleanup on component unmount
  * const Component = () => {
  *     const {dispose, stopped} = startCoroutine(myCoroutine);
@@ -296,9 +329,9 @@ const createCoroutineState = () => {
  *     });
  * }
  */
-export const startCoroutine = (fn: CoroutineFn) => {
+export const startCoroutine = (fn: CoroutineFn, paused: boolean = false) => {
   const iterator = fn();
-  const coroutineState = createCoroutineState();
+  const coroutineState = createCoroutineState(paused);
   const [stopped, setStopped] = createSignal(false);
 
   const onCoroutineDone = () => {
@@ -322,12 +355,19 @@ export const startCoroutine = (fn: CoroutineFn) => {
         return coroutineState.waitMs(result.value.ms);
       case "GeneratorWaitFrames":
         return coroutineState.waitFrames(Math.max(result.value.frames, 1));
+      case "GeneratorPause":
+        return coroutineState.setPause(true)
       default:
         return unreachable(result.value);
     }
   });
 
-  return { dispose, stopped };
+  return {
+    dispose,
+    stopped,
+    pause: () => coroutineState.setPause(true),
+    resume: () => coroutineState.setPause(false),
+  };
 };
 
 type CoroutineEasingFunction = (
@@ -509,4 +549,162 @@ export const createRepeatableCoroutine = (constructor: () => CoroutineFn): Corou
 
     if(result) yield result;
   }
+}
+
+/**
+ * Chains multiple coroutines to execute sequentially.
+ * Each coroutine runs to completion before the next one starts.
+ *
+ * **When to use:**
+ * - Complex animation sequences with distinct phases
+ * - Multi-step behaviors that need to execute in order
+ * - Composing reusable coroutine building blocks
+ * - Creating animation timelines
+ *
+ * **How it works:**
+ * 1. Executes first coroutine to completion using yield*
+ * 2. Proceeds to next coroutine immediately after previous completes
+ * 3. Continues until all coroutines have executed
+ * 4. Can be stopped early if any coroutine returns stop()
+ *
+ * @param {...CoroutineFn[]} coroutines - Variable number of coroutine functions to chain
+ * @returns {CoroutineFn} A single coroutine that executes all provided coroutines in sequence
+ *
+ * @example
+ * // Simple animation sequence
+ * const moveAndFade = chainCoroutine(
+ *     createEasingCoroutine(
+ *         (lerp) => sprite.x = lerp(0, 100),
+ *         easeOut,
+ *         500
+ *     ),
+ *     createEasingCoroutine(
+ *         (lerp) => sprite.alpha = lerp(1, 0),
+ *         easeIn,
+ *         300
+ *     )
+ * );
+ * startCoroutine(moveAndFade);
+ *
+ * @example
+ * // Multi-step game sequence
+ * const attackSequence = chainCoroutine(
+ *     // Wind up
+ *     createEasingCoroutine(
+ *         (lerp) => {
+ *             sprite.scale.x = lerp(1, 1.2);
+ *             sprite.scale.y = lerp(1, 0.8);
+ *         },
+ *         easeIn,
+ *         200
+ *     ),
+ *     // Wait
+ *     waitMsCoroutine(100),
+ *     // Attack
+ *     function* () {
+ *         dealDamage();
+ *         playSound('attack');
+ *         yield CoroutineControl.continue();
+ *     },
+ *     // Recover
+ *     createEasingCoroutine(
+ *         (lerp) => {
+ *             sprite.scale.x = lerp(1.2, 1);
+ *             sprite.scale.y = lerp(0.8, 1);
+ *         },
+ *         easeOut,
+ *         300
+ *     )
+ * );
+ *
+ * @example
+ * // Conditional early exit
+ * const patrolSequence = chainCoroutine(
+ *     moveToPosition(pointA),
+ *     waitMsCoroutine(1000),
+ *     function* () {
+ *         if (playerDetected()) {
+ *             return CoroutineControl.stop(); // Stops entire chain
+ *         }
+ *         yield CoroutineControl.continue();
+ *     },
+ *     moveToPosition(pointB)
+ * );
+ */
+export const chainCoroutine = (...coroutines: CoroutineFn[]): CoroutineFn => function* (){
+  for(const coroutine of coroutines) {
+    yield * coroutine();
+  }
+};
+
+/**
+ * Creates a coroutine that waits for a specified number of frames.
+ * Convenience wrapper around waitFrames() for use in coroutine composition.
+ *
+ * **When to use:**
+ * - When chaining coroutines and need a frame-based delay
+ * - Building reusable animation sequences
+ * - Frame-perfect timing requirements
+ * - Composing with other coroutine utilities
+ *
+ * @param {number} frames - Number of frames to wait
+ * @returns {CoroutineFn} A coroutine that waits for the specified frames
+ *
+ * @example
+ * // Simple delay in a chain
+ * const sequence = chainCoroutine(
+ *     doSomething,
+ *     waitFrameCoroutine(30), // Wait 30 frames (0.5s at 60fps)
+ *     doSomethingElse
+ * );
+ *
+ * @example
+ * // Frame-perfect combo timing
+ * const comboAttack = chainCoroutine(
+ *     lightPunch,
+ *     waitFrameCoroutine(8),  // Exact 8-frame window
+ *     heavyKick,
+ *     waitFrameCoroutine(12),
+ *     specialMove
+ * );
+ */
+export const waitFrameCoroutine = (frames: number): CoroutineFn => function* () {
+  yield CoroutineControl.waitFrames(frames)
+}
+
+/**
+ * Creates a coroutine that waits for a specified duration in milliseconds.
+ * Convenience wrapper around waitMs() for use in coroutine composition.
+ *
+ * **When to use:**
+ * - When chaining coroutines and need a time-based delay
+ * - Building reusable animation sequences
+ * - Time-based delays that should be framerate-independent
+ * - Composing with other coroutine utilities
+ *
+ * @param {number} ms - Duration to wait in milliseconds
+ * @returns {CoroutineFn} A coroutine that waits for the specified duration
+ *
+ * @example
+ * // Simple delay in a chain
+ * const notification = chainCoroutine(
+ *     showMessage,
+ *     waitMsCoroutine(3000), // Show for 3 seconds
+ *     hideMessage
+ * );
+ *
+ * @example
+ * // Complex sequence with mixed delays
+ * const cutscene = chainCoroutine(
+ *     fadeIn,
+ *     waitMsCoroutine(500),
+ *     showDialogue("Hello"),
+ *     waitMsCoroutine(2000),
+ *     showDialogue("Welcome"),
+ *     waitMsCoroutine(2000),
+ *     fadeOut
+ * );
+ */
+export const waitMsCoroutine = (ms: number): CoroutineFn => function* () {
+  yield CoroutineControl.waitMs(ms)
 }

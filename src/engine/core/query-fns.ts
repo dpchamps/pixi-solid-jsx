@@ -4,6 +4,7 @@ import {
   getOwner,
   onCleanup,
   runWithOwner,
+  createUniqueId
 } from "solid-custom-renderer/index.ts";
 import { useGameLoopContext } from "./game-loop-context.ts";
 import { Ticker } from "pixi.js";
@@ -48,6 +49,10 @@ function createEffectOnNextFrame<QueryResult>(
 ) {
   const gameLoopContext = useGameLoopContext();
   let dispose = () => {};
+  // Create a new root here to lift the dispose function up
+  // It's desirable to allow for the caller to dispose this context
+  // manually.
+  // Effectively, this disposal is a `cancelNextFrame`
   createRoot((_dispose) => {
     dispose = _dispose;
     createComputed(() => {
@@ -64,9 +69,12 @@ function createEffectOnNextFrame<QueryResult>(
     });
   });
 
-  onCleanup(() => {
-    dispose();
-  });
+  // Wire the lifted dispose function into the cleanup
+  // of the owner context, so we don't leave these roots dangling.
+  // The consequences of this would be effects left in the
+  // scheduler for one scheduled frame longer than
+  // expected
+  onCleanup(dispose);
 
   return dispose;
 }
@@ -142,7 +150,7 @@ export const createSynchronizedEffect = <T>(
   owner = getOwner(),
 ) =>
   createEffectOnNextFrame({
-    id: crypto.randomUUID(),
+    id: createUniqueId(),
     query: () => query(),
     effect: (queryResult, ticker) =>
       runWithOwner(owner, () => effect(queryResult, ticker)),
@@ -210,7 +218,7 @@ export const createSynchronizedEffect = <T>(
  */
 export const onEveryFrame = (fn: (ticker: Ticker) => void) =>
   createEffectOnNextFrame({
-    id: crypto.randomUUID(),
+    id: createUniqueId(),
     query: (frameCount) => {
       frameCount();
     },
