@@ -10,7 +10,7 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             enabled: true,
-            exclude: ["src/__tests__/**/*", 'sandbox/**/*', "vitest.config.ts"]
+            exclude: ["src/__tests__/**/*", "vite*.config.ts", "dist", 'sandbox/**/*', "vitest.config.ts", "src/**/deprecated/**"]
         },
         fakeTimers: {
             toFake: [...configDefaults.fakeTimers.toFake || [], 'performance']

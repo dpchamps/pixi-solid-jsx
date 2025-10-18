@@ -11,20 +11,32 @@
     "build:runtime": "tsc -b ./tsconfig.jsx-runtime.json",
     "fmt": "prettier --write \"src/**/*\"",
     "typecheck": "tsc --noEmit",
-    "analyze-bundle": "npx vite-bundle-analyzer"
+    "analyze-bundle": "npx vite-bundle-analyzer",
+    "prepare": "husky"
   },
   "type": "module",
   "files": [
     "dist",
     "README.md"
   ],
-  "keywords": ["typescript", "jsx", "pixi.js", "solidjs", "pixi", "solid", "reactive", "signal", "gamedev"],
+  "keywords": [
+    "typescript",
+    "jsx",
+    "pixi.js",
+    "solidjs",
+    "pixi",
+    "solid",
+    "reactive",
+    "signal",
+    "gamedev"
+  ],
   "author": "me@davecampion.com",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.7.2",
     "@vitest/coverage-v8": "^3.2.4",
     "canvas": "^3.2.0",
+    "husky": "^9.1.7",
     "jsdom": "^27.0.0",
     "pixi.js": "8.14.0",
     "prettier": "^3.6.2",

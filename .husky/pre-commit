@@ -1,0 +1,5 @@
+added_files=$(git diff --name-only --cached --diff-filter=d)
+
+npm run fmt
+
+git add ${added_files}
