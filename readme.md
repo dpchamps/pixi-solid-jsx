@@ -115,7 +115,7 @@ Wrap a subtree in a Pixi `RenderLayer`. Useful for independent z-sorting, compos
 </render-layer>
 ```
 
-## Frame-aware query functions (src/engine/core/query-fns.ts)
+## Frame-aware query functions [src/engine/core/query-fns.ts](./src/engine/core/query-fns.ts)
 
 ### createSynchronizedEffect(query, effect, owner?)
 
