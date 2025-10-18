@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { createSignal, createMemo } from "../../solidjs-universal-renderer";
-import { Text, Container } from "pixi.js";
+import { Container } from "pixi.js";
 import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 
 describe("nested reactivity", () => {

@@ -232,7 +232,7 @@ describe("PixiExternalContainer", () => {
     nestedChild.label = "nested";
     firstContainer.addChild(nestedChild);
 
-    const stage = await renderApplicationNode(() => (
+    await renderApplicationNode(() => (
       <PixiExternalContainer container={container()} />
     ));
 

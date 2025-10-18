@@ -1,12 +1,4 @@
-import {
-  ColorSource,
-  FillInput,
-  FillStyle,
-  Graphics,
-  GraphicsContext,
-  GraphicsOptions,
-  StrokeInput,
-} from "pixi.js";
+import { FillInput, Graphics, GraphicsContext, GraphicsOptions } from "pixi.js";
 
 type GFXOptions = GraphicsOptions | GraphicsContext;
 

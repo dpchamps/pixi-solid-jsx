@@ -2,11 +2,10 @@ import { describe, test, expect } from "vitest";
 import { Container } from "pixi.js";
 import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
 import { ContainerNode } from "../../proxy-dom";
-import { invariant } from "../../../utility-types";
 
 describe("untracked child operations", () => {
   test("addChildProxyUntracked adds to PixiJS but not tracked children", async () => {
-    const stage = await renderApplicationNode(() => (
+    await renderApplicationNode(() => (
       <container>
         <text>Tracked Child</text>
       </container>

@@ -139,7 +139,6 @@ describe("startCoroutine", () => {
     test("pauses execution for at least the number of specified ms but sometimes more than", async () => {
       const TestComponent = () => {
         const [status, setStatus] = createSignal("start");
-        const frameMs = 17;
         // one more than 17*2,
         const waitForMs = 35;
 

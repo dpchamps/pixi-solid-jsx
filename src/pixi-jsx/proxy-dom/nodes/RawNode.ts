@@ -6,7 +6,7 @@ export class RawNode extends ProxyNode<"raw", string, ProxyDomNode> {
     return new RawNode("raw", value);
   }
 
-  override replaceChild(value: ProxyDomNode) {
+  override replaceChild(_value: ProxyDomNode) {
     throw new Error(`cannot replace child on raw node.`);
   }
 

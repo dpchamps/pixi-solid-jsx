@@ -10,12 +10,12 @@ describe("createSynchronizedEffect", () => {
   describe("basic reactivity", () => {
     test("signal changes trigger effect on next frame", async () => {
       const TestComponent = () => {
-        const [x, setX] = createSignal(0);
+        const [x] = createSignal(0);
         const [effectRan, setEffectRan] = createSignal(false);
 
         createSynchronizedEffect(
           () => x(),
-          (value) => {
+          () => {
             setEffectRan(true);
           },
         );
@@ -110,7 +110,7 @@ describe("createSynchronizedEffect", () => {
     });
 
     test("updates only when signals update, otherwise does not fire", async () => {
-      const [x, setX] = createSignal(100);
+      const [x] = createSignal(100);
       const mockFn = vi.fn();
       const TestComponent = () => {
         const [receivedValue, setReceivedValue] = createSignal(0);

@@ -15,7 +15,7 @@ export class TextNode extends ProxyNode<"text", Text, ProxyDomNode> {
     return node;
   }
 
-  addChildProxy(node: ProxyDomNode, anchor?: ProxyDomNode): void {
+  addChildProxy(node: ProxyDomNode, _anchor?: ProxyDomNode): void {
     expectNode(node, "raw", `unexpect tag for text`);
   }
 

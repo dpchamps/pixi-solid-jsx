@@ -58,7 +58,7 @@ export class RenderLayerNode extends ProxyNode<
     super.addChild(node, anchor);
   }
 
-  addChildProxyUntracked(node: never): void {
+  addChildProxyUntracked(_node: never): void {
     throw new Error(`RenderLayerNode Does not Support untracked children.`);
   }
 
@@ -72,7 +72,7 @@ export class RenderLayerNode extends ProxyNode<
     super.removeChild(node);
   }
 
-  removeChildProxyUntracked(node: never): void {
+  removeChildProxyUntracked(_node: never): void {
     throw new Error(
       `RenderLayerNode Does not Support untracked children. Hint: use the parent container.`,
     );

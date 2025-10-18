@@ -1,8 +1,7 @@
-import { onNextFrame } from "../tags/Application.tsx";
 import { lerp } from "../libs/Math.ts";
 import { createSignal } from "solid-custom-renderer/patched-types.ts";
-import { isDefined, unreachable } from "../../utility-types.ts";
-import { createSynchronizedEffect, onEveryFrame } from "../core/query-fns.ts";
+import { unreachable } from "../../utility-types.ts";
+import { onEveryFrame } from "../core/query-fns.ts";
 
 export type GeneratorYieldResult =
   | GeneratorStop

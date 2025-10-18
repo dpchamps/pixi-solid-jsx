@@ -10,7 +10,7 @@
     "build:core": "vite build",
     "build:runtime": "tsc -b ./tsconfig.jsx-runtime.json",
     "fmt": "prettier --write \"src/**/*\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "analyze-bundle": "npx vite-bundle-analyzer",
     "prepare": "husky"
   },
