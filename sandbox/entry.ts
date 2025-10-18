@@ -8,7 +8,7 @@ const main = async () => {
     const start = performance.now();
     console.log("rendering...")
     // renderRoot(Scene1, document.body)
-    renderRoot(Game, document.body)
+    renderRoot(Main, document.body)
     console.log(`rendered ${performance.now()-start}`)
 }
 

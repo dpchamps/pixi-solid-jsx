@@ -14,8 +14,6 @@ import { ContainerIntrinsicProps } from "../../pixi-jsx/jsx/jsx-node";
  * Allows you to inject containers created outside of JSX into the reactive scene graph.
  *
  * ## When to Use
- * - Third-party PixiJS libraries that return pre-built Container instances
- * - Gradual migration from imperative PixiJS code to declarative patterns
  * - Advanced container control requiring fine-grained lifecycle management
  * - Dynamic container sourcing from external systems (plugins, procedural generation, etc.)
  *

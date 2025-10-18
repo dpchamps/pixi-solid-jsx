@@ -3,9 +3,9 @@ import {Scene1} from "./Scene1.tsx";
 import {Controller, createController} from "./createController.ts";
 import {invariant} from "../../src/utility-types.ts";
 import {Show, createContext, useContext, createEffect, createMemo} from "../../src/pixi-jsx/solidjs-universal-renderer";
-import {BasicTest} from "../BasicTest.tsx";
-import {ClickSpriteExample} from "../ClickSpriteExample.tsx";
-import {CoroutineContainerTest} from "../CoroutineContainerTest.tsx";
+import {BasicExample} from "../readme-examples/BasicExample.tsx";
+import {ClickSpriteExample} from "../readme-examples/ClickSpriteExample.tsx";
+import {BasicReactivityLoadTest} from "../readme-examples/BasicReactivityLoadTest.tsx";
 
 export type GameState = {
     controller: Controller
@@ -48,7 +48,7 @@ const MainStage = () => {
 export const Game = () => {
     return (
         <Application background={'#ecdddd'} width={window.innerWidth} height={window.innerHeight}>
-            <CoroutineContainerTest/>
+            <BasicReactivityLoadTest/>
         </Application>
     )
 }

@@ -1,7 +1,7 @@
 {
-  "name": "pixi-jsx",
-  "version": "0.0.1",
-  "description": "",
+  "name": "sylph",
+  "version": "0.1.0",
+  "description": "A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences.",
   "main": "index.js",
   "scripts": {
     "test": "vitest",
@@ -14,8 +14,8 @@
     "analyze-bundle": "npx vite-bundle-analyzer"
   },
   "type": "module",
-  "keywords": [],
-  "author": "",
+  "keywords": ["typescript", "jsx", "pixi.js", "solidjs", "pixi", "solid", "reactive", "signal", "gamedev"],
+  "author": "me@davecampion.com",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.7.2",
