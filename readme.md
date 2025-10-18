@@ -6,7 +6,9 @@ A lightweight, SolidJS-powered runtime for building declarative PixiJS experienc
 
 Sprites, Pixi.js's... A reactive framework that's lighter than air.
 
-> **Project status:** 0.x pre-release. APIs are still settling and may change between minor versions.
+## Status
+
+The framework is fully-functional, but APIs are subject to change.
 
 ## Installation
 
