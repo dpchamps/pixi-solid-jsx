@@ -1,7 +1,7 @@
 import { onNextFrame } from "../tags/Application.tsx";
 import { lerp } from "../libs/Math.ts";
 import { createSignal } from "solid-custom-renderer/patched-types.ts";
-import {isDefined, unreachable} from "../../utility-types.ts";
+import { isDefined, unreachable } from "../../utility-types.ts";
 import { createSynchronizedEffect, onEveryFrame } from "../core/query-fns.ts";
 
 export type GeneratorYieldResult =
@@ -15,9 +15,13 @@ type GeneratorStop = { type: "GeneratorStop" };
 type GeneratorContinue = { type: "GeneratorContinue" };
 type GeneratorWaitForMs = { type: "GeneratorWaitMs"; ms: number };
 type GeneratorWaitForFrames = { type: "GeneratorWaitFrames"; frames: number };
-type GeneratorPause = {type: "GeneratorPause"};
+type GeneratorPause = { type: "GeneratorPause" };
 
-export type CoroutineFn = () => Generator<GeneratorYieldResult, void|GeneratorYieldResult, number>;
+export type CoroutineFn = () => Generator<
+  GeneratorYieldResult,
+  void | GeneratorYieldResult,
+  number
+>;
 
 export type AsyncCoroutineFn = () => AsyncGenerator<unknown, void, number>;
 
@@ -218,7 +222,7 @@ const createCoroutineState = (paused: boolean) => {
       frameCounter = initializeCounterState(frames);
     },
     setPause: (nextPause: boolean) => {
-      paused = nextPause
+      paused = nextPause;
     },
     isWaitingOnNextTick: (elapsedMsSinceLastFrame: number) => {
       timeStampState = getNextTimeStampState(
@@ -356,7 +360,7 @@ export const startCoroutine = (fn: CoroutineFn, paused: boolean = false) => {
       case "GeneratorWaitFrames":
         return coroutineState.waitFrames(Math.max(result.value.frames, 1));
       case "GeneratorPause":
-        return coroutineState.setPause(true)
+        return coroutineState.setPause(true);
       default:
         return unreachable(result.value);
     }
@@ -371,9 +375,9 @@ export const startCoroutine = (fn: CoroutineFn, paused: boolean = false) => {
 };
 
 type CoroutineEasingFunction = (
-    onStepCallback: (fn: (a: number, b: number) => number) => void,
-    easingFn: (x: number) => number,
-    duration: number,
+  onStepCallback: (fn: (a: number, b: number) => number) => void,
+  easingFn: (x: number) => number,
+  duration: number,
 ) => CoroutineFn;
 
 /**
@@ -542,14 +546,17 @@ export const createEasingCoroutine: CoroutineEasingFunction = (
  * // Later: stop the infinite rotation
  * dispose();
  */
-export const createRepeatableCoroutine = (constructor: () => CoroutineFn): CoroutineFn => function*() {
-  while(true){
-    const iterator = constructor();
-    const result = yield * iterator();
+export const createRepeatableCoroutine = (
+  constructor: () => CoroutineFn,
+): CoroutineFn =>
+  function* () {
+    while (true) {
+      const iterator = constructor();
+      const result = yield* iterator();
 
-    if(result) yield result;
-  }
-}
+      if (result) yield result;
+    }
+  };
 
 /**
  * Chains multiple coroutines to execute sequentially.
@@ -631,11 +638,12 @@ export const createRepeatableCoroutine = (constructor: () => CoroutineFn): Corou
  *     moveToPosition(pointB)
  * );
  */
-export const chainCoroutine = (...coroutines: CoroutineFn[]): CoroutineFn => function* (){
-  for(const coroutine of coroutines) {
-    yield * coroutine();
-  }
-};
+export const chainCoroutine = (...coroutines: CoroutineFn[]): CoroutineFn =>
+  function* () {
+    for (const coroutine of coroutines) {
+      yield* coroutine();
+    }
+  };
 
 /**
  * Creates a coroutine that waits for a specified number of frames.
@@ -668,9 +676,10 @@ export const chainCoroutine = (...coroutines: CoroutineFn[]): CoroutineFn => fun
  *     specialMove
  * );
  */
-export const waitFrameCoroutine = (frames: number): CoroutineFn => function* () {
-  yield CoroutineControl.waitFrames(frames)
-}
+export const waitFrameCoroutine = (frames: number): CoroutineFn =>
+  function* () {
+    yield CoroutineControl.waitFrames(frames);
+  };
 
 /**
  * Creates a coroutine that waits for a specified duration in milliseconds.
@@ -705,6 +714,7 @@ export const waitFrameCoroutine = (frames: number): CoroutineFn => function* () 
  *     fadeOut
  * );
  */
-export const waitMsCoroutine = (ms: number): CoroutineFn => function* () {
-  yield CoroutineControl.waitMs(ms)
-}
+export const waitMsCoroutine = (ms: number): CoroutineFn =>
+  function* () {
+    yield CoroutineControl.waitMs(ms);
+  };

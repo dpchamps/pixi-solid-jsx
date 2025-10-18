@@ -21,7 +21,7 @@ export {
   type Setter,
   createRoot,
   type Resource,
-  createUniqueId
+  createUniqueId,
 } from "solid-js";
 
 export {

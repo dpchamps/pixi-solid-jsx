@@ -4,7 +4,7 @@ import {
   getOwner,
   onCleanup,
   runWithOwner,
-  createUniqueId
+  createUniqueId,
 } from "solid-custom-renderer/index.ts";
 import { useGameLoopContext } from "./game-loop-context.ts";
 import { Ticker } from "pixi.js";

@@ -4,7 +4,7 @@ type BaseEasingFunction = (t: number) => number;
 
 type EasingFunctionMagnitude = (t: number, magnitude?: number) => number;
 
-export type EasingFunction = BaseEasingFunction|EasingFunctionMagnitude;
+export type EasingFunction = BaseEasingFunction | EasingFunctionMagnitude;
 
 export const linear = (t: number) => t;
 
