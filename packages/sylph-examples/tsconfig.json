@@ -1,0 +1,8 @@
+{
+  "extends": "../sylph-jsx/tsconfig.json",
+  "compilerOptions": {
+    "composite": true
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}

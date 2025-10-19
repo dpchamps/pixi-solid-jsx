@@ -1,0 +1,13 @@
+{
+  "name": "sylph-examples",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Examples and sandbox for sylph-jsx",
+  "scripts": {
+    "dev": "VITE_STAGE=DEV vite"
+  },
+  "type": "module",
+  "dependencies": {
+    "sylph-jsx": "*"
+  }
+}

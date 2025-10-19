@@ -1,38 +1,22 @@
 {
-  "name": "sylph-jsx",
+  "name": "sylph",
   "version": "0.1.0",
-  "description": "A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences",
-  "main": "./dist/index.js",
+  "private": true,
+  "description": "sylph-jsx and related packages",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "test": "vitest",
-    "dev": "VITE_STAGE=DEV vite",
-    "build": "npm run build:core && npm run build:runtime",
-    "build:core": "vite build",
-    "build:runtime": "tsc -b ./tsconfig.jsx-runtime.json",
-    "fmt": "prettier --write \"src/**/*\"",
-    "typecheck": "tsc -p tsconfig.build.json --noEmit",
-    "analyze-bundle": "npx vite-bundle-analyzer",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "fmt": "prettier --write \"packages/**/*\"",
     "prepare": "husky"
   },
   "lint-staged": {
-    "src/**/*": "prettier --write"
+    "packages/**/*": "prettier --write"
   },
   "type": "module",
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "keywords": [
-    "typescript",
-    "jsx",
-    "pixi.js",
-    "solidjs",
-    "pixi",
-    "solid",
-    "reactive",
-    "signal",
-    "gamedev"
-  ],
   "author": "me@davecampion.com",
   "license": "MIT",
   "devDependencies": {
@@ -53,16 +37,5 @@
     "vitest": "3.2.4",
     "vitest-canvas-mock": "^0.3.3",
     "vitest-webgl-canvas-mock": "^1.1.0"
-  },
-  "dependencies": {
-    "@pixi/devtools": "^2.0.1",
-    "@solid-primitives/deep": "^0.2.9",
-    "css": "^3.0.0",
-    "shallow-equal": "^3.1.0",
-    "vite-plugin-solid": "2.11.9"
-  },
-  "peerDependencies": {
-    "pixi.js": "8.14.0",
-    "solid-js": "1.9.4"
   }
 }
