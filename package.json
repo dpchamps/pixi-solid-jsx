@@ -14,7 +14,8 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "packages/**/*": "prettier --write"
+    "packages/**/*.{ts, tsx, md, html}": "prettier --write",
+    "readme.md": "prettier --write"
   },
   "type": "module",
   "author": "me@davecampion.com",
