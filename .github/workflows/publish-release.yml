@@ -1,0 +1,117 @@
+name: Publish Stable Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  publish:
+    name: Publish to npm
+    # Only run if PR was merged, has the release label, and was created by the bot
+    if: |
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'release') &&
+      github.event.pull_request.user.login == 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - sylph-jsx
+          # Add new packages here
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Build ${{ matrix.package }}
+        run: npm run build -w ${{ matrix.package }}
+
+      - name: Get version from package.json
+        id: version
+        run: |
+          cd packages/${{ matrix.package }}
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${{ matrix.package }}-v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if version changed
+        id: check
+        run: |
+          cd packages/${{ matrix.package }}
+
+          # Check if this package version was changed in the PR
+          git diff HEAD~1 HEAD -- package.json | grep -q '"version"'
+          if [ $? -eq 0 ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to npm
+        if: steps.check.outputs.changed == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+        run: |
+          cd packages/${{ matrix.package }}
+          npm publish --access public
+
+      - name: Create git tag
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.tag }}
+          git push origin ${{ steps.version.outputs.tag }}
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const changelogPath = './packages/${{ matrix.package }}/CHANGELOG.md';
+            let releaseNotes = '';
+
+            if (fs.existsSync(changelogPath)) {
+              const changelog = fs.readFileSync(changelogPath, 'utf8');
+              // Extract the latest version section
+              const versionMatch = changelog.match(/## \[?${{ steps.version.outputs.version }}\]?[\s\S]*?(?=\n## |\n\[|$)/);
+              if (versionMatch) {
+                releaseNotes = versionMatch[0];
+              }
+            }
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ steps.version.outputs.tag }}',
+              name: '${{ matrix.package }} v${{ steps.version.outputs.version }}',
+              body: releaseNotes || 'Release ${{ matrix.package }} v${{ steps.version.outputs.version }}',
+              draft: false,
+              prerelease: false
+            });
