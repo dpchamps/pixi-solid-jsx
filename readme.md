@@ -8,10 +8,6 @@
 </p>
 <hr/> 
 
-> Why "Sylph"?
-
-Sprites, Pixi.js's... A reactive framework that's lighter than air.
-
 ## Status
 
 The framework is fully-functional, but APIs are subject to change.
@@ -304,3 +300,7 @@ const external = new Container();
 ```
 
 The overlay subtree above always renders through the same layer, even as the `alerts()` array grows or shrinks, while the player sprite continues to follow normal container ordering.
+
+> Why the word "Sylph"?
+
+Sprites, Pixi.js's... A reactive framework that's lighter than air.
