@@ -12,6 +12,10 @@ The framework is fully-functional, but APIs are subject to change.
 
 ## Installation
 
+Right now Sylph.jsx is in such active development that it is recommended you build and link
+manually. What's published to the package registry is not guaranteed to be stable.
+
+<details>
 ```bash
 npm install sylph-jsx
 ```
@@ -21,27 +25,29 @@ Peer dependencies:
 - pixi.js@8.14.0
 - solid-js@1.9.4
 
-## Development
+</details>
 
-```bash 
-npm install
-npm run test # run test suite with watch, show coverage
-npm run dev # run the sandbox app
-```
+## Overview
 
-## Quick start
+Sylph uses the [SolidJs Universal Renderer](./src/pixi-jsx/solidjs-universal-renderer/index.ts) to construct 
+a Pixi.js container hierarchy.
+
+Additionally, it provides top-level mechanisms for writing declarative components with fine-grained reactivity. Effects
+are synchronized to the Pixi.js ticker to ensure deterministic sequencing and updating within a given frame.
+
+What this means is that you can write Pixi.js applications that leverage SolidJs reactive primitives. An example
+of would be:
 
 ```tsx
-import { createAsset, Application, createSignal, render } from "sylph";
+import { createAsset, Application, createSignal, render, onEveryFrame } from "sylph-jsx";
 
 const App = () => {
     const texture = createAsset("fire.png");
     const [angle, setAngle] = createSignal(0);
-    
-    createSynchronizedEffect(
-      angle,
-      (rotation, ticker) => setAngle(rotation + 0.05 * ticker.deltaTime)
-    );
+
+    onEveryFrame((time) => {
+        setAngle((last) => last-(0.05*time.deltaTime))
+    });
     
     return (
       <Application width={800} height={600} backgroundColor={0x101820}>
@@ -55,9 +61,94 @@ const App = () => {
       </Application>
     );
 };
-
-render(() => <App />, document.getElementById("root")!);
 ```
+The above example creates an `Application` component, with a single `sprite` as a child.
+
+It uses the `onEveryFrame` lifecycle hook execute a side effect on every frame of the PixiJS ticker. The side effect
+in this case is updating the `angle` signal. Note that we have `ticker` primitives available: `time.deltaTime`
+is used to ensure smoothness across frames.
+
+We can then consume this signal in the `sprite` component below. 
+
+The end result is that we have updates applied to containers that trigger re-renders _only when_ the 
+reactive primitives they're dependent on are triggered. Read more about fine-grained reactivity here:
+(SolidJs Docs on fine-grained reactivity)[https://docs.solidjs.com/advanced-concepts/fine-grained-reactivity].
+
+### Motivations
+
+Sylph is intended to be a general-purpose framework for writing canvas/webgpu PixiJs Applications. The personal
+goals that inspired this project were to have a general suite of tools that enabled performant push-based 
+reactivity for game development.
+
+For example:
+
+```tsx
+const PLAYER_SPEED = 5;
+const DESTINATION = {x: 500, y: 500};
+
+const ExampleSprite = (props: PixiNodeProps<{x: number, y: number}>) => {
+    const texture = createAsset<Texture>('fire.png');
+
+    return (
+        <sprite
+            texture={texture()}
+            scale={1}
+            x={props.x}
+            y={props.y}
+            tint={"white"}
+            pivot={{x: 0.5, y: 0.5}}
+        />
+    )
+}
+
+
+export const ControlsAndMovement = () => {
+    const wasdController = createWASDController();
+    const [playerPosition, setPlayerPosition] = createSignal({x: 0, y: 0});
+    const winCondition = () => euclideanDistance(playerPosition(), DESTINATION) < 20;
+
+    createSynchronizedEffect(wasdController, ({x, y}, time) => {
+        setPlayerPosition((last) => ({
+            x: last.x+x*PLAYER_SPEED*time.deltaTime,
+            y: last.y+y*PLAYER_SPEED*time.deltaTime
+        }))
+    });
+    
+    return (
+        <Show when={!winCondition()} fallback={<text>You Won!</text>}>
+            <ExampleSprite x={playerPosition().x} y={playerPosition().y}/>
+            <ExampleSprite x={DESTINATION.x} y={DESTINATION.y}/>
+        </Show>
+    )
+}
+```
+
+The above example demonstrates generally how we can compose effects and signals together to write a 
+declarative scene where parts only update when the dependencies change:
+
+1. The first `ExampleSprite` updates only when player position changes
+2. The second `ExampleSprite` never updates
+3. The `Show` block only updates when the winCondition changes
+
+Further, the example shows how effects, signals and components are composable:
+
+1. `winCondition` is a simple function, but it preserves reactivity from its inner computation
+2. `ExampleSprite` is a reusable component for a sprite with a given tecture
+3. `wasdController` (not shown in example) is similar to `winCondition`: derived signals bound to input
+
+This kind of development may not be desirable or appropriate for parts of the application. The component `PixiExternalContainer`
+is provided to allow you to eject from the reactive runtime at any point and perform your own logic directly in 
+a PixiJs container. See [#pixiexternalcontainer](#pixiexternalcontainer) below for more info.
+
+## Development
+
+```bash 
+npm install
+npm run test # run test suite with watch, show coverage
+npm run dev # run the sandbox app
+```
+
+## Quick start
 
 ## JSX primitives
 

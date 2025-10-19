@@ -11,7 +11,7 @@ import {
     linear
 } from "../../src";
 import {Texture} from "pixi.js";
-import {CoroutineContainer} from "../../src/engine/tags/extensions/CoroutineContainer.ts";
+import {CoroutineContainer} from "../../src/engine/tags/extensions/CoroutineContainer.tsx";
 import {For, createSignal} from "../../src/pixi-jsx";
 import {PixiNodeProps} from "jsx-runtime/jsx-node.ts";
 

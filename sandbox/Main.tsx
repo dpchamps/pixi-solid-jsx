@@ -3,6 +3,7 @@ import {BasicExample} from "./readme-examples/BasicExample.tsx";
 import {createWindowDimensions} from "../src";
 import {ClickSpriteExample} from "./readme-examples/ClickSpriteExample.tsx";
 import {BasicCoroutineExample} from "./readme-examples/BasicCoroutineExample.tsx";
+import {ControlsAndMovement} from "./readme-examples/ControlsAndMovement.tsx";
 
 export const Main = () => {
     const windowDimensions = createWindowDimensions(window)
@@ -15,7 +16,8 @@ export const Main = () => {
             antialias={true}
         >
             {/*<BasicTest/>*/}
-            <BasicCoroutineExample/>
+            {/*<BasicCoroutineExample/>*/}
+            <ControlsAndMovement/>
         </Application>
     )
 }

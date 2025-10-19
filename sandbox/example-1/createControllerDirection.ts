@@ -1,9 +1,10 @@
 import {Controller} from "./createController.ts";
-import {createComputed, createSignal} from "solid-js";
+import {createSignal} from "solid-js";
 import {createSynchronizedEffect} from "../../src/engine/core/query-fns.ts";
 
 export type ControllerDirection = ReturnType<typeof createControllerDirection>;
 export const createControllerDirection = (controller: Controller) => {
+
     const [x, setDirectionX] = createSignal(0, {equals: false});
     const [y, setDirectionY] = createSignal(0, {equals: false});
     const onHoldDirectionKey = controller.onKeyHold("KeyW", "KeyA", "KeyS", "KeyD");
@@ -19,5 +20,5 @@ export const createControllerDirection = (controller: Controller) => {
     })
 
 
-    return {x, y};
+    return () => ({x: x(), y: y()});
 }
