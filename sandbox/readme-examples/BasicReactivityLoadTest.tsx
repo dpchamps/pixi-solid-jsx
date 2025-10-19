@@ -10,7 +10,7 @@ import {
   linear, Maybe,
 } from "../../src";
 import { Texture } from "pixi.js";
-import { CoroutineContainer } from "../../src/engine/tags/extensions/CoroutineContainer.ts";
+import { CoroutineContainer } from "../../src/engine/tags/extensions/CoroutineContainer.tsx";
 import { FpsCounter } from "../example-1/FpsCounter.tsx";
 import { onEveryFrame } from "../../src/engine/core/query-fns.ts";
 import {PixiNodeProps} from "jsx-runtime/jsx-node.ts";
@@ -81,7 +81,7 @@ const SpriteTransition = (props: SpriteTransitionProps) => {
 export const BasicReactivityLoadTest = () => {
   const texture = createAsset<Texture>("fire.png");
   const [activeCount, setActiveCount] = createSignal(0);
-  const entityList = Array.from({length: SPRITE_MAX}, (_, i) => Math.floor(Math.random()*100));
+  const entityList = Array.from({length: SPRITE_MAX}, (_) => Math.floor(Math.random()*100));
 
   onEveryFrame(() => {
     setActiveCount((current) => {
