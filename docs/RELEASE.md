@@ -4,8 +4,7 @@ Automated releases powered by semantic-release and conventional commits.
 
 ## Release Strategy
 
-**Dev Releases** - Automatic prerelease versions on every merge to `main`
-**Stable Releases** - Manual release PR → review → merge → publish
+**Trunk-based development** - Every merge to `main` automatically publishes a new version to npm.
 
 ## Commit Message Format
 
@@ -47,11 +46,12 @@ Commits without a scope or with an unrecognized scope will not trigger a release
 - `fix:` - Bug fix (triggers **patch** version bump)
 - `perf:` - Performance improvement (triggers **patch** version bump)
 - `refactor:` - Code refactoring (triggers **patch** version bump)
-- `docs:` - Documentation changes (triggers **patch** for README)
+- `chore:` - Maintenance tasks (triggers **patch** version bump)
+- `docs:` - Documentation changes (triggers **patch** for README scope)
 - `test:` - Adding or updating tests (no release)
-- `chore:` - Maintenance tasks (no release)
 - `ci:` - CI/CD changes (no release)
 - `style:` - Code style changes (no release)
+- `build:` - Build system changes (no release)
 
 ### Breaking Changes
 
@@ -73,18 +73,19 @@ fix(sylph-jsx): prevent memory leak in ticker cleanup
 perf(sylph-jsx): optimize sprite batch rendering
 docs(sylph-jsx): update installation instructions
 refactor(sylph-jsx): simplify event handler logic
+chore(sylph-jsx): update dependencies
 ```
 
 ## Workflow
 
-### Dev Releases
+1. Make changes with properly scoped conventional commits
+2. Create a PR and merge to `main`
+3. semantic-release automatically:
+   - Analyzes commits to determine version bump
+   - Updates package.json and CHANGELOG.md
+   - Creates git tag (e.g., `sylph-jsx-v0.1.2`)
+   - Publishes to npm
+   - Commits version changes back to `main` with `[skip ci]`
+   - Creates GitHub release with changelog
 
-Merge to `main` → semantic-release publishes `x.y.z-dev.N` to npm `@dev` tag.
-
-Package version in git stays at last stable release.
-
-### Stable Releases
-
-1. **Create**: Actions → Create Release PR → select package
-2. **Review**: PR shows version bump + changelog
-3. **Merge**: Auto-publishes to npm `@latest` + creates git tag
+Version format: `x.y.z` (e.g., `0.1.0`, `0.1.1`, `0.2.0`)

@@ -1,4 +1,4 @@
-name: Dev Release
+name: Release
 
 on:
   push:
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   release:
-    name: Release packages (dev)
+    name: Release packages
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -39,27 +39,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check for package changes
+      - name: Check for releasable commits
         id: changes
         run: |
-          # Get the last release tag for this package
-          LAST_TAG=$(git describe --tags --abbrev=0 --match "${{ matrix.package }}-v*" 2>/dev/null || echo "")
+          cd packages/${{ matrix.package }}
 
-          if [ -z "$LAST_TAG" ]; then
-            echo "No previous release found, will release"
+          if npx semantic-release --dry-run 2>&1 | grep -q "Published release"; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else
-            # Check if there are commits with the correct scope for this package since last release
-            # semantic-release-monorepo only processes commits like "feat(sylph-jsx):" or "fix(sylph-jsx):"
-            COMMITS=$(git log $LAST_TAG..HEAD --oneline --grep="^[a-z]*(\(${{ matrix.package }}\))" --extended-regexp | wc -l)
-
-            if [ "$COMMITS" -gt 0 ]; then
-              echo "Found $COMMITS scoped commits since $LAST_TAG"
-              echo "has_changes=true" >> $GITHUB_OUTPUT
-            else
-              echo "No scoped commits since $LAST_TAG, skipping release"
-              echo "has_changes=false" >> $GITHUB_OUTPUT
-            fi
+            echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Build ${{ matrix.package }}
