@@ -1,5 +1,5 @@
 
-<h3 align="center" style="font-size: 30px">sylph.jsx</h2>
+<p align="center" style="font-size: 30px; font-weight: bold">sylph.jsx</h2>
 <p align="center">
     <img height="120" src="./assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
 </p>
