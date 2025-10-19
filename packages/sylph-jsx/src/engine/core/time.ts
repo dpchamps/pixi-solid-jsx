@@ -31,6 +31,8 @@ export const createTimer = (args: CreateTimerArgs) => {
   const [frameCount, setFrameCount] = createSignal(0);
 
   function frameTick(ticker: Ticker) {
+    // TODO: performance.now is making tests flaky in CI.
+    //  Either bind this to the ticker, or use fake timers in tests
     const frameStart = performance.now();
     setFrameCount((last) => last + 1);
 
