@@ -1,4 +1,3 @@
-
 <h3 align="center" style="font-size: 30px; font-weight: bold">sylph.jsx</h2>
 <p align="center">
     <img height="120" src="./assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
@@ -6,7 +5,7 @@
 <p  align="center">
     <em>A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences.</em>
 </p>
-<hr/> 
+<hr/>
 
 ## Status
 
@@ -31,7 +30,7 @@ Peer dependencies:
 
 ## Overview
 
-Sylph uses the [SolidJS Universal Renderer](./src/pixi-jsx/solidjs-universal-renderer/index.ts) to construct
+Sylph uses the [SolidJS Universal Renderer](./packages/sylph-jsx/src/pixi-jsx/solidjs-universal-renderer/index.ts) to construct
 a PixiJS container hierarchy.
 
 Additionally, it provides top-level mechanisms for writing declarative components with fine-grained reactivity. Effects
@@ -41,29 +40,36 @@ What this means is that you can write PixiJS applications that leverage SolidJS 
 would be:
 
 ```tsx
-import { createAsset, Application, createSignal, render, onEveryFrame } from "sylph-jsx";
+import {
+  createAsset,
+  Application,
+  createSignal,
+  render,
+  onEveryFrame,
+} from "sylph-jsx";
 
 const App = () => {
-    const texture = createAsset("fire.png");
-    const [angle, setAngle] = createSignal(0);
+  const texture = createAsset("fire.png");
+  const [angle, setAngle] = createSignal(0);
 
-    onEveryFrame((time) => {
-        setAngle((last) => last-(0.05*time.deltaTime))
-    });
-    
-    return (
-      <Application width={800} height={600} backgroundColor={0x101820}>
-        <sprite
-          texture={texture()}
-          pivot={{ x: 0.5, y: 0.5 }}
-          x={400}
-          y={300}
-          rotation={angle()}
-        />
-      </Application>
-    );
+  onEveryFrame((time) => {
+    setAngle((last) => last - 0.05 * time.deltaTime);
+  });
+
+  return (
+    <Application width={800} height={600} backgroundColor={0x101820}>
+      <sprite
+        texture={texture()}
+        pivot={{ x: 0.5, y: 0.5 }}
+        x={400}
+        y={300}
+        rotation={angle()}
+      />
+    </Application>
+  );
 };
 ```
+
 The above example creates an `Application` component, with a single `sprite` as a child.
 
 It uses the `onEveryFrame` lifecycle hook to execute a side effect on every frame of the PixiJS ticker. The side effect
@@ -80,11 +86,14 @@ reactive primitives they're dependent on are triggered. Read more about fine-gra
 
 Sylph's fine-grained reactivity enables performance characteristics that are difficult to achieve with traditional component-based rendering:
 
-- **Frame-synchronized effects**: All reactive updates are batched and executed within a single frame, collapsing multi-frame input latency (input → state → derived state → render) into a single tick.
-- **Granular updates**: Only the specific properties that changed are updated, not entire component trees. If a sprite's `x` position changes, only that property is set—nothing else re-renders.
-- **Predictable performance**: Effects are processed within a frame budget to prevent frame drops, with graceful degradation if the cascade exceeds the limit.
+- **Frame-synchronized effects**: All reactive updates are scheduled to perform in a single tick.
+  - The scheduler will flush as many effect-cascades as possible within a budgeted frame window
+- **Granular updates**: Only the specific properties that changed are updated, not entire component trees.
+  - If a sprite's `x` position changes, only that property is set—nothing else re-renders.
 
-**Real-world performance**: The [BasicReactivityLoadTest](./sandbox/readme-examples/BasicReactivityLoadTest.tsx) demonstrates 3,000+ individually tracked sprites, each with reactive position, scale, and rotation properties updating in real-time using coroutine-based easing animations—all while maintaining 60fps with minimal performance impact.
+**Examples**:
+
+- [BasicReactivityLoadTest](./packages/sylph-examples/readme-examples/BasicReactivityLoadTest.tsx) demonstrates 3,000+ individually tracked sprites, each with reactive position, scale, and rotation properties updating in real-time using coroutine-based easing animations—all while maintaining 60fps with minimal performance impact.
 
 This makes Sylph particularly well-suited for interactive visualizations, 2D games, and real-time data displays where declarative code and smooth performance are both important.
 
@@ -97,53 +106,53 @@ This makes Sylph particularly well-suited for interactive visualizations, 2D gam
 ### Motivations
 
 Sylph is intended to be a general-purpose framework for writing canvas/webgpu PixiJS applications. The personal
-goals that inspired this project were to have a general suite of tools that enabled performant push-based 
+goals that inspired this project were to have a general suite of tools that enabled performant push-based
 reactivity for game development.
 
 For example:
 
 ```tsx
 const PLAYER_SPEED = 5;
-const DESTINATION = {x: 500, y: 500};
+const DESTINATION = { x: 500, y: 500 };
 
-const ExampleSprite = (props: PixiNodeProps<{x: number, y: number}>) => {
-    const texture = createAsset<Texture>('fire.png');
+const ExampleSprite = (props: PixiNodeProps<{ x: number; y: number }>) => {
+  const texture = createAsset<Texture>("fire.png");
 
-    return (
-        <sprite
-            texture={texture()}
-            scale={1}
-            x={props.x}
-            y={props.y}
-            tint={"white"}
-            pivot={{x: 0.5, y: 0.5}}
-        />
-    )
-}
-
+  return (
+    <sprite
+      texture={texture()}
+      scale={1}
+      x={props.x}
+      y={props.y}
+      tint={"white"}
+      pivot={{ x: 0.5, y: 0.5 }}
+    />
+  );
+};
 
 export const ControlsAndMovement = () => {
-    const wasdController = createWASDController();
-    const [playerPosition, setPlayerPosition] = createSignal({x: 0, y: 0});
-    const winCondition = () => euclideanDistance(playerPosition(), DESTINATION) < 20;
+  const wasdController = createWASDController();
+  const [playerPosition, setPlayerPosition] = createSignal({ x: 0, y: 0 });
+  const winCondition = () =>
+    euclideanDistance(playerPosition(), DESTINATION) < 20;
 
-    createSynchronizedEffect(wasdController, ({x, y}, time) => {
-        setPlayerPosition((last) => ({
-            x: last.x+x*PLAYER_SPEED*time.deltaTime,
-            y: last.y+y*PLAYER_SPEED*time.deltaTime
-        }))
-    });
-    
-    return (
-        <Show when={!winCondition()} fallback={<text>You Won!</text>}>
-            <ExampleSprite x={playerPosition().x} y={playerPosition().y}/>
-            <ExampleSprite x={DESTINATION.x} y={DESTINATION.y}/>
-        </Show>
-    )
-}
+  createSynchronizedEffect(wasdController, ({ x, y }, time) => {
+    setPlayerPosition((last) => ({
+      x: last.x + x * PLAYER_SPEED * time.deltaTime,
+      y: last.y + y * PLAYER_SPEED * time.deltaTime,
+    }));
+  });
+
+  return (
+    <Show when={!winCondition()} fallback={<text>You Won!</text>}>
+      <ExampleSprite x={playerPosition().x} y={playerPosition().y} />
+      <ExampleSprite x={DESTINATION.x} y={DESTINATION.y} />
+    </Show>
+  );
+};
 ```
 
-The above example demonstrates generally how we can compose effects and signals together to write a 
+The above example demonstrates generally how we can compose effects and signals together to write a
 declarative scene where parts only update when the dependencies change:
 
 1. The first `ExampleSprite` updates only when player position changes
@@ -162,10 +171,10 @@ a PixiJS container. See [#pixiexternalcontainer](#pixiexternalcontainer) below f
 
 ## Development
 
-```bash 
+```bash
 npm install
 npm run test # run test suite with watch, show coverage
-npm run dev # run the sandbox app
+npm run dev -w slyph-examples # run the sandbox app
 ```
 
 ## Quick start
@@ -173,6 +182,7 @@ npm run dev # run the sandbox app
 ## JSX primitives
 
 ### `<application>`
+
 Handles PixiJS initialization, waits to mount until `.initialize()` runs, and accepts standard `ApplicationOptions` plus `loadingState`, `appInitialize`, and `createTicker` hooks.
 
 ```tsx
@@ -182,6 +192,7 @@ Handles PixiJS initialization, waits to mount until `.initialize()` runs, and ac
 ```
 
 ### `<container>`
+
 Standard scene graph grouping element. Accepts other intrinsics (including `<render-layer>`) and supports PixiJS container options such as `sortableChildren`, `eventMode`, and position properties.
 
 ```tsx
@@ -192,6 +203,7 @@ Standard scene graph grouping element. Accepts other intrinsics (including `<ren
 ```
 
 ### `<sprite>`
+
 Leaf element for textured display objects. Provide a PixiJS `Texture`, positional props, interactivity settings, and transforms.
 
 ```tsx
@@ -206,6 +218,7 @@ Leaf element for textured display objects. Provide a PixiJS `Texture`, positiona
 ```
 
 ### `<text>`
+
 Displays dynamic copy. String children automatically concatenate into the PixiJS `Text` value, and updates react when signals change.
 
 ```tsx
@@ -215,18 +228,21 @@ Displays dynamic copy. String children automatically concatenate into the PixiJS
 ```
 
 ### `<render-layer>`
+
 Wrap a subtree in a PixiJS `RenderLayer`. Useful for independent z-sorting, compositing, or post-processing passes without leaving JSX.
 
 ```tsx
 <render-layer zIndex={100}>
-  <text x={16} y={16}>HUD Overlay</text>
+  <text x={16} y={16}>
+    HUD Overlay
+  </text>
   <container>
     <sprite texture={hudTexture()} />
   </container>
 </render-layer>
 ```
 
-## Frame-aware query functions [src/engine/core/query-fns.ts](./src/engine/core/query-fns.ts)
+## Frame-aware query functions [src/engine/core/query-fns.ts](./packages/sylph-jsx/src/engine/core/query-fns.ts)
 
 ### createSynchronizedEffect(query, effect, owner?)
 
@@ -248,7 +264,7 @@ Wrap a subtree in a PixiJS `RenderLayer`. Useful for independent z-sorting, comp
 
 ### Application
 
-The `<Application>` component constructs the intrinsic `<application>` tag, 
+The `<Application>` component constructs the intrinsic `<application>` tag,
 and adds all necessary lifecycle management and core providers required for framework functionality.
 
 There's usually no good reason to not use this component.
@@ -259,7 +275,6 @@ There's usually no good reason to not use this component.
 - Boots the PixiJS devtools overlay via `initDevtools` when available.
 
 Use the intrinsic form (`<application>`) when authoring low-level JSX trees and the component form when you want the full runtime integration.
-
 
 ### PixiExternalContainer
 
@@ -275,7 +290,6 @@ const external = new Container();
 
 - Adds reactivity around the managed container
 
-
 ## Working with render layers
 
 `<render-layer>` mounts a PixiJS `RenderLayer` alongside your display objects and automatically registers every descendant with that layer. The layer itself is inserted into the parent container, while the children remain regular siblings in the display list; they are simply marked as `renderLayerChildren` so PixiJS sorts and composites them through the layer. This means you can freely mix layered and non-layered content inside the same container without losing control over draw order.
@@ -288,11 +302,15 @@ const external = new Container();
 ```tsx
 <container>
   <render-layer zIndex={100} sortableChildren>
-    <text x={16} y={16}>HUD Overlay</text>
+    <text x={16} y={16}>
+      HUD Overlay
+    </text>
     <container>
       <sprite texture={hudTexture()} />
     </container>
-    <For each={alerts()}>{(alert) => <text y={alert().y}>{alert().label}</text>}</For>
+    <For each={alerts()}>
+      {(alert) => <text y={alert().y}>{alert().label}</text>}
+    </For>
   </render-layer>
 
   <sprite texture={playerTexture()} x={player().x} y={player().y} />
