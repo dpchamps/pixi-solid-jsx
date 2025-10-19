@@ -1,7 +1,7 @@
 <p align="center">
-    <img height="200" src="./assets/logos/feather-circle.png" alt="SylphJsx Logo">
+    <img height="200" src="./assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
 </p>
-<h3 align="center" style="margin-top: -50px">
+<h3 align="center">
     SylphJSX
 </h3>
 
