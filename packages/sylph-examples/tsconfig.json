@@ -3,7 +3,13 @@
   "compilerOptions": {
     "composite": false,
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "paths": {
+      "sylph-jsx": ["../sylph-jsx/src/index.ts"],
+      "sylph-jsx/*": ["../sylph-jsx/*"],
+      "jsx-runtime/*": ["../sylph-jsx/src/pixi-jsx/jsx/*"],
+      "solid-custom-renderer/*": ["../sylph-jsx/src/pixi-jsx/solidjs-universal-renderer/*"]
+    }
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]
