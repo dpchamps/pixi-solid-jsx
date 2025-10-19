@@ -1,10 +1,12 @@
-# Sylph
 
-A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences. 
-
-> Why "Sylph"?
-
-Sprites, Pixi.js's... A reactive framework that's lighter than air.
+<h3 align="center" style="font-size: 30px; font-weight: bold">sylph.jsx</h2>
+<p align="center">
+    <img height="120" src="./assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
+</p>
+<p  align="center">
+    <em>A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences.</em>
+</p>
+<hr/> 
 
 ## Status
 
@@ -298,3 +300,7 @@ const external = new Container();
 ```
 
 The overlay subtree above always renders through the same layer, even as the `alerts()` array grows or shrinks, while the player sprite continues to follow normal container ordering.
+
+> Why the word "Sylph"?
+
+Sprites, Pixi.js's... A reactive framework that's lighter than air.
