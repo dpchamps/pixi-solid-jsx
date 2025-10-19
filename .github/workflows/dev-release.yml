@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'packages/**'
+      - '.releaserc.base.cjs'
 
 permissions:
   contents: write
@@ -36,11 +39,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check for package changes
+        id: changes
+        run: |
+          # Get the last release tag for this package
+          LAST_TAG=$(git describe --tags --abbrev=0 --match "${{ matrix.package }}-v*" 2>/dev/null || echo "")
+
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous release found, will release"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            # Check if there are commits for this package since last release
+            COMMITS=$(git log $LAST_TAG..HEAD --oneline -- packages/${{ matrix.package }}/ | wc -l)
+
+            if [ "$COMMITS" -gt 0 ]; then
+              echo "Found $COMMITS commits since $LAST_TAG"
+              echo "has_changes=true" >> $GITHUB_OUTPUT
+            else
+              echo "No commits since $LAST_TAG, skipping release"
+              echo "has_changes=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Build ${{ matrix.package }}
+        if: steps.changes.outputs.has_changes == 'true'
         run: npm run build -w ${{ matrix.package }}
-        continue-on-error: true
 
       - name: Release ${{ matrix.package }}
+        if: steps.changes.outputs.has_changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
