@@ -36,7 +36,7 @@ Additionally, it provides top-level mechanisms for writing declarative component
 are synchronized to the Pixi.js ticker to ensure deterministic sequencing and updating within a given frame.
 
 What this means is that you can write Pixi.js applications that leverage SolidJs reactive primitives. An example
-of would be:
+would be:
 
 ```tsx
 import { createAsset, Application, createSignal, render, onEveryFrame } from "sylph-jsx";
@@ -64,15 +64,15 @@ const App = () => {
 ```
 The above example creates an `Application` component, with a single `sprite` as a child.
 
-It uses the `onEveryFrame` lifecycle hook execute a side effect on every frame of the PixiJS ticker. The side effect
+It uses the `onEveryFrame` lifecycle hook to execute a side effect on every frame of the PixiJS ticker. The side effect
 in this case is updating the `angle` signal. Note that we have `ticker` primitives available: `time.deltaTime`
 is used to ensure smoothness across frames.
 
 We can then consume this signal in the `sprite` component below. 
 
-The end result is that we have updates applied to containers that trigger re-renders _only when_ the 
+The end result is that we have updates applied to containers that trigger re-renders _only when_ the
 reactive primitives they're dependent on are triggered. Read more about fine-grained reactivity here:
-(SolidJs Docs on fine-grained reactivity)[https://docs.solidjs.com/advanced-concepts/fine-grained-reactivity].
+[SolidJs Docs on fine-grained reactivity](https://docs.solidjs.com/advanced-concepts/fine-grained-reactivity).
 
 ### Motivations
 
@@ -133,7 +133,7 @@ declarative scene where parts only update when the dependencies change:
 Further, the example shows how effects, signals and components are composable:
 
 1. `winCondition` is a simple function, but it preserves reactivity from its inner computation
-2. `ExampleSprite` is a reusable component for a sprite with a given tecture
+2. `ExampleSprite` is a reusable component for a sprite with a given texture
 3. `wasdController` (not shown in example) is similar to `winCondition`: derived signals bound to input
 
 This kind of development may not be desirable or appropriate for parts of the application. The component `PixiExternalContainer`
@@ -243,7 +243,7 @@ Use the intrinsic form (`<application>`) when authoring low-level JSX trees and 
 
 ### PixiExternalContainer
 
-You may want to manage some or most of you logic outside the reactive render tree. For these cases, you may reach for `PixiExternalContainer` :
+You may want to manage some or most of your logic outside the reactive render tree. For these cases, you may reach for `PixiExternalContainer` :
 
 ```tsx
 const external = new Container();
