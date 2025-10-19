@@ -1,6 +1,6 @@
 <h3 align="center" style="font-size: 30px; font-weight: bold">sylph.jsx</h2>
 <p align="center">
-    <img height="120" src="https://raw.githubusercontent.com/dpchamps/pixi-jsx/main/assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
+    <img height="120" src="https://raw.githubusercontent.com/dpchamps/sylph.jsx/main/assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
 </p>
 <p  align="center">
     <em>A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences.</em>
@@ -30,7 +30,7 @@ Peer dependencies:
 
 ## Overview
 
-Sylph uses the [SolidJS Universal Renderer](https://github.com/dpchamps/pixi-jsx/blob/main/packages/sylph-jsx/src/pixi-jsx/solidjs-universal-renderer/index.ts) to construct
+Sylph uses the [SolidJS Universal Renderer](https://github.com/dpchamps/sylph.jsx/blob/main/packages/sylph-jsx/src/sylph.jsx/solidjs-universal-renderer/index.ts) to construct
 a PixiJS container hierarchy.
 
 Additionally, it provides top-level mechanisms for writing declarative components with fine-grained reactivity. Effects
@@ -93,7 +93,7 @@ Sylph's fine-grained reactivity enables performance characteristics that are dif
 
 **Examples**:
 
-- [BasicReactivityLoadTest](https://github.com/dpchamps/pixi-jsx/blob/main/packages/sylph-examples/readme-examples/BasicReactivityLoadTest.tsx) demonstrates 3,000+ individually tracked sprites, each with reactive position, scale, and rotation properties updating in real-time using coroutine-based easing animations—all while maintaining 60fps with minimal performance impact.
+- [BasicReactivityLoadTest](https://github.com/dpchamps/sylph.jsx/blob/main/packages/sylph-examples/readme-examples/BasicReactivityLoadTest.tsx) demonstrates 3,000+ individually tracked sprites, each with reactive position, scale, and rotation properties updating in real-time using coroutine-based easing animations—all while maintaining 60fps with minimal performance impact.
 
 This makes Sylph particularly well-suited for interactive visualizations, 2D games, and real-time data displays where declarative code and smooth performance are both important.
 
@@ -242,7 +242,7 @@ Wrap a subtree in a PixiJS `RenderLayer`. Useful for independent z-sorting, comp
 </render-layer>
 ```
 
-## Frame-aware query functions [src/engine/core/query-fns.ts](https://github.com/dpchamps/pixi-jsx/blob/main/packages/sylph-jsx/src/engine/core/query-fns.ts)
+## Frame-aware query functions [src/engine/core/query-fns.ts](https://github.com/dpchamps/sylph.jsx/blob/main/packages/sylph-jsx/src/engine/core/query-fns.ts)
 
 ### createSynchronizedEffect(query, effect, owner?)
 

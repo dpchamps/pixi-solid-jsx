@@ -1,7 +1,6 @@
 module.exports = {
   extends: 'semantic-release-monorepo',
   branches: [
-    '+([0-9])?(.{+([0-9]),x}).x',
     {
       name: 'main',
       channel: 'dev',
