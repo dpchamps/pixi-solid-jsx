@@ -1,4 +1,11 @@
-# Sylph
+<p align="center">
+    <img height="200" src="./assets/logos/feather-circle.png" alt="SylphJsx Logo">
+</p>
+<h3 align="center" style="margin-top: -50px">
+    SylphJSX
+</h3>
+
+# SylphJSX
 
 A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences. 
 
