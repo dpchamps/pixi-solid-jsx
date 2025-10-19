@@ -29,13 +29,13 @@ Peer dependencies:
 
 ## Overview
 
-Sylph uses the [SolidJs Universal Renderer](./src/pixi-jsx/solidjs-universal-renderer/index.ts) to construct 
-a Pixi.js container hierarchy.
+Sylph uses the [SolidJS Universal Renderer](./src/pixi-jsx/solidjs-universal-renderer/index.ts) to construct
+a PixiJS container hierarchy.
 
 Additionally, it provides top-level mechanisms for writing declarative components with fine-grained reactivity. Effects
-are synchronized to the Pixi.js ticker to ensure deterministic sequencing and updating within a given frame.
+are synchronized to the PixiJS ticker to ensure deterministic sequencing and updating within a given frame.
 
-What this means is that you can write Pixi.js applications that leverage SolidJs reactive primitives. An example
+What this means is that you can write PixiJS applications that leverage SolidJS reactive primitives. An example
 would be:
 
 ```tsx
@@ -68,15 +68,33 @@ It uses the `onEveryFrame` lifecycle hook to execute a side effect on every fram
 in this case is updating the `angle` signal. Note that we have `ticker` primitives available: `time.deltaTime`
 is used to ensure smoothness across frames.
 
-We can then consume this signal in the `sprite` component below. 
+We can then consume this signal in the `sprite` component below.
 
 The end result is that we have updates applied to containers that trigger re-renders _only when_ the
 reactive primitives they're dependent on are triggered. Read more about fine-grained reactivity here:
-[SolidJs Docs on fine-grained reactivity](https://docs.solidjs.com/advanced-concepts/fine-grained-reactivity).
+[SolidJS Docs on fine-grained reactivity](https://docs.solidjs.com/advanced-concepts/fine-grained-reactivity).
+
+### Performance
+
+Sylph's fine-grained reactivity enables performance characteristics that are difficult to achieve with traditional component-based rendering:
+
+- **Frame-synchronized effects**: All reactive updates are batched and executed within a single frame, collapsing multi-frame input latency (input → state → derived state → render) into a single tick.
+- **Granular updates**: Only the specific properties that changed are updated, not entire component trees. If a sprite's `x` position changes, only that property is set—nothing else re-renders.
+- **Predictable performance**: Effects are processed within a frame budget to prevent frame drops, with graceful degradation if the cascade exceeds the limit.
+
+**Real-world performance**: The [BasicReactivityLoadTest](./sandbox/readme-examples/BasicReactivityLoadTest.tsx) demonstrates 3,000+ individually tracked sprites, each with reactive position, scale, and rotation properties updating in real-time using coroutine-based easing animations—all while maintaining 60fps with minimal performance impact.
+
+This makes Sylph particularly well-suited for interactive visualizations, 2D games, and real-time data displays where declarative code and smooth performance are both important.
+
+### Development Features
+
+- **TypeScript support**: All JSX elements have complete type definitions—your IDE will autocomplete PixiJS properties and catch errors before runtime.
+- **PixiJS devtools**: The devtools overlay boots automatically in development, giving you scene graph inspection and performance monitoring.
+- **Full SolidJS compatibility**: All SolidJS primitives and components work with PixiJS containers. Use `<Show>`, `<For>`, `<Index>`, `createMemo`, `createResource`, and any other SolidJS feature—they all just work.
 
 ### Motivations
 
-Sylph is intended to be a general-purpose framework for writing canvas/webgpu PixiJs Applications. The personal
+Sylph is intended to be a general-purpose framework for writing canvas/webgpu PixiJS applications. The personal
 goals that inspired this project were to have a general suite of tools that enabled performant push-based 
 reactivity for game development.
 
@@ -137,8 +155,8 @@ Further, the example shows how effects, signals and components are composable:
 3. `wasdController` (not shown in example) is similar to `winCondition`: derived signals bound to input
 
 This kind of development may not be desirable or appropriate for parts of the application. The component `PixiExternalContainer`
-is provided to allow you to eject from the reactive runtime at any point and perform your own logic directly in 
-a PixiJs container. See [#pixiexternalcontainer](#pixiexternalcontainer) below for more info.
+is provided to allow you to eject from the reactive runtime at any point and perform your own logic directly in
+a PixiJS container. See [#pixiexternalcontainer](#pixiexternalcontainer) below for more info.
 
 ## Development
 
@@ -153,7 +171,7 @@ npm run dev # run the sandbox app
 ## JSX primitives
 
 ### `<application>`
-Handles Pixi initialization, waits to mount until `.initialize()` runs, and accepts standard `ApplicationOptions` plus `loadingState`, `appInitialize`, and `createTicker` hooks.
+Handles PixiJS initialization, waits to mount until `.initialize()` runs, and accepts standard `ApplicationOptions` plus `loadingState`, `appInitialize`, and `createTicker` hooks.
 
 ```tsx
 <application width={800} height={600} backgroundColor={0x101820}>
@@ -162,7 +180,7 @@ Handles Pixi initialization, waits to mount until `.initialize()` runs, and acce
 ```
 
 ### `<container>`
-Standard scene graph grouping element. Accepts other intrinsics (including `<render-layer>`) and supports Pixi container options such as `sortableChildren`, `eventMode`, and position properties.
+Standard scene graph grouping element. Accepts other intrinsics (including `<render-layer>`) and supports PixiJS container options such as `sortableChildren`, `eventMode`, and position properties.
 
 ```tsx
 <container x={100} y={120} sortableChildren>
@@ -172,7 +190,7 @@ Standard scene graph grouping element. Accepts other intrinsics (including `<ren
 ```
 
 ### `<sprite>`
-Leaf element for textured display objects. Provide a Pixi `Texture`, positional props, interactivity settings, and transforms.
+Leaf element for textured display objects. Provide a PixiJS `Texture`, positional props, interactivity settings, and transforms.
 
 ```tsx
 <sprite
@@ -186,7 +204,7 @@ Leaf element for textured display objects. Provide a Pixi `Texture`, positional 
 ```
 
 ### `<text>`
-Displays dynamic copy. String children automatically concatenate into the Pixi `Text` value, and updates react when signals change.
+Displays dynamic copy. String children automatically concatenate into the PixiJS `Text` value, and updates react when signals change.
 
 ```tsx
 <text style={{ fontSize: 24 }} fill={0xffffff} x={32} y={32}>
@@ -195,7 +213,7 @@ Displays dynamic copy. String children automatically concatenate into the Pixi `
 ```
 
 ### `<render-layer>`
-Wrap a subtree in a Pixi `RenderLayer`. Useful for independent z-sorting, compositing, or post-processing passes without leaving JSX.
+Wrap a subtree in a PixiJS `RenderLayer`. Useful for independent z-sorting, compositing, or post-processing passes without leaving JSX.
 
 ```tsx
 <render-layer zIndex={100}>
@@ -213,8 +231,8 @@ Wrap a subtree in a Pixi `RenderLayer`. Useful for independent z-sorting, compos
 > Run when reactive state changes and commit changes during the next frame
 
 - Tracks reactive dependencies in the query function.
-- Queues the effect for the next Pixi ticker frame and runs it with the most recent Ticker.
-- Preserves the caller’s Solid owner so cleanup and disposals behave as if the effect lived in the component.
+- Queues the effect for the next PixiJS ticker frame and runs it with the most recent Ticker.
+- Preserves the caller's SolidJS owner so cleanup and disposals behave as if the effect lived in the component.
 
 ### onEveryFrame(effect)
 
@@ -234,9 +252,9 @@ and adds all necessary lifecycle management and core providers required for fram
 There's usually no good reason to not use this component.
 
 - Awaits `appInitialize` and shows `loadingState` (defaults to `<text>Loading...</text>`) while asynchronous setup completes.
-- Starts the ticker only after the Pixi application is ready and exposes the instance through `useApplicationState()`.
+- Starts the ticker only after the PixiJS application is ready and exposes the instance through `useApplicationState()`.
 - Seeds the internal game-loop context so that `createSynchronizedEffect` and `onEveryFrame` can schedule work onto the game loop.
-- Boots the Pixi devtools overlay via `initDevtools` when available.
+- Boots the PixiJS devtools overlay via `initDevtools` when available.
 
 Use the intrinsic form (`<application>`) when authoring low-level JSX trees and the component form when you want the full runtime integration.
 
@@ -258,11 +276,11 @@ const external = new Container();
 
 ## Working with render layers
 
-`<render-layer>` mounts a Pixi `RenderLayer` alongside your display objects and automatically registers every descendant with that layer. The layer itself is inserted into the parent container, while the children remain regular siblings in the display list; they are simply marked as `renderLayerChildren` so Pixi sorts and composites them through the layer. This means you can freely mix layered and non-layered content inside the same container without losing control over draw order.
+`<render-layer>` mounts a PixiJS `RenderLayer` alongside your display objects and automatically registers every descendant with that layer. The layer itself is inserted into the parent container, while the children remain regular siblings in the display list; they are simply marked as `renderLayerChildren` so PixiJS sorts and composites them through the layer. This means you can freely mix layered and non-layered content inside the same container without losing control over draw order.
 
 - Any prop you pass to `<render-layer>` (such as `sortableChildren` or `zIndex`) updates the underlying layer immediately, and reactive props will resync as signals change.
 - Descendants inherit the layer recursively: nested containers, sprites, text nodes, and additional `render-layer` blocks all attach correctly, so complex hierarchies continue to render through the intended layer.
-- Conditional rendering, `For`/`Index` loops, and other Solid control flow work the same way—adding or removing nodes updates both the container’s display list and the layer’s child registry.
+- Conditional rendering, `For`/`Index` loops, and other SolidJS control flow work the same way—adding or removing nodes updates both the container's display list and the layer's child registry.
 - Removing the layer detaches the `RenderLayer` itself and clears the associated `renderLayerChildren`, leaving the rest of the scene untouched.
 
 ```tsx
