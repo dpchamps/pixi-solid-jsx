@@ -1,14 +1,13 @@
+<h1 align="center">
+Sylph.jsx
+</h1>
 <p align="center">
-    <img height="200" src="./assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
-    
+    <img height="120" src="./assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
 </p>
-<p align="center">
-    <b>SylphJSX</b>
+<p  align="center">
+    <em>A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences.</em>
 </p>
-
-# SylphJSX
-
-A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences. 
+<hr/> 
 
 > Why "Sylph"?
 
