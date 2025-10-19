@@ -6,15 +6,15 @@ import {
   createStore,
   onMount,
 } from "solid-custom-renderer/patched-types.ts";
-import { ContainerNode } from "../../src/pixi-jsx/proxy-dom";
-import { invariant, Maybe } from "../../src/utility-types.ts";
+import { ContainerNode } from "sylph-jsx/src/pixi-jsx/proxy-dom";
+import { invariant, Maybe } from "sylph-jsx/src/utility-types.ts";
 import { JSX } from "jsx-runtime/jsx-runtime.ts";
 import { Accessor, Setter } from "solid-js";
 import { FillInput, Graphics } from "pixi.js";
-import { ProxyNode } from "../../src/pixi-jsx/proxy-dom/nodes/Node.ts";
-import { createRect } from "../../src/engine/effects/createGraphics.ts";
-import { clamp } from "../../src/utility-numbers.ts";
-import { FlexBoxProps } from "../../src/engine/tags/FlexBox/types.ts";
+import { ProxyNode } from "sylph-jsx/src/pixi-jsx/proxy-dom/nodes/Node.ts";
+import { createRect } from "sylph-jsx/src/engine/effects/createGraphics.ts";
+import { clamp } from "sylph-jsx/src/utility-numbers.ts";
+import { FlexBoxProps } from "sylph-jsx/src/engine/tags/deprecated/FlexBox/types.ts";
 
 type BackgroundContainerPropsBase = {
   padding?: number;

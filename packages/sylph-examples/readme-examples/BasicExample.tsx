@@ -1,5 +1,5 @@
-import { createAsset, createWindowDimensions } from "../../src";
-import { onEveryFrame } from "../../src/engine/core/query-fns.ts";
+import { createAsset, createWindowDimensions } from "sylph-jsx";
+import { onEveryFrame } from "sylph-jsx/src/engine/core/query-fns.ts";
 import { Texture } from "pixi.js";
 import { createSignal } from "solid-custom-renderer/index.ts";
 

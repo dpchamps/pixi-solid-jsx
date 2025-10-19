@@ -1,7 +1,7 @@
 import { EntityProps } from "./Entity.tsx";
-import { invariant } from "../../src/utility-types.ts";
+import { invariant } from "sylph-jsx/src/utility-types.ts";
 import { createSignal } from "solid-js";
-import { shallowAssignAndDiff } from "../../src/utility-arrays.ts";
+import { shallowAssignAndDiff } from "sylph-jsx/src/utility-arrays.ts";
 
 export type EntityList = ReturnType<typeof createEntityList>;
 export const createEntityList = () => {

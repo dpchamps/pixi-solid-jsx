@@ -3,12 +3,12 @@ import {
   createAsset,
   createWindowDimensions,
   euclideanDistance,
-} from "../../src";
+} from "sylph-jsx";
 import { Texture } from "pixi.js";
 import {
   createSynchronizedEffect,
   onEveryFrame,
-} from "../../src/engine/core/query-fns.ts";
+} from "sylph-jsx/src/engine/core/query-fns.ts";
 import { PixiNodeProps } from "jsx-runtime/jsx-node.ts";
 import { createControllerDirection } from "../example-1/createControllerDirection.ts";
 import { createController } from "../example-1/createController.ts";

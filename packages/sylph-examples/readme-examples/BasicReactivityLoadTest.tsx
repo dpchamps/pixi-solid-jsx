@@ -11,11 +11,11 @@ import {
   invariant,
   linear,
   Maybe,
-} from "../../src";
+} from "sylph-jsx";
 import { Texture } from "pixi.js";
-import { CoroutineContainer } from "../../src/engine/tags/extensions/CoroutineContainer.tsx";
+import { CoroutineContainer } from "sylph-jsx/src/engine/tags/extensions/CoroutineContainer.tsx";
 import { FpsCounter } from "../example-1/FpsCounter.tsx";
-import { onEveryFrame } from "../../src/engine/core/query-fns.ts";
+import { onEveryFrame } from "sylph-jsx/src/engine/core/query-fns.ts";
 import { PixiNodeProps } from "jsx-runtime/jsx-node.ts";
 
 const SPRITE_MAX = 3000;

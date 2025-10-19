@@ -1,6 +1,6 @@
 import { Controller } from "./createController.ts";
 import { createSignal } from "solid-js";
-import { createSynchronizedEffect } from "../../src/engine/core/query-fns.ts";
+import { createSynchronizedEffect } from "sylph-jsx/src/engine/core/query-fns.ts";
 
 export type ControllerDirection = ReturnType<typeof createControllerDirection>;
 export const createControllerDirection = (controller: Controller) => {

@@ -9,10 +9,10 @@ import {
   flip,
   invariant,
   linear,
-} from "../../src";
+} from "sylph-jsx";
 import { Texture } from "pixi.js";
-import { CoroutineContainer } from "../../src/engine/tags/extensions/CoroutineContainer.tsx";
-import { For, createSignal } from "../../src/pixi-jsx";
+import { CoroutineContainer } from "sylph-jsx/src/engine/tags/extensions/CoroutineContainer.tsx";
+import { For, createSignal } from "sylph-jsx/src/pixi-jsx";
 import { PixiNodeProps } from "jsx-runtime/jsx-node.ts";
 
 const easingFns = [

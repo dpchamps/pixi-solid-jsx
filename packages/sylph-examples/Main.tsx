@@ -1,6 +1,6 @@
-import { Application } from "../src/engine/tags/Application.tsx";
+import { Application } from "sylph-jsx/src/engine/tags/Application.tsx";
 import { BasicExample } from "./readme-examples/BasicExample.tsx";
-import { createWindowDimensions } from "../src";
+import { createWindowDimensions } from "sylph-jsx";
 import { ClickSpriteExample } from "./readme-examples/ClickSpriteExample.tsx";
 import { BasicCoroutineExample } from "./readme-examples/BasicCoroutineExample.tsx";
 import { ControlsAndMovement } from "./readme-examples/ControlsAndMovement.tsx";

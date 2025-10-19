@@ -1,4 +1,4 @@
-import { createAsset } from "../../src/engine/effects/createAsset.ts";
+import { createAsset } from "sylph-jsx/src/engine/effects/createAsset.ts";
 import { Texture } from "pixi.js";
 import { SpriteIntrinsicProps } from "jsx-runtime/jsx-node.ts";
 

@@ -4,7 +4,8 @@
   "private": true,
   "description": "Examples and sandbox for sylph-jsx",
   "scripts": {
-    "dev": "VITE_STAGE=DEV vite"
+    "dev": "VITE_STAGE=DEV vite",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module",
   "dependencies": {

@@ -1,8 +1,3 @@
-import {
-  Application,
-  useApplicationState,
-} from "../../src/engine/tags/Application.tsx";
-import { FpsCounter } from "../example-1/FpsCounter.tsx";
 import { JSX } from "jsx-runtime/jsx-runtime.ts";
 import {
   children,
@@ -12,15 +7,14 @@ import {
   onMount,
   untrack,
 } from "solid-custom-renderer/patched-types.ts";
-import { intoArray } from "../../src/utility-types.ts";
-import { ProxyNode } from "../../src/pixi-jsx/proxy-dom/nodes/Node.ts";
-import { createAsset } from "../../src/engine/effects/createAsset.ts";
+import { ProxyNode } from "sylph-jsx/src/pixi-jsx/proxy-dom/nodes/Node.ts";
+import { createAsset } from "sylph-jsx/src/engine/effects/createAsset.ts";
 import { Container, Texture, Text } from "pixi.js";
 import { createController } from "../example-1/createController.ts";
-import { ContainerNode } from "../../src/pixi-jsx/proxy-dom";
-import { invariant } from "../../src/utility-types.ts";
+import { ContainerNode } from "sylph-jsx/src/pixi-jsx/proxy-dom";
+import { invariant } from "sylph-jsx/src/utility-types.ts";
 import { Box } from "./BackgroundContainer.tsx";
-import { FlexBox } from "../../src/engine/tags/deprecated/FlexBox/FlexBox.tsx";
+import { FlexBox } from "sylph-jsx/src/engine/tags/deprecated/FlexBox/FlexBox.tsx";
 
 type HorizontalSpacingProps = {
   x?: number;

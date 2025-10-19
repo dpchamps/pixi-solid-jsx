@@ -9,7 +9,7 @@ import { shallowEqual } from "shallow-equal";
 import {
   createSynchronizedEffect,
   onEveryFrame,
-} from "../../src/engine/core/query-fns.ts";
+} from "sylph-jsx/src/engine/core/query-fns.ts";
 
 export type Controller = ReturnType<typeof createController>;
 export const createController = () => {

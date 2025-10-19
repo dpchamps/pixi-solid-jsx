@@ -1,14 +1,13 @@
-import { Application } from "../../src/engine/tags/Application.tsx";
-import { Scene1 } from "./Scene1.tsx";
+import { Application } from "sylph-jsx/src/engine/tags/Application.tsx";
 import { Controller, createController } from "./createController.ts";
-import { invariant } from "../../src/utility-types.ts";
+import { invariant } from "sylph-jsx/src/utility-types.ts";
 import {
   Show,
   createContext,
   useContext,
   createEffect,
   createMemo,
-} from "../../src/pixi-jsx/solidjs-universal-renderer";
+} from "sylph-jsx/src/pixi-jsx/solidjs-universal-renderer";
 import { BasicExample } from "../readme-examples/BasicExample.tsx";
 import { ClickSpriteExample } from "../readme-examples/ClickSpriteExample.tsx";
 import { BasicReactivityLoadTest } from "../readme-examples/BasicReactivityLoadTest.tsx";
@@ -47,7 +46,7 @@ const MainStage = () => {
   return (
     <GameContext.Provider value={gameState}>
       <Show when={sceneToggle()} fallback={<text>Scene 2</text>}>
-        <Scene1 />
+        <text>Empty</text>
       </Show>
     </GameContext.Provider>
   );

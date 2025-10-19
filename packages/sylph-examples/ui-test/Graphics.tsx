@@ -1,6 +1,6 @@
 import { createSignal, onMount } from "solid-custom-renderer/patched-types.ts";
-import { GraphicsNode } from "../../src/pixi-jsx/proxy-dom/nodes/Graphics.ts";
-import { invariant } from "../../src/utility-types.ts";
+import { GraphicsNode } from "sylph-jsx/src/pixi-jsx/proxy-dom/nodes/Graphics.ts";
+import { invariant } from "sylph-jsx/src/utility-types.ts";
 import { JSX } from "jsx-runtime/jsx-runtime.ts";
 import { Graphics as PixiGraphics } from "pixi.js";
 
