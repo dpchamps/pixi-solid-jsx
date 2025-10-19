@@ -1,174 +1,152 @@
-# Proxy-DOM Architecture Deep Dive
+# Proxy DOM Architecture Deep Dive
 
-## The Core Abstraction: ProxyNode
+This document describes the current Proxy DOM implementation under `src/pixi-jsx/proxy-dom`. It reflects the runtime as of v0.1.0 and emphasizes how Solid’s renderer cooperates with Pixi nodes through proxy objects.
 
-The **ProxyNode** base class (Node.ts:42) is the foundation of the entire rendering system. It maintains a **dual-tracking system**:
+---
 
-```typescript
-protected children: NodeType[] = [];         // Original children
-protected proxiedChildren: NodeType[] = [];  // Transformed/proxied versions
-protected untrackedChildren: Container[] = []; // Direct PixiJS containers
-```
+## 1. Core Concepts
 
-This dual-tracking allows nodes to **transform children** during insertion while maintaining references to both the original and transformed versions.
+### 1.1 ProxyNode base (`nodes/Node.ts`)
+- Every intrinsic maps to a `ProxyNode<Tag, Container, ProxyDomNode>` instance.
+- Common responsibilities:
+  - Maintain `children`, `proxiedChildren`, and `untrackedChildren` arrays.
+  - Track parent/child pointers with `id` stability for renderer traversal.
+  - Optionally cache a `RenderLayer` reference and propagate it to descendants.
+  - Provide template methods: `addChildProxy`, `removeChildProxy`, `setProp`, `addChildProxyUntracked`, and `removeChildProxyUntracked`.
+  - Expose helpers (`getChildren`, `getParent`, `getRenderLayer`, `setRenderLayer`) so Solid’s renderer can explore the tree without touching Pixi directly.
+- `addChild` / `removeChild` wrap the specialized `addChildProxy` / `removeChildProxy` and keep the logical arrays in sync. When a specialized implementation returns a different node (e.g., `ApplicationNode` converting raw text into `TextNode`), `proxiedChildren` stores the transformed node while `children` retains the original reference.
 
-## Node Type Hierarchy & Capabilities
+### 1.2 Type definitions (`nodes/types.ts`)
+- `ProxyDomNode` is a tagged union covering: `application`, `container`, `text`, `sprite`, `graphics`, `render-layer`, `raw`, and `html`.
+- Utility type `GenericNode` keeps renderer code agnostic of specific node classes.
 
-### Container Nodes (Can have children)
+### 1.3 Factory (`proxy-dom/index.ts`)
+- `createProxiedPixieContainerNode(tag)` instantiates the correct subclass or throws on unknown tags.
+- Re-exports node classes (`ApplicationNode`, `ContainerNode`, etc.) plus helpers like `HtmlElementNode` for consumers that need direct access.
 
-- **ContainerNode** - General-purpose container, can have any child except `application` and `html`
-- **ApplicationNode** - Root node, adds children to `stage`, converts `raw` nodes to `TextNode`
-- **TextNode** - Special container that concatenates `raw` string children into text content
-- **HtmlElementNode** - DOM bridge, only accepts `application` as child
+---
 
-### Leaf Nodes (Cannot have children)
+## 2. Node Catalog & Responsibilities
 
-- **SpriteNode** - Image rendering, throws on any child addition
-- **GraphicsNode** - Vector graphics, throws on any child addition
-- **RawNode** - String literal, throws on any child addition
+### 2.1 Structural nodes
 
-## Key Mechanisms
+| Node | Responsibilities | Highlights |
+| --- | --- | --- |
+| `ApplicationNode` | root Pixi `Application` wrapper | buffers initialization props in `initializationProps`, converts raw children into `TextNode`s, attaches / removes children to the Pixi stage, inserts the canvas into the DOM inside `initialize()` |
+| `ContainerNode` | scene graph containers | enforces child invariants (`application`/`html` disallowed), resolves anchor positions with `resolveInsertIndex`, propagates attached render layers to children, supports untracked child management |
+| `RenderLayerNode` | transparent render-layer shim | owns a Pixi `RenderLayer`, queues children until `setParent` runs, automatically calls `ProxyNode.attachRenderLayer`, clears layer attachments on removal |
+| `HtmlElementNode` | DOM bridge | only accepts an `application` child, handles canvas insertion/removal from a host HTMLElement |
 
-### 1. Child Transformation via addChildProxy()
+### 2.2 Leaf nodes
 
-Nodes can return a **different node** than what was passed in:
+| Node | Responsibilities | Highlights |
+| --- | --- | --- |
+| `TextNode` | Pixi `Text` wrapper | only accepts `raw` children, concatenates strings in `recomputeProxy`, recreates the text string when children change |
+| `SpriteNode` | Pixi `Sprite` wrapper | rejects all children (throws on misuse), simply reflects prop updates onto the sprite |
+| `GraphicsNode` | Pixi `Graphics` wrapper | rejects children, used for imperative drawing with `createGraphics` helpers |
+| `RawNode` | JSX raw text node | wraps bare strings/numbers so Solid can treat them uniformly; transparent to Pixi |
 
-```typescript
-// ApplicationNode.ts:14
-override addChildProxy(node: ProxyDomNode) {
-    const child = node.tag === "raw" ? TextNode.create() : node;
-    this.container.stage.addChild(child.container);
-    return child; // Returns transformed child
-}
-```
+---
 
-This enables **automatic coercion**: raw text under `<application>` becomes a `<text>` node.
+## 3. Render Layer Propagation
 
-### 2. Parallel Child Arrays
+### 3.1 Attach semantics
+- When a `<render-layer>` intrinsic is encountered, `RenderLayerNode` creates a `RenderLayer` instance and stores it on `this.renderLayer`.
+- `addChildProxy` on `RenderLayerNode`:
+  1. Calls `child.setRenderLayer(this.renderLayer)`.
+  2. Optimistically attaches the layer to the child via `ProxyNode.attachRenderLayer`.
+  3. If the layer does not yet have a parent, queues the `(child, anchor)` pair in `pendingChildren`. Once `setParent` runs, the node flushes the queue by re-inserting children into the parent container.
 
-The base class tracks both:
-- `children[]` - What SolidJS thinks is there (source of truth)
-- `proxiedChildren[]` - What's actually in PixiJS scene graph
+### 3.2 Container cooperation
+- `ContainerNode.addChildProxy` attaches render-layer nodes directly to the container and keeps render-layer children in sync with Pixi ordering.
+- When removing a `RenderLayerNode`, `ContainerNode` detaches both the layer and any Pixi containers the layer had previously attached.
 
-Example: When you add a `RawNode` to `ApplicationNode`:
-- `children[0]` = RawNode instance
-- `proxiedChildren[0]` = TextNode instance (the transformed version)
+### 3.3 Transparent hierarchy
+- Render layer nodes never appear as Pixi display objects; instead, the underlying `RenderLayer` sits alongside the parent container’s children. This enables declarative JSX nesting while maintaining explicit ordering controls.
 
-### 3. Untracked Children System
+---
 
-ContainerNode (ContainerNode.ts:21) implements `addChildProxyUntracked()` to manage **direct PixiJS containers** outside the reactive system:
+## 4. Untracked Children (External Containers)
 
-```typescript
-override addChildProxyUntracked(untracked: Container) {
-    this.container.addChild(untracked);
-    this.untrackedChildren.push(untracked)
-}
+### 4.1 Use case
+- `ContainerNode` supports imperative Pixi children (e.g., via `<PixiExternalContainer>`) without Solid tracking their lifecycle.
+- `addChildProxyUntracked(container)` pushes the foreign container into Pixi, records it in `untrackedChildren`, and excludes it from `proxiedChildren`.
+- `removeChildProxyUntracked` detaches a specific container by Pixi UID.
+- `syncUntracked` re-inserts missing containers—used when a Pixi consumer manipulates the display list outside Sylph’s knowledge.
 
-override syncUntracked() {
-    for(const untracked of this.untrackedChildren){
-        if(!this.container.children.includes(untracked)){
-            this.container.children.push(untracked);
-        }
-    }
-}
-```
+### 4.2 Guarantees
+- Tracked Solid children remain in `children`/`proxiedChildren`, while untracked containers only appear inside the Pixi display tree. Consumers must clean up their own foreign containers on unmount to avoid leaks.
 
-This enables **imperative PixiJS manipulation** alongside reactive SolidJS code - useful for third-party PixiJS libraries or manual scene management.
+---
 
-### 4. TextNode's String Concatenation
+## 5. Text Handling
 
-TextNode (TextNode.ts:11) has unique logic - it **concatenates all raw children** into a single text value:
+### 5.1 Raw node ingestion
+- JSX raw strings become `RawNode` instances via the renderer’s `createTextNode`.
+- `TextNode.addChildProxy` asserts every child is `raw`; Solid’s renderer relies on this to throw early when developers attempt to nest elements under `<text>`.
 
-```typescript
-addChildProxy(node: ProxyDomNode, anchor?: ProxyDomNode): void {
-    expectNode(node, "raw", `unexpect tag for text`);
-    const nextText = this.children.reduce((acc, el, idx, arr) => {
-        // Complex anchor/insertion logic
-        return `${acc}${el.container}`;
-    }, "");
-    this.container.text = value;
-}
-```
+### 5.2 Recompute
+- `recomputeProxy` concatenates child `.container` values to produce the final text string (`this.container.text`).
+- Removal recomputes the string by skipping the removed child, ensuring partial updates (e.g., toggling falsy values) do not require rebuilding the entire node.
 
-This allows: `<text>{variable1} {variable2}</text>` to work reactively - each variable is a `RawNode` child.
+---
 
-### 5. ApplicationNode's Deferred Initialization
+## 6. Application Initialization
 
-ApplicationNode (ApplicationNode.ts:26) intercepts `setProp()` to **collect initialization props** before the PixiJS Application exists:
+### 6.1 Prop buffering
+- `ApplicationNode.setProp` stores all prop mutations in `initializationProps` instead of applying them directly.
+- During Solid’s mounting sequence, `ApplicationNode.initialize()`:
+  1. Validates its parent is an `HtmlElementNode` (`expectNode`).
+  2. Calls `app.init(initializationProps)` to initialize the Pixi renderer with the buffered options.
+  3. Calls `app.render()` once so the canvas has content before insertion.
+  4. Appends `app.canvas` to the parent HTML element.
 
-```typescript
-override setProp<T>(name: string, value: T) {
-    this.initializationProps[name] = value; // Store for later
-}
+### 6.2 Render layer compatibility
+- When children include `<render-layer>`, `ApplicationNode` ensures both the layer and the proxied children (converted text nodes, sprites, etc.) attach to the Pixi stage in proper order.
 
-async initialize(){
-    await this.container.init(this.initializationProps); // Apply all at once
-    this.container.render();
-    root.container.appendChild(this.container.canvas);
-}
-```
+---
 
-This solves a timing issue: SolidJS sets props before the Application can be initialized, so props are buffered and applied during `initialize()`.
+## 7. Solid Renderer Integration
 
-## Integration with SolidJS Universal Renderer
+### 7.1 Renderer contract (`solidjs-universal-renderer/index.ts`)
+- `createRenderer<ProxyDomNode>` implementation:
+  - `createElement` dispatches tag creation to `createProxiedPixieContainerNode`.
+  - `insertNode(parent, node, anchor)` delegates to `parent.addChild(node, anchor)`.
+  - `removeNode(parent, node)` delegates to `parent.removeChild(node)`.
+  - `replaceText` swaps a `RawNode` with a new instance via the parent’s `replaceChild`.
+  - `setProperty` calls `node.setProp`.
+  - `getFirstChild`, `getNextSibling`, `getParentNode` rely on `ProxyNode` sibling arrays and parent pointers.
+- The renderer never touches Pixi objects directly; it trusts each proxy class to enforce invariants.
 
-The renderer (solidjs-universal-renderer/index.ts:19) maps DOM operations to ProxyNode methods:
+### 7.2 Typing surface
+- `patched-types.ts` re-exports Solid primitives so project code can use `createSignal`, `createEffect`, `Show`, `For`, etc., without leaving the Pixi-adapted renderer context.
 
-```typescript
-createRenderer<ProxyDomNode>({
-    createElement(tag) {
-        return createProxiedPixieContainerNode(tag); // Factory function
-    },
-    insertNode(parent, node, anchor): void {
-        parent.addChild(node, anchor); // Uses dual-tracking
-    },
-    removeNode(parent, node): void {
-        parent.removeChild(node); // Cleans up both arrays
-    },
-    setProperty(node, name, value, prev): void {
-        node.setProp(name, value, prev); // Delegates to node
-    }
-})
-```
+---
 
-## Node Validation & Type Safety
+## 8. Validation Helpers
 
-Two utility functions enforce the scene graph rules:
+- `expectNode` and `expectNodeNot` (in `nodes/utility-node.ts`) throw descriptive errors when a node receives unsupported children or is removed from an illegal habitat.
+- `isNodeWithPixiContainer` type guard differentiates nodes that wrap actual Pixi display objects (`container`, `sprite`, `text`, `graphics`) from transparent wrappers (`raw`, `html`, `render-layer`, `application`).
+- These helpers make misconfiguration errors obvious at runtime, which is essential when debugging complex control flows like nested `<Show>` or `<For>` blocks.
 
-```typescript
-expectNode<Node, Tag>(node, tag, context)     // Assert node IS a tag
-expectNodeNot<Node, Tag>(node, context, ...tags) // Assert node is NOT tags
-```
+---
 
-Examples:
-- ApplicationNode: `expectNodeNot(node, "...", "application", "html")` - prevents nesting Applications
-- TextNode: `expectNode(node, "raw", "...")` - only allows raw strings
-- HtmlElementNode: `expectNode(node, "application", "...")` - enforces Application as only child
+## 9. Testing Signals
 
-## Design Patterns Summary
+- `src/pixi-jsx/__tests__/renderer/*.test.tsx` validate insertion/removal order, anchor handling, raw text behavior, and nested node traversal.
+- `render-layer.test.tsx` covers inheritance, mixed content, list updates, and regression cases (e.g., removing scoped raw text).
+- `untracked-children.test.tsx` ensures `addChildProxyUntracked` / `removeChildProxyUntracked` behave predictably under interleaved tracked children.
+- `node-ids.test.tsx` guarantees ID stability for Solid’s reconciliation.
 
-1. **Template Method Pattern** - ProxyNode defines the skeleton, subclasses implement specifics
-2. **Proxy Pattern** - ProxyNode wraps PixiJS objects with SolidJS-friendly interface
-3. **Factory Pattern** - `createProxiedPixieContainerNode()` creates appropriate node types
-4. **Command Pattern** - Props are captured and applied later (ApplicationNode)
-5. **Composite Pattern** - Tree structure with uniform interface
+---
 
-## Statistics
+## 10. Practical Guidance
 
-- **7 node types** total (340 lines combined)
-- **ContainerNode** is the only node supporting untracked children
-- **ApplicationNode** is the only node with deferred initialization
-- **TextNode** is the only node that concatenates children
-- **4 nodes** are pure leaf nodes (Sprite, Graphics, Raw, Html)
+1. **Add new intrinsics** by implementing a `ProxyNode` subclass, updating `createProxiedPixieContainerNode`, and expanding `JSX.IntrinsicElements`.
+2. **Be cautious with render layers**: transparent nodes rely on parents correctly honoring `setRenderLayer`. Follow the existing pattern inside `ContainerNode` when introducing new container-like nodes.
+3. **Use untracked children** sparingly: they bypass Solid’s cleanup guarantees. Always pair with `onCleanup` if you add imperative containers.
+4. **Debugging tips**: watch for descriptive `expectNode` errors when JSX structure doesn’t match expected child tags.
 
-## Key Insights
+---
 
-This architecture elegantly bridges the **declarative reactive world** of SolidJS with the **imperative scene graph** of PixiJS, while maintaining type safety and clear separation of concerns.
-
-The dual-tracking system is the key innovation that allows:
-- Transparent node transformation (raw → text)
-- Proper cleanup when nodes are removed
-- Integration with imperative PixiJS code via untracked children
-- Type-safe scene graph validation
-
-The design follows functional programming principles while managing mutable PixiJS state internally, providing a clean reactive interface to consumers.
+The Proxy DOM system enables Sylph to present a declarative JSX surface while staying tightly aligned with Pixi’s imperative display list. By isolating all Pixi mutations inside proxy classes and keeping Solid’s renderer oblivious to Pixi internals, the architecture remains both testable and extensible.
