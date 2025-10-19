@@ -1,6 +1,5 @@
-<div id="user-content-toc">
-<h1 align="center">Sylph.jsx</h1>
-</div>
+
+<h2 align="center">sylph.jsx</h2>
 <p align="center">
     <img height="120" src="./assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
 </p>
