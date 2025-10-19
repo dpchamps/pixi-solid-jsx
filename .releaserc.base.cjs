@@ -1,14 +1,7 @@
-const branch = process.env.GITHUB_REF_NAME || 'main';
-const isStableRelease = branch === 'release';
-
 module.exports = {
   extends: 'semantic-release-monorepo',
   branches: [
     '+([0-9])?(.{+([0-9]),x}).x',
-    {
-      name: 'release',
-      channel: 'latest',
-    },
     {
       name: 'main',
       channel: 'dev',
@@ -63,19 +56,8 @@ module.exports = {
         tarballDir: 'dist',
       },
     ],
-    // Only commit version changes on stable releases (not dev)
-    ...(isStableRelease
-      ? [
-          [
-            '@semantic-release/git',
-            {
-              assets: ['package.json', 'CHANGELOG.md'],
-              message:
-                'chore(release): ${nextRelease.gitTag} [skip ci]\n\n${nextRelease.notes}',
-            },
-          ],
-        ]
-      : []),
+    // Note: No @semantic-release/git plugin - dev releases don't commit back
+    // Stable releases are handled by a separate workflow
     '@semantic-release/github',
   ],
 };
