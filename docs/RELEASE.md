@@ -77,57 +77,6 @@ docs(sylph-jsx): update installation instructions
 refactor(sylph-jsx): simplify event handler logic
 ```
 
-## Development Workflow
-
-### 1. Making Changes
-
-1. Create a feature branch from `main`
-2. Make your changes
-3. Commit using conventional commit format (enforced by commitlint)
-4. Push and create a PR to `main`
-
-### 2. Dev Releases (Automatic)
-
-When a PR is merged to `main`:
-
-1. GitHub Actions runs automatically
-2. Semantic-release analyzes commits since last release
-3. Publishes a dev release: `x.y.z-dev.N` to npm with `@dev` tag
-4. Updates CHANGELOG.md
-5. Creates a GitHub release (prerelease)
-
-**Install dev releases:**
-```bash
-npm install sylph-jsx@dev
-```
-
-### 3. Stable Releases (Manual)
-
-When you're ready to publish a stable version:
-
-1. Create a PR from `main` to `release` branch
-2. Review the accumulated changes and CHANGELOG
-3. Merge the PR
-
-On merge to `release`:
-
-1. GitHub Actions runs with full test suite
-2. Semantic-release analyzes all commits since last stable release
-3. Determines version bump based on conventional commits:
-   - BREAKING CHANGE → major (1.0.0 → 2.0.0)
-   - feat → minor (1.0.0 → 1.1.0)
-   - fix/perf/refactor → patch (1.0.0 → 1.0.1)
-4. Publishes stable release to npm with `@latest` tag
-5. Updates CHANGELOG.md
-6. Creates a GitHub release
-
-**Install stable releases:**
-```bash
-npm install sylph-jsx
-# or explicitly
-npm install sylph-jsx@latest
-```
-
 ## Package Versioning
 
 This monorepo uses **independent versioning** powered by `semantic-release-monorepo`:
@@ -135,7 +84,7 @@ This monorepo uses **independent versioning** powered by `semantic-release-monor
 - `sylph-jsx` - Versioned and published independently
 - `sylph-examples` - Private package, not published
 
-Each publishable package has its own `.releaserc.js` configuration that extends the shared base configuration at `.releaserc.base.js`.
+Each publishable package has its own `.releaserc.cjs` configuration that extends the shared base configuration at `.releaserc.base.cjs`.
 
 **Key behavior:**
 - **Dev releases** (on `main`): Version is published to npm but **not committed back** to git. The package.json version stays at the last stable release.
@@ -147,9 +96,9 @@ To add a new publishable package:
 
 1. **Create the package** in `packages/your-package/`
 
-2. **Add `.releaserc.js`** that extends the base config:
+2. **Add `.releaserc.cjs`** that extends the base config:
    ```javascript
-   const baseConfig = require('../../.releaserc.base.js');
+   const baseConfig = require('../../.releaserc.base.cjs');
 
    module.exports = {
      ...baseConfig,
@@ -176,26 +125,8 @@ The semantic-release-monorepo plugin will automatically skip packages without ch
 
 ### GitHub Secrets
 
-
 - `NPM_ACCESS_TOKEN`
 
-## Troubleshooting
-
-### Commits not triggering releases
-
-- Ensure commit messages follow conventional commits format
-- Check that commit type triggers a release (see types above)
-- Dev releases only happen on `main`, stable only on `release`
-
-
-## Manual Testing
-
-To test semantic-release locally (dry-run, won't publish):
-
-```bash
-cd packages/sylph-jsx
-npx semantic-release --dry-run --no-ci
-```
 
 ## Branch Strategy
 

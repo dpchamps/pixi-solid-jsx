@@ -1,4 +1,4 @@
-const baseConfig = require('../../.releaserc.base.js');
+const baseConfig = require('../../.releaserc.base.cjs');
 
 module.exports = {
   ...baseConfig,
