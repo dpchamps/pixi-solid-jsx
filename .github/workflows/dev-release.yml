@@ -49,14 +49,15 @@ jobs:
             echo "No previous release found, will release"
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else
-            # Check if there are commits for this package since last release
-            COMMITS=$(git log $LAST_TAG..HEAD --oneline -- packages/${{ matrix.package }}/ | wc -l)
+            # Check if there are commits with the correct scope for this package since last release
+            # semantic-release-monorepo only processes commits like "feat(sylph-jsx):" or "fix(sylph-jsx):"
+            COMMITS=$(git log $LAST_TAG..HEAD --oneline --grep="^[a-z]*(\(${{ matrix.package }}\))" --extended-regexp | wc -l)
 
             if [ "$COMMITS" -gt 0 ]; then
-              echo "Found $COMMITS commits since $LAST_TAG"
+              echo "Found $COMMITS scoped commits since $LAST_TAG"
               echo "has_changes=true" >> $GITHUB_OUTPUT
             else
-              echo "No commits since $LAST_TAG, skipping release"
+              echo "No scoped commits since $LAST_TAG, skipping release"
               echo "has_changes=false" >> $GITHUB_OUTPUT
             fi
           fi
