@@ -30,7 +30,7 @@ Peer dependencies:
 
 ## Overview
 
-Sylph uses the [SolidJS Universal Renderer](./packages/sylph-jsx/src/pixi-jsx/solidjs-universal-renderer/index.ts) to construct
+Sylph uses the [SolidJS Universal Renderer](./src/pixi-jsx/solidjs-universal-renderer/index.ts) to construct
 a PixiJS container hierarchy.
 
 Additionally, it provides top-level mechanisms for writing declarative components with fine-grained reactivity. Effects
@@ -86,14 +86,11 @@ reactive primitives they're dependent on are triggered. Read more about fine-gra
 
 Sylph's fine-grained reactivity enables performance characteristics that are difficult to achieve with traditional component-based rendering:
 
-- **Frame-synchronized effects**: All reactive updates are scheduled to perform in a single tick.
-  - The scheduler will flush as many effect-cascades as possible within a budgeted frame window
-- **Granular updates**: Only the specific properties that changed are updated, not entire component trees.
-  - If a sprite's `x` position changes, only that property is set—nothing else re-renders.
+- **Frame-synchronized effects**: All reactive updates are batched and executed within a single frame, collapsing multi-frame input latency (input → state → derived state → render) into a single tick.
+- **Granular updates**: Only the specific properties that changed are updated, not entire component trees. If a sprite's `x` position changes, only that property is set—nothing else re-renders.
+- **Predictable performance**: Effects are processed within a frame budget to prevent frame drops, with graceful degradation if the cascade exceeds the limit.
 
-**Examples**:
-
-- [BasicReactivityLoadTest](./packages/sylph-examples/readme-examples/BasicReactivityLoadTest.tsx) demonstrates 3,000+ individually tracked sprites, each with reactive position, scale, and rotation properties updating in real-time using coroutine-based easing animations—all while maintaining 60fps with minimal performance impact.
+**Real-world performance**: The [BasicReactivityLoadTest](./sandbox/readme-examples/BasicReactivityLoadTest.tsx) demonstrates 3,000+ individually tracked sprites, each with reactive position, scale, and rotation properties updating in real-time using coroutine-based easing animations—all while maintaining 60fps with minimal performance impact.
 
 This makes Sylph particularly well-suited for interactive visualizations, 2D games, and real-time data displays where declarative code and smooth performance are both important.
 
@@ -174,7 +171,7 @@ a PixiJS container. See [#pixiexternalcontainer](#pixiexternalcontainer) below f
 ```bash
 npm install
 npm run test # run test suite with watch, show coverage
-npm run dev -w slyph-examples # run the sandbox app
+npm run dev # run the sandbox app
 ```
 
 ## Quick start
@@ -242,7 +239,7 @@ Wrap a subtree in a PixiJS `RenderLayer`. Useful for independent z-sorting, comp
 </render-layer>
 ```
 
-## Frame-aware query functions [src/engine/core/query-fns.ts](./packages/sylph-jsx/src/engine/core/query-fns.ts)
+## Frame-aware query functions [src/engine/core/query-fns.ts](./src/engine/core/query-fns.ts)
 
 ### createSynchronizedEffect(query, effect, owner?)
 

@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "outFile": "./dist/jsx-runtime.d.ts",
+    "emitDeclarationOnly": true,
+    "declaration": true
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+}
