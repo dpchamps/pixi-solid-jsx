@@ -1,11 +1,3 @@
-## Ways of Working
-
-### Planning
-When generating a plan, always output the current
-task plan in `.config/claude/current-task.md`.
-Update the plan as you complete it. When finished, move to a new file
-and clear `current-task.md`.
-
 ## Code Style Guide
 
 When writing code for this project, follow these established patterns:
