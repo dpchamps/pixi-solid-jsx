@@ -12,7 +12,8 @@
   "files": [
     "dist",
     "README.md",
-    "jsx-runtime.d.ts"
+    "jsx-runtime.d.ts",
+    "src/pixi-jsx/jsx"
   ],
   "keywords": [
     "typescript",
