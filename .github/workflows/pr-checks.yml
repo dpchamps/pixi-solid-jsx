@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
 
 jobs:
   test:
@@ -27,3 +30,13 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Upload coverage
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          files: packages/sylph-jsx/coverage/lcov.info
+          flags: sylph-jsx
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

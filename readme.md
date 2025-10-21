@@ -2,6 +2,11 @@
 <p align="center">
     <img height="120" src="https://raw.githubusercontent.com/dpchamps/sylph.jsx/main/assets/logos/feather-circle-transparent.png" alt="SylphJsx Logo">
 </p>
+<p align="center">
+    <a href="https://www.npmjs.com/package/sylph-jsx"><img src="https://img.shields.io/npm/v/sylph-jsx?label=npm%20latest" alt="npm version"></a>
+    <a href="https://github.com/dpchamps/sylph.jsx/actions/workflows/pr-checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/dpchamps/sylph.jsx/pr-checks.yml?branch=main" alt="PR Checks status"></a>
+    <a href="https://app.codecov.io/gh/dpchamps/sylph.jsx"><img src="https://img.shields.io/codecov/c/github/dpchamps/sylph.jsx?branch=main&label=coverage" alt="Coverage"></a>
+</p>
 <p  align="center">
     <em>A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences.</em>
 </p>
