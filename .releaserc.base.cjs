@@ -50,13 +50,6 @@ module.exports = {
         tarballDir: 'dist',
       },
     ],
-    [
-      '@semantic-release/git',
-      {
-        assets: ['package.json', 'CHANGELOG.md'],
-        message: 'chore(release): ${nextRelease.gitTag} [skip ci]\n\n${nextRelease.notes}',
-      },
-    ],
     '@semantic-release/github',
   ],
 };
