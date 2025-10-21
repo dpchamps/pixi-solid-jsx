@@ -13,7 +13,7 @@ export default defineConfig({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["pixi.js", "solid-js"],
+      external: ["pixi.js"],
     },
     copyPublicDir: false,
   },
@@ -27,10 +27,6 @@ export default defineConfig({
     }),
     dts({
       rollupTypes: true,
-      tsconfigPath:
-        process.env["VITE_STAGE"] === "DEV"
-          ? "tsconfig.json"
-          : "tsconfig.build.json",
     }),
   ],
 });
