@@ -5,16 +5,14 @@
   "main": "./dist/index.js",
   "scripts": {
     "test": "vitest",
-    "dev": "VITE_STAGE=DEV vite",
-    "build": "npm run build:core && npm run build:runtime",
-    "build:core": "vite build",
-    "build:runtime": "tsc -b ./tsconfig.jsx-runtime.json",
+    "build": "vite build",
     "typecheck": "tsc -p tsconfig.build.json --noEmit"
   },
   "type": "module",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "jsx-runtime.d.ts"
   ],
   "keywords": [
     "typescript",
@@ -34,10 +32,10 @@
     "@solid-primitives/deep": "^0.2.9",
     "css": "^3.0.0",
     "shallow-equal": "^3.1.0",
+    "solid-js": "1.9.4",
     "vite-plugin-solid": "2.11.9"
   },
   "peerDependencies": {
-    "pixi.js": "8.14.0",
-    "solid-js": "1.9.4"
+    "pixi.js": "8.14.0"
   }
 }

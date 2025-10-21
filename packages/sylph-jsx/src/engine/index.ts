@@ -1,4 +1,6 @@
+export * from "./core/query-fns.ts";
 export * from "./core/time.ts";
+export * from "./core/game-loop-context.ts";
 
 export * from "./effects/coroutines.ts";
 export * from "./effects/createAsset.ts";

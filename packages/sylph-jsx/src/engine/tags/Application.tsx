@@ -44,21 +44,6 @@ export const useApplicationState = () => {
 };
 
 /**
- * @deprecated Use {@link createSynchronizedEffect} from "engine/core/query-fns" instead.
- */
-export type OnNextFrameQuery<QueryResult> = {
-  query: (applicationState: ApplicationState) => QueryResult;
-  tick: (queryResult: QueryResult) => void;
-};
-
-/**
- * @deprecated Use {@link createSynchronizedEffect} from "engine/core/query-fns" instead.
- */
-export function onNextFrame<QueryResult>(_args: OnNextFrameQuery<QueryResult>) {
-  throw new Error("On Next Frame is deprecated");
-}
-
-/**
  * Root component that initializes a PixiJS Application and integrates it with SolidJS's reactive system.
  *
  * **Core Responsibilities:**
