@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import {beforeAll, describe, expect, test, vi} from "vitest";
 import { createSignal } from "solid-custom-renderer/index.ts";
 import {
   CoroutineControl,
@@ -13,6 +13,9 @@ import { Sprite, Text } from "pixi.js";
 import { createSynchronizedEffect } from "../../../core/query-fns.ts";
 
 describe("startCoroutine", () => {
+  beforeAll(() => {
+    vi.useFakeTimers();
+  })
   describe("basic execution", () => {
     test("executes generator function frame by frame", async () => {
       const TestComponent = () => {

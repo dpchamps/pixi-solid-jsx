@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import {beforeAll, describe, expect, test} from "vitest";
 import { createSignal } from "solid-custom-renderer/index.ts";
 import {
   chainCoroutine,
@@ -11,8 +11,12 @@ import {
 import { renderApplicationWithFakeTicker } from "../../../../__tests__/test-utils/test-utils.tsx";
 import { invariant } from "../../../../utility-types.ts";
 import { Container, Sprite, Text } from "pixi.js";
+import {vi} from "vitest";
 
 describe("coroutine composition", () => {
+  beforeAll(() => {
+    vi.useFakeTimers();
+  })
   describe("chainCoroutine", () => {
     test("executes coroutines sequentially", async () => {
       const TestComponent = () => {

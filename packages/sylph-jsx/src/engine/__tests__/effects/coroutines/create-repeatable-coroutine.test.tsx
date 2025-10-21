@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import {beforeAll, describe, expect, test, vi} from "vitest";
 import { createSignal } from "solid-custom-renderer/index.ts";
 import {
   CoroutineControl,
@@ -13,6 +13,10 @@ import { assert, invariant } from "../../../../utility-types.ts";
 import { Sprite, Text } from "pixi.js";
 
 describe("createRepeatableCoroutine", () => {
+  beforeAll(() => {
+    vi.useFakeTimers();
+  })
+
   describe("basic repeating behavior", () => {
     test("automatically repeats coroutine after completion", async () => {
       const TestComponent = () => {
