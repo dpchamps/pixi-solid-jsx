@@ -6,7 +6,7 @@
   "scripts": {
     "test": "vitest",
     "build": "vite build",
-    "typecheck": "tsc -p tsconfig.build.json --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "type": "module",
   "files": [
