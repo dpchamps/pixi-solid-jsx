@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { createSignal, Show } from "../../solidjs-universal-renderer";
 import { Text, Container } from "pixi.js";
-import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils";
 
 describe("conditional rendering", () => {
   test("Show component adds and removes nodes", async () => {

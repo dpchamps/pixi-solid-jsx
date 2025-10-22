@@ -1,17 +1,16 @@
-import { JSX } from "../../pixi-jsx/jsx/jsx-runtime.ts";
+import { JSX } from "../../pixi-jsx/jsx/jsx-runtime.js";
 import {
   createContext,
   createSignal,
-  onMount,
   useContext,
   createResource,
   Show,
-} from "solid-custom-renderer/index.ts";
+} from "../../pixi-jsx/solidjs-universal-renderer/index.js";
 import { Application as PixiApplication, Ticker } from "pixi.js";
-import { invariant, Maybe } from "../../utility-types.ts";
-import { ApplicationNode } from "../../pixi-jsx/proxy-dom";
-import { createTimer } from "../core/time.ts";
-import { GameLoopContextProvider } from "./GameLoopContextProvider.tsx";
+import { invariant, Maybe } from "../../utility-types.js";
+import { ApplicationNode } from "../../pixi-jsx/proxy-dom/index.js";
+import { createTimer } from "../core/time.js";
+import { GameLoopContextProvider } from "./GameLoopContextProvider.jsx";
 import { initDevtools } from "@pixi/devtools";
 /**
  * Application state provided to all child components via ApplicationContext.
@@ -104,7 +103,6 @@ export const useApplicationState = () => {
  */
 export const Application = (props: JSX.IntrinsicElements["application"]) => {
   const [application, setApplication] = createSignal<ApplicationNode>();
-  const [mount, setOnMount] = createSignal(false);
   const scheduledEffects = new Map<string, (ticker: Ticker) => void>();
   const timer = createTimer({
     nextFrameFns: scheduledEffects,
@@ -114,9 +112,7 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
     application: null as Maybe<ApplicationState["application"]>,
   };
 
-  const [applicationReady] = createResource(mount, async () => {
-    const app = application();
-    invariant(app);
+  const [applicationReady] = createResource(application, async (app) => {
     await initDevtools({ app: app.container });
     /**
      * @warn
@@ -132,10 +128,6 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
     timer.ticker.start();
     applicationState.application = app.container;
     return true;
-  });
-
-  onMount(() => {
-    setOnMount(true);
   });
 
   const fallback = props.loadingState ?? <text>Loading...</text>;

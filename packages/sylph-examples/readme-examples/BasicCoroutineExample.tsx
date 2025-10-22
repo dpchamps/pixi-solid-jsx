@@ -11,9 +11,8 @@ import {
   linear,
 } from "sylph-jsx";
 import { Texture } from "pixi.js";
-import { CoroutineContainer } from "sylph-jsx/src/engine/tags/extensions/CoroutineContainer.tsx";
-import { For, createSignal } from "sylph-jsx/src/pixi-jsx";
-import { PixiNodeProps } from "jsx-runtime/jsx-node.ts";
+import { CoroutineContainer } from "sylph-jsx";
+import { For, createSignal, PixiNodeProps } from "sylph-jsx";
 
 const easingFns = [
   linear,

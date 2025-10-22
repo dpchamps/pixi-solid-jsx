@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { Container } from "pixi.js";
-import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils";
 import { ContainerNode } from "../../proxy-dom";
 
 describe("untracked child operations", () => {

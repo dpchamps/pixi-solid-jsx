@@ -1,5 +1,4 @@
-import { createSignal } from "solid-custom-renderer/patched-types.ts";
-import { createAsset } from "sylph-jsx";
+import { createAsset, createSignal } from "sylph-jsx";
 import { Texture } from "pixi.js";
 
 export const ClickSpriteExample = () => {

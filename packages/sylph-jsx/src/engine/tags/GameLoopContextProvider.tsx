@@ -1,5 +1,5 @@
-import { GameLoopContext } from "../core/game-loop-context.ts";
-import { JSX } from "jsx-runtime/jsx-runtime.ts";
+import { GameLoopContext } from "../core/game-loop-context.js";
+import { JSX } from "../../pixi-jsx/jsx/jsx-runtime.js";
 
 /**
  * Props for GameLoopContextProvider component.
@@ -7,6 +7,7 @@ import { JSX } from "jsx-runtime/jsx-runtime.ts";
 type GameLoopContextProviderProps = JSX.PixieNodeProps<{
   gameLoopContext: GameLoopContext;
 }>;
+debugger;
 
 /**
  * Low-level provider component that makes game loop state available to all child components.

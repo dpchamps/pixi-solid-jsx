@@ -1,4 +1,4 @@
-import { UnknownRecord } from "../../utility-types.ts";
+import { UnknownRecord } from "../../utility-types.js";
 import {
   TextOptions,
   ApplicationOptions,
@@ -15,10 +15,10 @@ import {
   ProxyDomNode,
   SpriteNode,
   TextNode,
-} from "../proxy-dom";
-import { Setter } from "../solidjs-universal-renderer";
-import { GraphicsNode } from "../proxy-dom/nodes/Graphics.ts";
-import { RenderLayerNode } from "../proxy-dom/nodes/RenderLayerNode.ts";
+} from "../proxy-dom/index.js";
+import { Setter } from "../solidjs-universal-renderer/index.js";
+import { GraphicsNode } from "../proxy-dom/nodes/Graphics.js";
+import { RenderLayerNode } from "../proxy-dom/nodes/RenderLayerNode.js";
 
 export type UnknownNodeProps = Record<string, unknown>;
 export type PixiNodeProps<

@@ -5,8 +5,8 @@ import {
   onCleanup,
   runWithOwner,
   createUniqueId,
-} from "solid-custom-renderer/index.ts";
-import { useGameLoopContext } from "./game-loop-context.ts";
+} from "../../pixi-jsx/solidjs-universal-renderer/index.js";
+import { useGameLoopContext } from "./game-loop-context.js";
 import { Ticker } from "pixi.js";
 import { Accessor } from "solid-js";
 

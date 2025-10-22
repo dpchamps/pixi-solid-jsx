@@ -1,8 +1,8 @@
-import { ProxyNode } from "./Node.ts";
-import { ProxyDomNode } from "./types.ts";
+import { ProxyNode } from "./Node.js";
+import { ProxyDomNode } from "./types.js";
 import { Container } from "pixi.js";
-import { invariant } from "../../../utility-types.ts";
-import { expectNodeNot, isNodeWithPixiContainer } from "./utility-node.ts";
+import { invariant } from "../../../utility-types.js";
+import { expectNodeNot, isNodeWithPixiContainer } from "./utility-node.js";
 
 export class ContainerNode extends ProxyNode<
   "container",

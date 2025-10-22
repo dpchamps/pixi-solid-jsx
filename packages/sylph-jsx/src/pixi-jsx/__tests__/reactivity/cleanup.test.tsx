@@ -6,7 +6,7 @@ import {
   onCleanup,
 } from "../../solidjs-universal-renderer";
 import { Text, Container } from "pixi.js";
-import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils";
 
 describe("cleanup and memory management", () => {
   test("removed nodes no longer appear in scene", async () => {

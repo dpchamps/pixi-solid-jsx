@@ -1,4 +1,4 @@
-import { lerp } from "./Math.ts";
+import { lerp } from "./Math.js";
 
 type BaseEasingFunction = (t: number) => number;
 

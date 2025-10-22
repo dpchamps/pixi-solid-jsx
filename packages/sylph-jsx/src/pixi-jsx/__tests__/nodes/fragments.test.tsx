@@ -6,7 +6,7 @@ import {
   Index,
 } from "../../solidjs-universal-renderer";
 import { Text, Container, RenderLayer } from "pixi.js";
-import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils";
 
 describe("Fragment nodes", () => {
   test("basic fragment renders children to parent", async () => {

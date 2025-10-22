@@ -1,4 +1,3 @@
-import { createSignal, Index } from "solid-custom-renderer/patched-types.ts";
 import {
   circularIn,
   createAsset,
@@ -11,12 +10,13 @@ import {
   invariant,
   linear,
   Maybe,
+  createSignal,
+  Index,
+  CoroutineContainer,
+  onEveryFrame,
+  PixiNodeProps,
 } from "sylph-jsx";
 import { Texture } from "pixi.js";
-import { CoroutineContainer } from "sylph-jsx/src/engine/tags/extensions/CoroutineContainer.tsx";
-import { FpsCounter } from "../example-1/FpsCounter.tsx";
-import { onEveryFrame } from "sylph-jsx/src/engine/core/query-fns.ts";
-import { PixiNodeProps } from "jsx-runtime/jsx-node.ts";
 
 const SPRITE_MAX = 3000;
 const easingFns = [
@@ -51,7 +51,6 @@ const DemoText = (props: PixiNodeProps<{ activeCount: number }>) => {
           <sprite x={1000} width={500} height={300} texture={Texture.WHITE} />
         </container>
       </container>
-      <FpsCounter />
     </render-layer>
   );
 };

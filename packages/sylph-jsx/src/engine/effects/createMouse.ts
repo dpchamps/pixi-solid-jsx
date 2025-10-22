@@ -2,8 +2,8 @@ import {
   createComputed,
   createSignal,
   onCleanup,
-} from "solid-custom-renderer/patched-types.ts";
-import { Point } from "../libs/Point.ts";
+} from "../../pixi-jsx/solidjs-universal-renderer/patched-types.js";
+import { Point } from "../libs/Point.js";
 
 type ButtonType =
   | "Main"

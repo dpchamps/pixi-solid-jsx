@@ -1,7 +1,10 @@
-import { createAsset, createWindowDimensions } from "sylph-jsx";
-import { onEveryFrame } from "sylph-jsx/src/engine/core/query-fns.ts";
+import {
+  createAsset,
+  createWindowDimensions,
+  onEveryFrame,
+  createSignal,
+} from "sylph-jsx";
 import { Texture } from "pixi.js";
-import { createSignal } from "solid-custom-renderer/index.ts";
 
 export const BasicExample = () => {
   const [rotation, setRotation] = createSignal(0);

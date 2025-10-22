@@ -2,8 +2,8 @@ import {
   Accessor,
   createContext,
   useContext,
-} from "solid-custom-renderer/index.ts";
-import { invariantUseContext } from "../../utility-types.ts";
+} from "../../pixi-jsx/solidjs-universal-renderer/index.js";
+import { invariantUseContext } from "../../utility-types.js";
 import { Ticker } from "pixi.js";
 
 /**
@@ -22,8 +22,8 @@ export type GameLoopContext = {
   scheduledEffects: Map<string, (ticker: Ticker) => void>;
 };
 
+debugger;
 export const GameLoopContext = createContext<GameLoopContext>();
-
 /**
  * Hook to access the game loop context from any child component.
  *

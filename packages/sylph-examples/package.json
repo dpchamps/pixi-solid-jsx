@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "VITE_STAGE=DEV vite",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint": "eslint '**/*.{ts,tsx,js,jsx}' --max-warnings 0"
   },
   "type": "module",
   "dependencies": {
-    "sylph-jsx": "*"
+    "sylph-jsx": "0.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",

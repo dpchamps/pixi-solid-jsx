@@ -1,7 +1,7 @@
-import { lerp } from "../libs/Math.ts";
-import { createSignal } from "solid-custom-renderer/patched-types.ts";
-import { unreachable } from "../../utility-types.ts";
-import { onEveryFrame } from "../core/query-fns.ts";
+import { lerp } from "../libs/Math.js";
+import { createSignal } from "../../pixi-jsx/solidjs-universal-renderer/patched-types.js";
+import { unreachable } from "../../utility-types.js";
+import { onEveryFrame } from "../core/query-fns.js";
 
 export type GeneratorYieldResult =
   | GeneratorStop

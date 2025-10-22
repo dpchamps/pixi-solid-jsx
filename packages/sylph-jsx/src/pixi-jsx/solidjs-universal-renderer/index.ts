@@ -1,10 +1,10 @@
 import { createRenderer } from "solid-js/universal";
-import { invariant } from "../../utility-types.ts";
+import { invariant } from "../../utility-types.js";
 import {
   createProxiedPixieContainerNode,
   ProxyDomNode,
   RawNode,
-} from "../proxy-dom";
+} from "../proxy-dom/index.js";
 
 export const {
   render,
@@ -61,4 +61,4 @@ export const {
   },
 });
 
-export * from "./patched-types.ts";
+export * from "./patched-types.js";

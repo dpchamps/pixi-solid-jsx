@@ -1,4 +1,3 @@
-import { createSignal, Show } from "solid-custom-renderer/index.ts";
 import {
   createAsset,
   createWindowDimensions,
@@ -8,8 +7,10 @@ import { Texture } from "pixi.js";
 import {
   createSynchronizedEffect,
   onEveryFrame,
-} from "sylph-jsx/src/engine/core/query-fns.ts";
-import { PixiNodeProps } from "jsx-runtime/jsx-node.ts";
+  PixiNodeProps,
+  createSignal,
+  Show,
+} from "sylph-jsx";
 import { createControllerDirection } from "../example-1/createControllerDirection.ts";
 import { createController } from "../example-1/createController.ts";
 import { Accessor } from "solid-js";

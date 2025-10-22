@@ -1,6 +1,6 @@
 import { createRoot } from "solid-js";
-import { JSX } from "jsx-runtime/jsx-runtime.ts";
-import { render } from "solid-custom-renderer/index.ts";
+import { JSX } from "../../pixi-jsx/jsx/jsx-runtime";
+import { render } from "../../pixi-jsx/solidjs-universal-renderer/index";
 import {
   HtmlElementNode,
   ProxyDomNode,

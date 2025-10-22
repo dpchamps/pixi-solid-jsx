@@ -2,8 +2,8 @@ import { describe, test, expect } from "vitest";
 import { createSignal } from "../../../pixi-jsx/solidjs-universal-renderer";
 import { createSynchronizedEffect, onEveryFrame } from "../../core/query-fns";
 import { Text, Sprite, Container } from "pixi.js";
-import { renderApplicationWithFakeTicker } from "../../../__tests__/test-utils/test-utils.tsx";
-import { invariant, assert } from "../../../utility-types.ts";
+import { renderApplicationWithFakeTicker } from "../../../__tests__/test-utils/test-utils";
+import { invariant, assert } from "../../../utility-types";
 import { vi, beforeAll, afterEach, afterAll } from "vitest";
 
 describe("createSynchronizedEffect", () => {

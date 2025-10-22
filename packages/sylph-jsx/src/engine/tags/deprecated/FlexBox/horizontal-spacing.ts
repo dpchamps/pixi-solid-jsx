@@ -1,4 +1,4 @@
-import { SpacingFn } from "./types.ts";
+import { SpacingFn } from "./types.js";
 
 const nextRow: SpacingFn = (el, _index, parentBoxModel, acc) => {
   const offsetX = parentBoxModel.padding + parentBoxModel.margin;

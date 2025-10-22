@@ -6,7 +6,7 @@ import {
   Index,
 } from "../../solidjs-universal-renderer";
 import { Text, Container, RenderLayer, Sprite } from "pixi.js";
-import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils";
 
 describe("RenderLayer node", () => {
   test("render-layer is added to parent container as RenderLayer instance", async () => {

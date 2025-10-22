@@ -1,4 +1,4 @@
-import { ProxyNode } from "../../../../pixi-jsx/proxy-dom/nodes/Node.ts";
+import { ProxyNode } from "../../../../pixi-jsx/proxy-dom/nodes/Node.js";
 
 export type FlexBoxOrientation = "vertical" | "horizontal";
 

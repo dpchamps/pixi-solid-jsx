@@ -1,7 +1,5 @@
 import { renderRoot } from "sylph-jsx";
 import { Main } from "./Main.tsx";
-import { Game } from "./example-1/Game.tsx";
-// import {Scene1} from "./example-1/Scene1.tsx";
 
 const main = async () => {
   const start = performance.now();

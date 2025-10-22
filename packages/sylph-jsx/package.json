@@ -3,17 +3,42 @@
   "version": "0.0.0",
   "description": "A lightweight, SolidJS-powered runtime for building declarative PixiJS experiences",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./jsx-runtime": {
+      "types": "./jsx-runtime.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./jsx-runtime.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "jsx-runtime": [
+        "./jsx-runtime.d.ts"
+      ],
+      "jsx-dev-runtime": [
+        "./jsx-runtime.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "test": "vitest",
-    "build": "vite build",
-    "typecheck": "tsc --noEmit"
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' --max-warnings 0"
   },
   "type": "module",
   "files": [
     "dist",
     "README.md",
-    "jsx-runtime.d.ts",
-    "src/pixi-jsx/jsx"
+    "jsx-runtime.d.ts"
   ],
   "keywords": [
     "typescript",
@@ -33,10 +58,13 @@
     "@solid-primitives/deep": "^0.2.9",
     "css": "^3.0.0",
     "shallow-equal": "^3.1.0",
-    "solid-js": "1.9.4",
     "vite-plugin-solid": "2.11.9"
   },
   "peerDependencies": {
-    "pixi.js": "8.14.0"
+    "pixi.js": "8.14.0",
+    "solid-js": "1.9.4"
+  },
+  "devDependencies": {
+    "tsc-alias": "^1.8.16"
   }
 }

@@ -1,5 +1,5 @@
-import { ProxyNode } from "./Node.ts";
-import { ProxyDomNode } from "./types.ts";
+import { ProxyNode } from "./Node.js";
+import { ProxyDomNode } from "./types.js";
 import { Sprite } from "pixi.js";
 
 export class SpriteNode extends ProxyNode<"sprite", Sprite, ProxyDomNode> {

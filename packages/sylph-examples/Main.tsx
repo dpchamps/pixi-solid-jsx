@@ -1,4 +1,4 @@
-import { Application } from "sylph-jsx/src/engine/tags/Application.tsx";
+import { Application } from "sylph-jsx";
 import { BasicExample } from "./readme-examples/BasicExample.tsx";
 import { createWindowDimensions } from "sylph-jsx";
 import { ClickSpriteExample } from "./readme-examples/ClickSpriteExample.tsx";

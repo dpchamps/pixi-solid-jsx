@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { createSignal } from "../../../pixi-jsx/solidjs-universal-renderer";
 import { Container, Text } from "pixi.js";
-import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils";
 import { PixiExternalContainer } from "../../../engine/tags/PixiExternalContainer";
 
 describe("PixiExternalContainer", () => {
