@@ -1,7 +1,7 @@
 import {
   createComputed,
   createSignal,
-} from "solid-custom-renderer/patched-types.ts";
+} from "../../pixi-jsx/solidjs-universal-renderer/patched-types.js";
 
 type WindowDimensions = {
   innerWidth: number;

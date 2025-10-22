@@ -1,10 +1,10 @@
-export * from "solid-custom-renderer/index.ts";
-export * from "./jsx/jsx-runtime.ts";
+export * from "./solidjs-universal-renderer/index.js";
+export * from "./jsx/jsx-runtime.js";
 
 import { createRoot } from "solid-js";
-import { JSX } from "jsx-runtime/jsx-runtime.ts";
-import { HtmlElementNode } from "./proxy-dom";
-import { render } from "solid-custom-renderer/index.ts";
+import { JSX } from "./jsx/jsx-runtime.js";
+import { HtmlElementNode } from "./proxy-dom/index.js";
+import { render } from "./solidjs-universal-renderer/index.js";
 
 export const renderRoot = (root: () => JSX.Element, attachTo: HTMLElement) => {
   createRoot((_dispose) => {

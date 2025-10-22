@@ -3,9 +3,9 @@ import {
   createEffect,
   createSignal,
   onCleanup,
-} from "../../pixi-jsx/solidjs-universal-renderer";
-import { ContainerNode } from "../../pixi-jsx/proxy-dom";
-import { ContainerIntrinsicProps } from "../../pixi-jsx/jsx/jsx-node";
+} from "../../pixi-jsx/solidjs-universal-renderer/index.js";
+import { ContainerNode } from "../../pixi-jsx/proxy-dom/index.js";
+import { ContainerIntrinsicProps } from "../../pixi-jsx/jsx/jsx-node.js";
 
 /**
  * Bridges imperatively-created PixiJS Container instances into the declarative pixi-jsx render tree.

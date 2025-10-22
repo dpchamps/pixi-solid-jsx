@@ -8,7 +8,7 @@ import { setImmediate } from "node:timers/promises";
  *
  * To read more about the public api of Pixi Ticker see: https://pixijs.com/8.x/guides/components/ticker
  * See API here: https://pixijs.download/release/docs/ticker.Ticker.html
- * See sourcecode here: https://github.com/pixijs/pixijs/blob/v8.14.0/src/ticker/Ticker.ts
+ * See sourcecode here: https://github.com/pixijs/pixijs/blob/v8.14.0/src/ticker/Ticker
  */
 export class FakeTestingTicker extends Ticker {
   constructor() {

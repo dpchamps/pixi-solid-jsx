@@ -1,7 +1,7 @@
-import { assert, invariant, isDefined, Maybe } from "../../../utility-types.ts";
+import { assert, invariant, isDefined, Maybe } from "../../../utility-types.js";
 import { RenderLayer } from "pixi.js";
-import { isNodeWithPixiContainer } from "./utility-node.ts";
-import { ProxyDomNode, GenericNode } from "./types.ts";
+import { isNodeWithPixiContainer } from "./utility-node.js";
+import { ProxyDomNode, GenericNode } from "./types.js";
 
 // Bad foo for now
 let _id = 0;

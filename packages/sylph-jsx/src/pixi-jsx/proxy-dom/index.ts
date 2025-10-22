@@ -1,19 +1,19 @@
-import { TextNode } from "./nodes/TextNode.ts";
-import { ContainerNode } from "./nodes/ContainerNode.ts";
-import { ApplicationNode } from "./nodes/ApplicationNode.ts";
-import { SpriteNode } from "./nodes/SpriteNode.ts";
-import { GraphicsNode } from "./nodes/Graphics.ts";
-import { RenderLayerNode } from "./nodes/RenderLayerNode.ts";
+import { TextNode } from "./nodes/TextNode.js";
+import { ContainerNode } from "./nodes/ContainerNode.js";
+import { ApplicationNode } from "./nodes/ApplicationNode.js";
+import { SpriteNode } from "./nodes/SpriteNode.js";
+import { GraphicsNode } from "./nodes/Graphics.js";
+import { RenderLayerNode } from "./nodes/RenderLayerNode.js";
 
-export { RawNode } from "./nodes/RawNode.ts";
-export { HtmlElementNode } from "./nodes/HtmlElementNode.ts";
-export { type ProxyDomNode } from "./nodes/types.ts";
+export { RawNode } from "./nodes/RawNode.js";
+export { HtmlElementNode } from "./nodes/HtmlElementNode.js";
+export { type ProxyDomNode } from "./nodes/types.js";
 
-export * from "./nodes/TextNode.ts";
-export * from "./nodes/ContainerNode.ts";
-export * from "./nodes/ApplicationNode.ts";
-export * from "./nodes/SpriteNode.ts";
-export * from "./nodes/RenderLayerNode.ts";
+export * from "./nodes/TextNode.js";
+export * from "./nodes/ContainerNode.js";
+export * from "./nodes/ApplicationNode.js";
+export * from "./nodes/SpriteNode.js";
+export * from "./nodes/RenderLayerNode.js";
 
 export const createProxiedPixieContainerNode = (tag: string) => {
   switch (tag) {

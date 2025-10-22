@@ -1,5 +1,5 @@
-import {beforeAll, describe, expect, test, vi} from "vitest";
-import { createSignal } from "solid-custom-renderer/index.ts";
+import { beforeAll, describe, expect, test, vi } from "vitest";
+import { createSignal } from "../../../../pixi-jsx/solidjs-universal-renderer/index";
 import {
   CoroutineControl,
   createEasingCoroutine,
@@ -7,15 +7,15 @@ import {
   startCoroutine,
   waitFrames,
   waitMs,
-} from "../../../effects/coroutines.ts";
-import { renderApplicationWithFakeTicker } from "../../../../__tests__/test-utils/test-utils.tsx";
-import { assert, invariant } from "../../../../utility-types.ts";
+} from "../../../effects/coroutines";
+import { renderApplicationWithFakeTicker } from "../../../../__tests__/test-utils/test-utils";
+import { assert, invariant } from "../../../../utility-types";
 import { Sprite, Text } from "pixi.js";
 
 describe("createRepeatableCoroutine", () => {
   beforeAll(() => {
     vi.useFakeTimers();
-  })
+  });
 
   describe("basic repeating behavior", () => {
     test("automatically repeats coroutine after completion", async () => {

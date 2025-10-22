@@ -1,15 +1,13 @@
-import { createStore } from "solid-js/store";
+import { createStore } from "sylph-jsx";
 import {
   createComputed,
   createEffect,
   createSignal,
   onCleanup,
-} from "solid-js";
-import { shallowEqual } from "shallow-equal";
-import {
   createSynchronizedEffect,
   onEveryFrame,
-} from "sylph-jsx/src/engine/core/query-fns.ts";
+} from "sylph-jsx";
+import { shallowEqual } from "shallow-equal";
 
 export type Controller = ReturnType<typeof createController>;
 export const createController = () => {

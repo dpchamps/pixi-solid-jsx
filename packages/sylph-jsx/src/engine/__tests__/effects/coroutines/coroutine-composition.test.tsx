@@ -1,5 +1,5 @@
-import {beforeAll, describe, expect, test} from "vitest";
-import { createSignal } from "solid-custom-renderer/index.ts";
+import { beforeAll, describe, expect, test } from "vitest";
+import { createSignal } from "../../../../pixi-jsx/solidjs-universal-renderer/index";
 import {
   chainCoroutine,
   CoroutineControl,
@@ -7,16 +7,16 @@ import {
   startCoroutine,
   waitFrameCoroutine,
   waitMsCoroutine,
-} from "../../../effects/coroutines.ts";
-import { renderApplicationWithFakeTicker } from "../../../../__tests__/test-utils/test-utils.tsx";
-import { invariant } from "../../../../utility-types.ts";
+} from "../../../effects/coroutines";
+import { renderApplicationWithFakeTicker } from "../../../../__tests__/test-utils/test-utils";
+import { invariant } from "../../../../utility-types";
 import { Container, Sprite, Text } from "pixi.js";
-import {vi} from "vitest";
+import { vi } from "vitest";
 
 describe("coroutine composition", () => {
   beforeAll(() => {
     vi.useFakeTimers();
-  })
+  });
   describe("chainCoroutine", () => {
     test("executes coroutines sequentially", async () => {
       const TestComponent = () => {

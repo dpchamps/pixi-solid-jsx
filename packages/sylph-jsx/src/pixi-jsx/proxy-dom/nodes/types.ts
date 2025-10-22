@@ -6,7 +6,8 @@ import {
   Sprite,
   Text,
 } from "pixi.js";
-import { Maybe } from "../../../utility-types.ts";
+import { Maybe } from "../../../utility-types.js";
+
 export type ProxyDomNode =
   | IProxyNode<"application", Application, ProxyDomNode>
   | IProxyNode<"html", HTMLElement, ProxyDomNode>

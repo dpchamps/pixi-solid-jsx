@@ -1,4 +1,4 @@
-import { Maybe } from "../../utility-types.ts";
+import { Maybe } from "../../utility-types.js";
 
 export type Point = {
   x: number;

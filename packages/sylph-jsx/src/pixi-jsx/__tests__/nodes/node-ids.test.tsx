@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { invariant } from "../../../utility-types";
-import { renderPixiScene } from "../../../__tests__/test-utils/test-utils.tsx";
+import { renderPixiScene } from "../../../__tests__/test-utils/test-utils";
 import { ContainerNode, TextNode, SpriteNode } from "../../proxy-dom";
 
 describe("Node ID generation", () => {

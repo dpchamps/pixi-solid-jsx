@@ -5,31 +5,33 @@ import {
   ContainerIntrinsicProps,
   ApplicationIntrinsicProps,
   SpriteIntrinsicProps,
-  JSXNode,
   GraphicsIntrinsicProps,
   RenderLayerIntrinsicProps,
-} from "./jsx-node.ts";
+  JSXNode,
+} from "./jsx-node.js";
+
+export * from "../solidjs-universal-renderer/index.js";
+
+export { type JSXNode, type PixiNodeProps };
 
 // Reference: https://www.typescriptlang.org/docs/handbook/jsx.html#type-checking
 
-namespace JSX {
-  export type IntrinsicElements = {
+export namespace JSX {
+  export interface IntrinsicElements {
     text: TextIntrinsicProps;
     container: ContainerIntrinsicProps;
     application: ApplicationIntrinsicProps;
     sprite: SpriteIntrinsicProps;
     graphics: GraphicsIntrinsicProps;
     "render-layer": RenderLayerIntrinsicProps;
-  };
+  }
 
   export type Element = JSXNode;
 
-  export type ElementChildrenAttribute = {
+  export interface ElementChildrenAttribute {
     children: {};
-  };
+  }
 
   export type PixieNodeProps<T extends UnknownNodeProps = {}> =
     PixiNodeProps<T>;
 }
-
-export type { JSX };

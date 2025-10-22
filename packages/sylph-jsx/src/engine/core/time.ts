@@ -2,9 +2,9 @@ import {
   batch,
   createSignal,
   onCleanup,
-} from "solid-custom-renderer/patched-types.ts";
+} from "../../pixi-jsx/solidjs-universal-renderer/patched-types.js";
 import { Ticker } from "pixi.js";
-import { Maybe } from "../../utility-types.ts";
+import { Maybe } from "../../utility-types.js";
 
 type CreateTimerArgs = {
   nextFrameFns: {

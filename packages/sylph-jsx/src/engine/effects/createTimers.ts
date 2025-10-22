@@ -1,4 +1,4 @@
-import { onEveryFrame } from "../core/query-fns.ts";
+import { onEveryFrame } from "../core/query-fns.js";
 
 export const createInterval = (fn: () => void, ms: number) => {
   let current = ms;

@@ -34,7 +34,7 @@ export {
 /***
  * Patching JSX Element types for downstream
  */
-import { JSX } from "jsx-runtime/jsx-runtime.ts";
+import { JSX } from "../jsx/jsx-runtime.js";
 
 export type FlowProps<P = {}, C = JSX.Element> = P & {
   children: C;

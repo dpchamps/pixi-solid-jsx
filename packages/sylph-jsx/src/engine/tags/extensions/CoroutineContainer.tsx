@@ -1,13 +1,13 @@
 import { Accessor, createSignal, onCleanup } from "solid-js";
-import { JSX } from "../../../pixi-jsx/jsx/jsx-runtime.ts";
+import { JSX } from "../../../pixi-jsx/jsx/jsx-runtime.js";
 import {
   chainCoroutine,
   createEasingCoroutine,
   createRepeatableCoroutine,
   startCoroutine,
   waitMsCoroutine,
-} from "../../effects/coroutines.ts";
-import { createSynchronizedEffect } from "../../core/query-fns.ts";
+} from "../../effects/coroutines.js";
+import { createSynchronizedEffect } from "../../core/query-fns.js";
 
 type CoroutineContainerProps<T extends JSX.Element> = {
   duration: number;

@@ -1,17 +1,20 @@
-import { JSX } from "jsx-runtime/jsx-runtime.ts";
+import { JSX } from "../../../../pixi-jsx/jsx/jsx-runtime.js";
 import { mergeProps } from "solid-js";
-import { children, createEffect } from "solid-custom-renderer/patched-types.ts";
-import { unreachable } from "../../../../utility-types.ts";
-import { ProxyNode } from "../../../../pixi-jsx/proxy-dom/nodes/Node.ts";
+import {
+  children,
+  createEffect,
+} from "../../../../pixi-jsx/solidjs-universal-renderer/patched-types.js";
+import { unreachable } from "../../../../utility-types.js";
+import { ProxyNode } from "../../../../pixi-jsx/proxy-dom/nodes/Node.js";
 import {
   AnyProxyNode,
   BoxModel,
   FlexBoxOrientation,
   FlexBoxProps,
   SpacingFnState,
-} from "./types.ts";
-import { childWithHorizontalSpacing } from "./horizontal-spacing.ts";
-import { childWithVerticalSpacing } from "./vertical-spacing.ts";
+} from "./types.js";
+import { childWithHorizontalSpacing } from "./horizontal-spacing.js";
+import { childWithVerticalSpacing } from "./vertical-spacing.js";
 
 const DEFAULT_PROPS = {
   x: 0,

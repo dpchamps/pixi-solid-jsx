@@ -1,1 +1,1 @@
-export * from "./src/pixi-jsx/jsx/jsx-runtime";
+export * from "./dist/index.js";

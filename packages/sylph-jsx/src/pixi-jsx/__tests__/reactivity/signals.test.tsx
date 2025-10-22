@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { createSignal, createMemo } from "../../solidjs-universal-renderer";
 import { Container, Sprite } from "pixi.js";
-import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils.tsx";
+import { renderApplicationNode } from "../../../__tests__/test-utils/test-utils";
 
 describe("signal reactivity", () => {
   test("signal updates container position", async () => {

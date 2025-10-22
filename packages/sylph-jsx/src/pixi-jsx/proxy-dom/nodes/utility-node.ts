@@ -1,5 +1,5 @@
-import { ProxyDomNode } from "./types.ts";
-import { assert, unreachable } from "../../../utility-types.ts";
+import { ProxyDomNode } from "./types.js";
+import { assert, unreachable } from "../../../utility-types.js";
 
 export function expectNodeNot<
   Node extends ProxyDomNode,

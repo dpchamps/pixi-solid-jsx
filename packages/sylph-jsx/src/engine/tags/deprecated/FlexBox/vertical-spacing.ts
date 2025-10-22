@@ -1,4 +1,4 @@
-import { SpacingFn } from "./types.ts";
+import { SpacingFn } from "./types.js";
 
 export const childWithVerticalSpacing: SpacingFn = (
   el,

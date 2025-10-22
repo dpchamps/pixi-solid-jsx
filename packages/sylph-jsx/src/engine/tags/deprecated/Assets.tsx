@@ -1,10 +1,10 @@
 import { Texture, Assets } from "pixi.js";
-import { JSX } from "../../../pixi-jsx/jsx/jsx-runtime.ts";
+import { JSX } from "../../../pixi-jsx/jsx/jsx-runtime.js";
 import {
   createContext,
   createStore,
   createResource,
-} from "solid-custom-renderer/index.ts";
+} from "../../../pixi-jsx/solidjs-universal-renderer/index.js";
 
 type Asset = {
   url: string;
