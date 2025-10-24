@@ -16,22 +16,16 @@
 
 The framework is fully-functional, but APIs are subject to change.
 
-## Installation
+## Quick Start
 
-Right now Sylph.jsx is in such active development that it is recommended you build and link
-manually. What's published to the package registry is not guaranteed to be stable.
+Sylph offers a typescript template:
 
-<details>
 ```bash
-npm install sylph-jsx
+npx degit dpchamps/sylph.jsx/packages/sylph-template my-sylph-app
+cd my-sylph-app
+npm install
+npm run dev
 ```
-
-Peer dependencies:
-
-- pixi.js@8.14.0
-- solid-js@1.9.4
-
-</details>
 
 ## Overview
 
