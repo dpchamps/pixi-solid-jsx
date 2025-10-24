@@ -21,6 +21,6 @@
   "dependencies": {
     "pixi.js": "8.14.0",
     "solid-js": "1.9.4",
-    "sylph-jsx": "^0.4.0"
+    "sylph-jsx": "^0.5.0"
   }
 }
