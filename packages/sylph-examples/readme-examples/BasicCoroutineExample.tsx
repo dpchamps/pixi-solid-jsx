@@ -11,7 +11,7 @@ import {
   linear,
 } from "sylph-jsx";
 import { Texture } from "pixi.js";
-import { CoroutineContainer } from "sylph-jsx";
+import { Coroutine } from "sylph-jsx";
 import { For, createSignal, PixiNodeProps } from "sylph-jsx";
 
 const easingFns = [
@@ -72,7 +72,7 @@ export const BasicCoroutineExample = () => {
   return (
     <>
       <Menu setEasingFn={(nextEasingFn) => setEasingFn(() => nextEasingFn)} />
-      <CoroutineContainer
+      <Coroutine
         from={0}
         to={Math.max(
           windowDimensions().innerWidth,
@@ -97,7 +97,7 @@ export const BasicCoroutineExample = () => {
             />
           );
         }}
-      </CoroutineContainer>
+      </Coroutine>
     </>
   );
 };

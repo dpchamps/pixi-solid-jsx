@@ -20,7 +20,7 @@ type CoroutineContainerProps<T extends JSX.Element> = {
   children: (value: Accessor<number>, done: Accessor<boolean>) => T;
 };
 
-export const CoroutineContainer = <T extends JSX.Element>(
+export const Coroutine = <T extends JSX.Element>(
   props: CoroutineContainerProps<T>,
 ) => {
   const [getNext, setNext] = createSignal(props.from);
