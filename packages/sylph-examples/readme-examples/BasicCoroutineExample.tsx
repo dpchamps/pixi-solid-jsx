@@ -9,9 +9,9 @@ import {
   flip,
   invariant,
   linear,
+    EasingCoroutine
 } from "sylph-jsx";
 import { Texture } from "pixi.js";
-import { Coroutine } from "sylph-jsx";
 import { For, createSignal, PixiNodeProps } from "sylph-jsx";
 
 const easingFns = [
@@ -72,7 +72,7 @@ export const BasicCoroutineExample = () => {
   return (
     <>
       <Menu setEasingFn={(nextEasingFn) => setEasingFn(() => nextEasingFn)} />
-      <Coroutine
+      <EasingCoroutine
         from={0}
         to={Math.max(
           windowDimensions().innerWidth,
@@ -82,6 +82,7 @@ export const BasicCoroutineExample = () => {
         replay={true}
         delay={500}
         easingFn={easingFn()}
+        reverse={true}
       >
         {(currentStep) => {
           return (
@@ -97,7 +98,7 @@ export const BasicCoroutineExample = () => {
             />
           );
         }}
-      </Coroutine>
+      </EasingCoroutine>
     </>
   );
 };

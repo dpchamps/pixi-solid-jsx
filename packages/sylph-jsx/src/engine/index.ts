@@ -15,7 +15,7 @@ export * from "./libs/Easing.js";
 
 export * from "./components/GameLoopContextProvider.jsx";
 export * from "./components/Application.jsx";
-export * from "./components/extensions/Coroutine";
+export * from "./components/extensions/EasingCoroutine.jsx";
 
 // export * from "./tags/FlexBox/FlexBox";
 // export * from "./tags/FlexBox/types";
