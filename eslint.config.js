@@ -31,7 +31,8 @@ export default [
         {
           ignorePackages: true
         },
-      ]
+      ],
+      "no-debugger": "error",
     }
   },
   {

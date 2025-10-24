@@ -22,7 +22,6 @@ export type GameLoopContext = {
   scheduledEffects: Map<string, (ticker: Ticker) => void>;
 };
 
-debugger;
 export const GameLoopContext = createContext<GameLoopContext>();
 /**
  * Hook to access the game loop context from any child component.
