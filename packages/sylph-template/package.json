@@ -1,0 +1,26 @@
+{
+  "name": "sylph-template",
+  "version": "0.0.0",
+  "description": "A starter template for building with Sylph.jsx",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "sylph-jsx",
+    "pixi.js",
+    "solidjs",
+    "template"
+  ],
+  "author": "me@davecampion.com",
+  "license": "MIT",
+  "dependencies": {
+    "pixi.js": "8.14.0",
+    "solid-js": "1.9.4",
+    "sylph-jsx": "^0.4.0"
+  }
+}
