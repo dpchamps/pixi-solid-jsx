@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { createSignal } from "../../../pixi-jsx/solidjs-universal-renderer/index";
 import { renderApplicationWithFakeTicker } from "../../../__tests__/test-utils/test-utils";
 import { assert, invariant } from "../../../utility-types";
