@@ -12,5 +12,6 @@ const main = async () => {
 main().catch((error) => {
   console.error(``);
   console.error(error);
+  // eslint-disable-next-line no-debugger
   debugger;
 });
