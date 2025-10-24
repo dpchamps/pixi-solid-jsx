@@ -16,8 +16,8 @@ export const Main = () => {
       antialias={true}
     >
       {/*<BasicTest/>*/}
-      {/*<BasicCoroutineExample/>*/}
-      <ControlsAndMovement />
+      <BasicCoroutineExample/>
+      {/*<ControlsAndMovement />*/}
     </Application>
   );
 };

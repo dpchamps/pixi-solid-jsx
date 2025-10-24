@@ -12,7 +12,7 @@ import {
   Maybe,
   createSignal,
   Index,
-  CoroutineContainer,
+  EasingCoroutine,
   onEveryFrame,
   PixiNodeProps,
 } from "sylph-jsx";
@@ -68,7 +68,7 @@ const SpriteTransition = (props: SpriteTransitionProps) => {
   const yPosition = () => 500 + props.noise + Math.floor(props.index / 500) * 5;
 
   return (
-    <CoroutineContainer
+    <EasingCoroutine
       from={0.1}
       to={1}
       easingFn={props.easingFn}
@@ -87,7 +87,7 @@ const SpriteTransition = (props: SpriteTransitionProps) => {
           rotation={scale() * 2 * Math.PI}
         />
       )}
-    </CoroutineContainer>
+    </EasingCoroutine>
   );
 };
 

@@ -13,9 +13,9 @@ export * from "./libs/Point.js";
 export * from "./libs/Math.js";
 export * from "./libs/Easing.js";
 
-export * from "./tags/GameLoopContextProvider.jsx";
-export * from "./tags/Application.jsx";
-export * from "./tags/extensions/CoroutineContainer.jsx";
+export * from "./components/GameLoopContextProvider.jsx";
+export * from "./components/Application.jsx";
+export * from "./components/extensions/EasingCoroutine.jsx";
 
 // export * from "./tags/FlexBox/FlexBox";
 // export * from "./tags/FlexBox/types";
