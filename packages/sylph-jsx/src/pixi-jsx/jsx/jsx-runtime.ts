@@ -12,7 +12,16 @@ import {
 
 export * from "../solidjs-universal-renderer/index.js";
 
-export { type JSXNode, type PixiNodeProps };
+export {
+  type JSXNode,
+  type PixiNodeProps,
+  type TextIntrinsicProps,
+  type ContainerIntrinsicProps,
+  type ApplicationIntrinsicProps,
+  type SpriteIntrinsicProps,
+  type GraphicsIntrinsicProps,
+  type RenderLayerIntrinsicProps,
+};
 
 // Reference: https://www.typescriptlang.org/docs/handbook/jsx.html#type-checking
 
