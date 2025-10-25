@@ -32,6 +32,99 @@ This is **integration testing** - we verify that the system produces correct out
 src/**/*/__tests__/
 ```
 
+## Critical Reactivity Pattern ⚠️
+
+**MOST IMPORTANT**: Signals must be called **inside JSX** to maintain reactivity. Capturing signal values in variables in the component body evaluates them once and breaks reactivity.
+
+### ❌ WRONG - Signal Value Captured (Non-Reactive)
+```tsx
+const TestComponent = () => {
+  const mouse = createMouse(mockEl);
+  const pos = mouse.currentMousePosition();  // ❌ Evaluated ONCE
+  const click = mouse.click();                // ❌ Evaluated ONCE
+
+  return <sprite x={pos?.x ?? 0} y={pos?.y ?? 0} />;
+  //             ^ Will NEVER update when mouse moves
+};
+```
+
+**Why this fails**:
+- `pos` is evaluated once during component creation
+- When the mouse moves, `pos` still holds the old value
+- JSX never re-evaluates because there's no reactive dependency
+- Tests fail because PixiJS properties don't update
+
+### ✅ CORRECT - Signal Called in JSX (Reactive)
+```tsx
+const TestComponent = () => {
+  const mouse = createMouse(mockEl);
+
+  return <sprite x={mouse.currentMousePosition()?.x ?? 0}
+                 y={mouse.currentMousePosition()?.y ?? 0} />;
+  //             ^ Called IN JSX, tracks reactivity
+};
+```
+
+**Why this works**:
+- Signal is called every time JSX evaluates
+- SolidJS tracks the dependency and re-renders on changes
+- PixiJS properties update correctly
+- Tests pass
+
+### Exception: When Variable Capture is OK
+
+You can capture signal values **only when they won't need to react to changes**:
+
+```tsx
+// OK: Signal used in derived computation
+const TestComponent = () => {
+  const mouse = createMouse(mockEl);
+  const isDragging = () => mouse.click() !== false;  // ✅ Computed signal
+
+  return <sprite x={isDragging() ? 100 : 0} />;
+  //             ^ isDragging() called in JSX, still reactive
+};
+```
+
+### Testing Impact
+
+This pattern affects how you write test components. Always verify:
+
+1. **Signals called in JSX**: `<sprite x={signal()} />` ✅
+2. **Not captured in variables**: `const val = signal(); <sprite x={val} />` ❌
+3. **Use `ticker.tickFrames(1)`**: After dispatching events to propagate updates
+4. **Handle undefined**: Use `?? 0` or `?? "?"` for optional values in JSX
+
+### Real Example from createMouse Tests
+
+```tsx
+test("sprite follows mouse position", async () => {
+  const mockEl = createMockMouseElement();
+
+  const TestComponent = () => {
+    const mouse = createMouse(mockEl);
+    // ✅ Signals called directly in JSX
+    return <sprite
+      x={mouse.currentMousePosition()?.x ?? 0}
+      y={mouse.currentMousePosition()?.y ?? 0}
+    />;
+  };
+
+  const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
+    <TestComponent />
+  ));
+
+  const sprite = stage.children[0]?.children[0];
+  assert(sprite instanceof Sprite);
+
+  mockEl.dispatchMove(100, 200);
+  await ticker.tickFrames(1);  // Propagate reactive updates
+
+  expect(sprite.x).toBe(100);  // ✅ Works because signal called in JSX
+  expect(sprite.y).toBe(200);
+});
+```
+
 ## Test Patterns
 
 ### Pattern 1: Static Rendering
