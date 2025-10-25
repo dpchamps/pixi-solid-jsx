@@ -22,3 +22,9 @@ export const shallowAssignAndDiff = (
 
   return mutation;
 };
+
+export const shallowEqual = <T, U>(a: T[], b: U[]) => {
+  if (a.length !== b.length) return false;
+
+  return a.every((el, i) => el === b[i]);
+};

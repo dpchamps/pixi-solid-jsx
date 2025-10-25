@@ -9,7 +9,7 @@
     "declaration": true,
     "declarationMap": true,
     "noUncheckedIndexedAccess": true,
-//    "exactOptionalPropertyTypes": true,
+    //    "exactOptionalPropertyTypes": true,
 
     // Recommended Options
     "strict": true,
@@ -19,6 +19,6 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   }
 }

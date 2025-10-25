@@ -1,5 +1,5 @@
-import {Accessor, createSignal, onCleanup, Setter} from "solid-js";
-import {JSX, JSXNode} from "../../../pixi-jsx/jsx/jsx-runtime.js";
+import { Accessor, createSignal, onCleanup, Setter } from "solid-js";
+import { JSX, JSXNode } from "../../../pixi-jsx/jsx/jsx-runtime.js";
 import {
   chainCoroutine,
   createEasingCoroutine,
@@ -8,7 +8,7 @@ import {
   waitMsCoroutine,
 } from "../../effects/coroutines.js";
 import { createSynchronizedEffect } from "../../core/query-fns.js";
-import {flip} from "../../libs/Easing.js";
+import { flip } from "../../libs/Easing.js";
 
 /**
  * Props for the EasingCoroutine component.
@@ -46,34 +46,28 @@ type EasingCoroutineProps<T extends JSX.Element> = {
  */
 const createBaseCoroutineConstructor = (
   props: EasingCoroutineProps<JSXNode>,
-  setCurrentValue: Setter<number>
+  setCurrentValue: Setter<number>,
 ) => {
   const delay = props.delay ?? 0;
 
   const forwardEasing = createEasingCoroutine(
     (fn) => setCurrentValue(fn(props.from, props.to)),
     props.easingFn,
-    props.duration
+    props.duration,
   );
 
   if (!props.reverse) {
-    return () => chainCoroutine(
-      waitMsCoroutine(delay),
-      forwardEasing
-    );
+    return () => chainCoroutine(waitMsCoroutine(delay), forwardEasing);
   }
 
   const reverseEasing = createEasingCoroutine(
     (fn) => setCurrentValue(fn(props.from, props.to)),
     (x) => flip(props.easingFn(x)),
-    props.duration
+    props.duration,
   );
 
-  return () => chainCoroutine(
-    waitMsCoroutine(delay),
-    forwardEasing,
-    reverseEasing
-  );
+  return () =>
+    chainCoroutine(waitMsCoroutine(delay), forwardEasing, reverseEasing);
 };
 
 /**
@@ -147,7 +141,10 @@ export const EasingCoroutine = <T extends JSX.Element>(
 ) => {
   const [currentValue, setCurrentValue] = createSignal(props.from);
   const shouldStart = () => props.shouldStart ?? true;
-  const baseCoroutineConstructor = createBaseCoroutineConstructor(props, setCurrentValue);
+  const baseCoroutineConstructor = createBaseCoroutineConstructor(
+    props,
+    setCurrentValue,
+  );
   const baseCoroutine = props.replay
     ? createRepeatableCoroutine(baseCoroutineConstructor)
     : baseCoroutineConstructor();
@@ -164,6 +161,5 @@ export const EasingCoroutine = <T extends JSX.Element>(
     scheduledCoroutine.dispose();
   });
 
-  return () =>
-    props.children(currentValue, scheduledCoroutine.stopped);
+  return () => props.children(currentValue, scheduledCoroutine.stopped);
 };
