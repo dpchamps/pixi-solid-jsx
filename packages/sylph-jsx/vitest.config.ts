@@ -24,7 +24,6 @@ export default defineConfig({
     },
     environment: "jsdom",
     setupFiles: ["vitest-webgl-canvas-mock"],
-    // deps: { optimizer: { web: { include: ['vitest-webgl-canvas-mock'] } } },
   },
   plugins: [
     solidPlugin({

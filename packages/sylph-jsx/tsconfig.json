@@ -2,7 +2,6 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "composite": true,
     "target": "ESNext" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     "lib": [
       "ES2022",
@@ -44,7 +43,8 @@
     "paths": {
       "jsx-runtime/*": ["./src/pixi-jsx/jsx/*"]
     },
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "incremental": false
   },
   "include": ["src"]
 }

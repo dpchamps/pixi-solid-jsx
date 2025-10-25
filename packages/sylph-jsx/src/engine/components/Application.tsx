@@ -113,7 +113,9 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
   };
 
   const [applicationReady] = createResource(application, async (app) => {
-    await initDevtools({ app: app.container });
+    if(import.meta.env.DEV){
+      await initDevtools({ app: app.container });
+    }
     /**
      * @warn
      * You must assign the ticker prior to initialization.
