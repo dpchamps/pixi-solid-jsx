@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "composite": true,
     "target": "ESNext" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     "lib": [
-      "ES2022",
+      "ESNext",
       "DOM",
       "DOM.Iterable"
     ] /* Specify a set of bundled library declaration files that describe the target runtime environment. */,
@@ -16,7 +15,6 @@
     "module": "ESNext" /* Specify what module code is generated. */,
     "moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
     "allowImportingTsExtensions": true /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */,
-    "emitDeclarationOnly": true,
     /* Type Checking */
     "strict": true /* Enable all strict type-checking options. */,
     "noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */,
@@ -36,7 +34,8 @@
 
     /* Completeness */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    "skipDefaultLibCheck": true
+    "skipDefaultLibCheck": true,
+    "incremental": false
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]
