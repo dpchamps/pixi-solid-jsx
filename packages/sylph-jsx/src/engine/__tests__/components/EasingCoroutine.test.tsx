@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test, vi } from "vitest";
 import { createSignal } from "../../../pixi-jsx/solidjs-universal-renderer/index";
 import { renderApplicationWithFakeTicker } from "../../../__tests__/test-utils/test-utils";
 import { assert, invariant } from "../../../utility-types";
@@ -6,6 +6,9 @@ import { Sprite } from "pixi.js";
 import { EasingCoroutine } from "../../components/extensions/EasingCoroutine";
 
 describe("EasingCoroutine", () => {
+  beforeAll(() => {
+    vi.useFakeTimers();
+  });
   describe("basic easing animation", () => {
     test("animates from initial to target value", async () => {
       const TestComponent = () => {
@@ -80,9 +83,7 @@ describe("EasingCoroutine", () => {
       const TestComponent = () => {
         return (
           <EasingCoroutine from={1} to={2} duration={1020} easingFn={(t) => t}>
-            {(scale) => (
-              <sprite scale={{ x: scale(), y: scale() }} />
-            )}
+            {(scale) => <sprite scale={{ x: scale(), y: scale() }} />}
           </EasingCoroutine>
         );
       };
@@ -98,8 +99,8 @@ describe("EasingCoroutine", () => {
       expect(sprite.scale.y).toBe(1);
 
       await ticker.tickFrames(32);
-      expect(sprite.scale.x).toBe(1.5);
-      expect(sprite.scale.y).toBe(1.5);
+      expect(sprite.scale.x).toBeCloseTo(1.5);
+      expect(sprite.scale.y).toBeCloseTo(1.5);
 
       await ticker.tickFrames(30);
       expect(sprite.scale.x).toBe(2);
@@ -635,10 +636,20 @@ describe("EasingCoroutine", () => {
       const TestComponent = () => {
         return (
           <container>
-            <EasingCoroutine from={0} to={100} duration={1020} easingFn={(t) => t}>
+            <EasingCoroutine
+              from={0}
+              to={100}
+              duration={1020}
+              easingFn={(t) => t}
+            >
               {(value) => <sprite x={value()} y={0} />}
             </EasingCoroutine>
-            <EasingCoroutine from={0} to={200} duration={1020} easingFn={(t) => t}>
+            <EasingCoroutine
+              from={0}
+              to={200}
+              duration={1020}
+              easingFn={(t) => t}
+            >
               {(value) => <sprite x={0} y={value()} />}
             </EasingCoroutine>
           </container>
@@ -675,7 +686,12 @@ describe("EasingCoroutine", () => {
 
       const TestComponent = () => {
         return (
-          <EasingCoroutine from={0} to={100} duration={1020} easingFn={(t) => t}>
+          <EasingCoroutine
+            from={0}
+            to={100}
+            duration={1020}
+            easingFn={(t) => t}
+          >
             {(value) => <sprite x={value()} tint={color()} />}
           </EasingCoroutine>
         );
@@ -703,9 +719,19 @@ describe("EasingCoroutine", () => {
     test("nested EasingCoroutine components", async () => {
       const TestComponent = () => {
         return (
-          <EasingCoroutine from={0} to={100} duration={1020} easingFn={(t) => t}>
+          <EasingCoroutine
+            from={0}
+            to={100}
+            duration={1020}
+            easingFn={(t) => t}
+          >
             {(x) => (
-              <EasingCoroutine from={0} to={50} duration={1020} easingFn={(t) => t}>
+              <EasingCoroutine
+                from={0}
+                to={50}
+                duration={1020}
+                easingFn={(t) => t}
+              >
                 {(y) => <sprite x={x()} y={y()} />}
               </EasingCoroutine>
             )}

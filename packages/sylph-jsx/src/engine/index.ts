@@ -5,7 +5,8 @@ export * from "./core/game-loop-context.js";
 export * from "./effects/coroutines.js";
 export * from "./effects/createAsset.js";
 export * from "./effects/createGraphics.js";
-export * from "./effects/createMouse.js";
+export * from "./effects/input/createMouse.js";
+export * from "./effects/input/create-keyboard.js";
 export * from "./effects/createTimers.js";
 export * from "./effects/createWindow.js";
 

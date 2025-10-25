@@ -113,7 +113,7 @@ export const Application = (props: JSX.IntrinsicElements["application"]) => {
   };
 
   const [applicationReady] = createResource(application, async (app) => {
-    if(import.meta.env.DEV){
+    if (import.meta.env.DEV) {
       await initDevtools({ app: app.container });
     }
     /**

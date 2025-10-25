@@ -9,7 +9,7 @@ import {
   flip,
   invariant,
   linear,
-    EasingCoroutine
+  EasingCoroutine,
 } from "sylph-jsx";
 import { Texture } from "pixi.js";
 import { For, createSignal, PixiNodeProps } from "sylph-jsx";
