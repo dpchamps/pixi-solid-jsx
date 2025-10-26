@@ -7,6 +7,7 @@ export * from "./effects/createAsset.js";
 export * from "./effects/createGraphics.js";
 export * from "./effects/input/createMouse.js";
 export * from "./effects/input/create-keyboard.js";
+export * from "./effects/input/createPointer.js";
 export * from "./effects/createTimers.js";
 export * from "./effects/createWindow.js";
 
