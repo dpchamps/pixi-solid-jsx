@@ -14,104 +14,54 @@ import type {
   EventSubscriber,
 } from "./types.js";
 import {
+  createEventKey,
   createPointerEventData,
   isDuplicateMouseEvent,
 } from "./utilities-pointer.js";
 
-export const createPointerImpl = (element: PointerLikeEl): Pointer => {
-  const listenerOptions = { passive: true } satisfies AddEventListenerOptions;
+const POINTER_EVENTS = [
+  "pointerdown",
+  "pointerup",
+  "pointermove",
+  "pointercancel",
+  "pointerover",
+  "pointerout",
+  "pointerenter",
+  "pointerleave",
+  "gotpointercapture",
+  "lostpointercapture",
+] as const;
+
+const createPointerEventState = () => {
   const eventBuffer: PointerEventData[] = [];
-  const eventSubscribers = new Set<EventSubscriber>();
+  const eventSubscriptions = new Set<EventSubscriber>();
   const seenEvents = new Set<string>();
   let hadEventsLastFrame = false;
 
-  const clearEventAndSubscriberTracking = () => {
-    eventBuffer.length = 0;
-    eventSubscribers.clear();
-    seenEvents.clear();
-    hadEventsLastFrame = false;
-  };
-
-  const noEventsToProcess = () =>
-    eventBuffer.length === 0 && !hadEventsLastFrame;
-
-  const shouldNotifyOnLastFrame = () =>
-    eventBuffer.length === 0 && hadEventsLastFrame;
-
-  const eventMap: Record<PointerEventType, (event: PointerEvent) => void> = {
-    pointerdown: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "pointerdown"));
-    },
-    pointerup: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "pointerup"));
-    },
-    pointermove: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "pointermove"));
-    },
-    pointercancel: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "pointercancel"));
-    },
-    pointerover: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "pointerover"));
-    },
-    pointerout: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "pointerout"));
-    },
-    pointerenter: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "pointerenter"));
-    },
-    pointerleave: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "pointerleave"));
-    },
-    gotpointercapture: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "gotpointercapture"));
-    },
-    lostpointercapture: (event) => {
-      if (isDuplicateMouseEvent(event, seenEvents)) return;
-      eventBuffer.push(createPointerEventData(event, "lostpointercapture"));
-    },
-  };
-
-  createComputed(() => {
-    Object.entries(eventMap).forEach(([name, fn]) => {
-      element.addEventListener(name as PointerEventType, fn, listenerOptions);
-    });
-  });
-
-  onCleanup(() => {
-    Object.entries(eventMap).forEach(([name, fn]) => {
-      element.removeEventListener(
-        name as PointerEventType,
-        fn,
-        listenerOptions,
-      );
-    });
-    clearEventAndSubscriberTracking();
-  });
-
-  onEveryFrame(() => {
-    // Clear stale events when no subscribers to prevent replay later
-    if (eventSubscribers.size === 0) return clearEventAndSubscriberTracking();
-    // No events to process so we return early
-    if (noEventsToProcess()) return;
-    // No events this frame, but had events last frame - notify with empty arrays
-    if (shouldNotifyOnLastFrame()) {
+  return {
+    isEmptyEventQueue: () =>
+      eventSubscriptions.size === 0 ||
+      (eventBuffer.length === 0 && !hadEventsLastFrame),
+    shouldNotifySubscriptionsOfNoEvents: () =>
+      eventBuffer.length === 0 && hadEventsLastFrame,
+    performEmptyEventNotification: () => {
+      // When there were no new events, we should notify subscribers that no events occured
       hadEventsLastFrame = false;
-      eventSubscribers.forEach((subscriber) => {
+      eventSubscriptions.forEach((subscriber) => {
         subscriber.setValue([]);
       });
-    } else {
+    },
+    performEmptyQueueEventAction: (forceClean: boolean = false) => {
+      if (eventSubscriptions.size === 0 || forceClean) {
+        hadEventsLastFrame = false;
+        eventBuffer.length = 0;
+        eventSubscriptions.clear();
+        seenEvents.clear();
+      }
+    },
+    performStandardEventNotificationAction: () => {
       hadEventsLastFrame = true;
-      eventSubscribers.forEach((subscriber) => {
+      eventSubscriptions.forEach((subscriber) => {
         const matchedEvents = eventBuffer.filter((event) => {
           const typeMatches = subscriber.eventTypes.has(event.eventType);
           const filterMatches = subscriber.filter
@@ -125,7 +75,55 @@ export const createPointerImpl = (element: PointerLikeEl): Pointer => {
 
       eventBuffer.length = 0;
       seenEvents.clear();
-    }
+    },
+    addEventData: (event: PointerEvent, type: PointerEventType) => {
+      const eventKey = createEventKey(event);
+      const eventData = createPointerEventData(event, type);
+      if (isDuplicateMouseEvent(event, eventKey, seenEvents)) return;
+      seenEvents.add(eventKey);
+      eventBuffer.push(eventData);
+    },
+    addSubscription: (eventSubscription: EventSubscriber) => {
+      eventSubscriptions.add(eventSubscription);
+    },
+    removeSubscription: (eventSubscription: EventSubscriber) => {
+      eventSubscriptions.delete(eventSubscription);
+    },
+  };
+};
+
+export const createPointerImpl = (element: PointerLikeEl): Pointer => {
+  const listenerOptions = { passive: true } satisfies AddEventListenerOptions;
+  const pointerEventState = createPointerEventState();
+
+  const createEventFn =
+    <T extends PointerEventType>(eventType: T) =>
+    (event: PointerEvent) =>
+      pointerEventState.addEventData(event, eventType);
+
+  const eventFns = POINTER_EVENTS.map(
+    (eventType) => [eventType, createEventFn(eventType)] as const,
+  );
+
+  createComputed(() => {
+    eventFns.forEach(([eventType, fn]) => {
+      element.addEventListener(eventType, fn, listenerOptions);
+    });
+  });
+
+  onCleanup(() => {
+    eventFns.forEach(([eventType, fn]) => {
+      element.removeEventListener(eventType, fn, listenerOptions);
+    });
+    pointerEventState.performEmptyQueueEventAction(true);
+  });
+
+  onEveryFrame(() => {
+    if (pointerEventState.isEmptyEventQueue())
+      return pointerEventState.performEmptyQueueEventAction();
+    if (pointerEventState.shouldNotifySubscriptionsOfNoEvents())
+      return pointerEventState.performEmptyEventNotification();
+    pointerEventState.performStandardEventNotificationAction();
   });
 
   const onPointerEvent = (
@@ -146,10 +144,10 @@ export const createPointerImpl = (element: PointerLikeEl): Pointer => {
       setValue: (matchedEvents) => setEvents(matchedEvents),
     } satisfies EventSubscriber;
 
-    eventSubscribers.add(subscriber);
+    pointerEventState.addSubscription(subscriber);
 
     onCleanup(() => {
-      eventSubscribers.delete(subscriber);
+      pointerEventState.removeSubscription(subscriber);
       setEvents([]);
     });
 

@@ -48,20 +48,18 @@ export const createPointerEventData = (
   target: event.target,
 });
 
+type EventKey = ReturnType<typeof createEventKey>;
+export const createEventKey = (event: PointerEvent) =>
+  `${event.type}-${event.pointerId}-${event.timeStamp}` as const;
+
 export const isDuplicateMouseEvent = (
   event: PointerEvent,
+  key: EventKey,
   seenEvents: Set<string>,
 ): boolean => {
   if (event.pointerType !== "mouse") {
     return false;
   }
 
-  const eventKey = `${event.type}-${event.pointerId}-${event.timeStamp}`;
-
-  if (seenEvents.has(eventKey)) {
-    return true;
-  }
-
-  seenEvents.add(eventKey);
-  return false;
+  return seenEvents.has(key);
 };

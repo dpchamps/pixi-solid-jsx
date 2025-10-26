@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, test, vi } from "vitest";
-import {createPointer, Pointer} from "../../../effects/input/create-pointer";
+import { createPointer, Pointer } from "../../../effects/input/create-pointer";
 import { renderApplicationWithFakeTicker } from "../../../../__tests__/test-utils/test-utils";
-import {assert, invariant, Maybe} from "../../../../utility-types";
+import { assert, invariant, Maybe } from "../../../../utility-types";
 import { Text } from "pixi.js";
 
 type MockPointerElement = {
