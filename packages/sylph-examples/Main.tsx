@@ -5,6 +5,7 @@ import { ClickSpriteExample } from "./readme-examples/ClickSpriteExample.tsx";
 import { BasicCoroutineExample } from "./readme-examples/BasicCoroutineExample.tsx";
 import { ControlsAndMovement } from "./readme-examples/ControlsAndMovement.tsx";
 import { Input } from "./readme-examples/Input.tsx";
+import { Pointer } from "./readme-examples/Pointer.tsx";
 
 export const Main = () => {
   const windowDimensions = createWindowDimensions(window);
@@ -19,7 +20,8 @@ export const Main = () => {
       {/*<BasicTest/>*/}
       {/*<BasicCoroutineExample/>*/}
       {/*<ControlsAndMovement />*/}
-      <Input />
+      {/*<Input />*/}
+      <Pointer />
     </Application>
   );
 };

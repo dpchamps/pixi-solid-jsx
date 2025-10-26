@@ -25,6 +25,18 @@ export const renderPixiScene = (jsx: () => JSX.Element): HtmlElementNode => {
   return htmlNode;
 };
 
+export const renderPixiSceneWithDispose = (jsx: () => JSX.Element) => {
+  const mockElement = {
+    appendChild: vi.fn(),
+    removeChild: vi.fn(),
+  } as unknown as HTMLElement;
+
+  const htmlNode = HtmlElementNode.create(mockElement);
+  const dispose = render(jsx as () => ProxyDomNode, htmlNode);
+
+  return { htmlNode, dispose };
+};
+
 export const renderApplicationNode = async (
   jsx: () => JSX.Element,
 ): Promise<Container> => {
@@ -45,17 +57,6 @@ export const renderApplicationNode = async (
   return appNode.container.stage;
 };
 
-export const renderApplicationTag = async (
-  jsx: () => JSX.Element,
-): Promise<Container> => {
-  const htmlNode = renderPixiScene(() => (
-    <Application preference={"webgl"}>{jsx()}</Application>
-  ));
-
-  const appNode = htmlNode.getChildren()[0] as ApplicationNode;
-  return appNode.container.stage;
-};
-
 /**
  * Renders an Application component with a FakeTestingTicker for deterministic test control.
  * Returns both the stage and the ticker instance, allowing tests to manually advance frames.
@@ -69,15 +70,22 @@ export const renderApplicationTag = async (
  */
 export const renderApplicationWithFakeTicker = async (
   jsx: () => JSX.Element,
-): Promise<{ stage: Container; ticker: FakeTestingTicker }> => {
+): Promise<{
+  stage: Container;
+  ticker: FakeTestingTicker;
+  dispose: () => void;
+}> => {
   const ticker = new FakeTestingTicker();
 
-  const application = await new Promise<PixiApplication>((res) => {
-    renderPixiScene(() => (
+  const { app, dispose } = await new Promise<{
+    app: PixiApplication;
+    dispose: () => void;
+  }>((res) => {
+    let { dispose } = renderPixiSceneWithDispose(() => (
       <Application
         preference={"webgl"}
         createTicker={() => ticker}
-        appInitialize={(app) => res(app)}
+        appInitialize={(app) => res({ app, dispose })}
       >
         {jsx()}
       </Application>
@@ -87,7 +95,8 @@ export const renderApplicationWithFakeTicker = async (
   await setImmediate();
 
   return {
-    stage: application.stage,
+    stage: app.stage,
     ticker,
+    dispose,
   };
 };
