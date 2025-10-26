@@ -25,6 +25,7 @@ export const createPointerImpl = (element: PointerLikeEl): Pointer => {
   const eventSubscribers = new Set<EventSubscriber>();
   const seenEvents = new Set<string>();
   const activePointers = new Set<number>();
+  let hadEventsLastFrame = false;
 
   // Reactive capability store
   const [capabilities, setCapabilities] = createStore({
@@ -134,7 +135,6 @@ export const createPointerImpl = (element: PointerLikeEl): Pointer => {
       return;
     }
 
-    activePointers.delete(event.pointerId);
     eventBuffer.push(createPointerEventData(event, "lostpointercapture"));
   };
 
@@ -227,23 +227,41 @@ export const createPointerImpl = (element: PointerLikeEl): Pointer => {
 
   onEveryFrame(() => {
     if (eventSubscribers.size === 0) {
+      hadEventsLastFrame = false;
       return;
     }
 
-    eventSubscribers.forEach((subscriber) => {
-      const matchedEvents = eventBuffer.filter((event) => {
-        const typeMatches = subscriber.eventTypes.has(event.eventType);
-        const filterMatches = subscriber.filter
-          ? subscriber.filter(event)
-          : true;
-        return typeMatches && filterMatches;
+    const hasEvents = eventBuffer.length > 0;
+
+    // Skip work on idle frames after the first idle frame
+    if (!hasEvents && !hadEventsLastFrame) {
+      return;
+    }
+
+    if (hasEvents) {
+      // Process events with filtering
+      eventSubscribers.forEach((subscriber) => {
+        const matchedEvents = eventBuffer.filter((event) => {
+          const typeMatches = subscriber.eventTypes.has(event.eventType);
+          const filterMatches = subscriber.filter
+            ? subscriber.filter(event)
+            : true;
+          return typeMatches && filterMatches;
+        });
+
+        subscriber.setValue(matchedEvents);
       });
 
-      subscriber.setValue(matchedEvents);
-    });
-
-    eventBuffer.length = 0;
-    seenEvents.clear();
+      eventBuffer.length = 0;
+      seenEvents.clear();
+      hadEventsLastFrame = true;
+    } else {
+      // No events this frame, but had events last frame - notify with empty arrays
+      eventSubscribers.forEach((subscriber) => {
+        subscriber.setValue([]);
+      });
+      hadEventsLastFrame = false;
+    }
   });
 
   const onPointerEvent = (
