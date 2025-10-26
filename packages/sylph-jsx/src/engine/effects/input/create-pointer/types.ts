@@ -267,56 +267,6 @@ export type Pointer = {
     eventTypes: PointerEventType | PointerEventType[],
     options?: PointerEventOptions,
   ): Accessor<PointerEventData[]>;
-
-  /**
-   * Detected pointer capabilities based on observed pointer events.
-   *
-   * @remarks
-   * These values are runtime-detected and may change as different input devices
-   * are used. They start as `false` and become `true` when the corresponding
-   * input type is first detected.
-   *
-   * Capabilities are exposed as a reactive store that automatically updates
-   * Solid effects when input devices are detected.
-   *
-   * @example
-   * ```tsx
-   * const pointer = createPointer(window);
-   *
-   * // Reactively respond to capability changes
-   * createEffect(() => {
-   *   if (pointer.capabilities.hasStylus) {
-   *     showPressureSensitiveTools();
-   *   }
-   * });
-   *
-   * createEffect(() => {
-   *   if (pointer.capabilities.hasMultiTouch) {
-   *     enablePinchZoom();
-   *   }
-   * });
-   * ```
-   */
-  capabilities: {
-    /**
-     * Whether multiple simultaneous pointers have been detected.
-     * Typically indicates touch screen support.
-     */
-    hasMultiTouch: boolean;
-
-    /**
-     * Whether stylus/pen input has been detected.
-     * Indicates support for pressure, tilt, and twist properties.
-     */
-    hasStylus: boolean;
-
-    /**
-     * Whether pressure-sensitive input has been detected.
-     * True if any pointer has reported true pressure sensitivity
-     * (excludes fake pressure values from mice and basic touch).
-     */
-    hasPressure: boolean;
-  };
 };
 
 /**

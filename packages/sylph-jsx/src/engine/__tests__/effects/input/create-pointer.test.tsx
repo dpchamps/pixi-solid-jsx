@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, test, vi } from "vitest";
-import { createPointer } from "../../../effects/input/create-pointer";
+import {createPointer, Pointer} from "../../../effects/input/create-pointer";
 import { renderApplicationWithFakeTicker } from "../../../../__tests__/test-utils/test-utils";
-import { assert, invariant } from "../../../../utility-types";
+import {assert, invariant, Maybe} from "../../../../utility-types";
 import { Text } from "pixi.js";
 
 type MockPointerElement = {
@@ -302,102 +302,6 @@ describe("createPointer", () => {
       mockEl.dispatchPointerUp(1);
       await ticker.tickFrames(1);
       expect(textNode.text).toBe("pointerdown,pointerup");
-    });
-  });
-
-  describe("Capabilities Store Reactivity", () => {
-    test("hasStylus detects pen input", async () => {
-      const mockEl = createMockPointerElement();
-
-      const TestComponent = () => {
-        const pointer = createPointer(mockEl, { expect: true });
-        pointer.onPointerEvent("pointermove"); // Subscribe to trigger updates
-
-        return <text>{String(pointer.capabilities.hasStylus)}</text>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent />
-      ));
-
-      const textNode = stage.children[0]?.children[0];
-      invariant(textNode);
-      assert(textNode instanceof Text);
-
-      expect(textNode.text).toBe("false");
-
-      mockEl.dispatchPointerMove(1, 100, 200, { pointerType: "pen" });
-      await ticker.tickFrames(1);
-
-      expect(textNode.text).toBe("true");
-    });
-
-    test("hasMultiTouch detects multiple pointers", async () => {
-      const mockEl = createMockPointerElement();
-
-      const TestComponent = () => {
-        const pointer = createPointer(mockEl, { expect: true });
-        pointer.onPointerEvent("pointerdown"); // Subscribe to trigger updates
-
-        return <text>{String(pointer.capabilities.hasMultiTouch)}</text>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent />
-      ));
-
-      const textNode = stage.children[0]?.children[0];
-      invariant(textNode);
-      assert(textNode instanceof Text);
-
-      expect(textNode.text).toBe("false");
-
-      // First pointer down
-      mockEl.dispatchPointerDown(1, 100, 200);
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("false");
-
-      // Second pointer down (now we have 2 active)
-      mockEl.dispatchPointerDown(2, 150, 250);
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("true");
-    });
-
-    test("hasPressure ignores mouse false positives", async () => {
-      const mockEl = createMockPointerElement();
-
-      const TestComponent = () => {
-        const pointer = createPointer(mockEl, { expect: true });
-        pointer.onPointerEvent("pointermove"); // Subscribe to trigger updates
-
-        return <text>{String(pointer.capabilities.hasPressure)}</text>;
-      };
-
-      const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
-        <TestComponent />
-      ));
-
-      const textNode = stage.children[0]?.children[0];
-      invariant(textNode);
-      assert(textNode instanceof Text);
-
-      expect(textNode.text).toBe("false");
-
-      // Mouse with fake 0.5 pressure - should NOT trigger
-      mockEl.dispatchPointerMove(1, 100, 200, {
-        pointerType: "mouse",
-        pressure: 0.5,
-      });
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("false");
-
-      // Pen with real pressure - SHOULD trigger
-      mockEl.dispatchPointerMove(1, 100, 200, {
-        pointerType: "pen",
-        pressure: 0.7,
-      });
-      await ticker.tickFrames(1);
-      expect(textNode.text).toBe("true");
     });
   });
 
@@ -899,9 +803,15 @@ describe("createPointer", () => {
 
       const TestComponent = () => {
         const pointer = createPointer(mockEl, { expect: true });
-        pointer.onPointerEvent(["pointerdown", "pointercancel"]);
+        const events = pointer.onPointerEvent(["pointerdown", "pointercancel"]);
 
-        return <text>{String(pointer.capabilities.hasMultiTouch)}</text>;
+        return (
+          <text>
+            {events()
+              .map((e) => e.eventType)
+              .join(",")}
+          </text>
+        );
       };
 
       const { stage, ticker } = await renderApplicationWithFakeTicker(() => (
@@ -916,16 +826,15 @@ describe("createPointer", () => {
       mockEl.dispatchPointerDown(1, 100, 200);
       mockEl.dispatchPointerDown(2, 150, 250);
       await ticker.tickFrames(1);
-      expect(textNode.text).toBe("true");
+      expect(textNode.text).toBe("pointerdown,pointerdown");
 
-      // Cancel one - should still have multitouch since one remains active
+      // Cancel one
       mockEl.dispatchPointerCancel(1);
       await ticker.tickFrames(1);
-      // Note: hasMultiTouch stays true once detected
-      expect(textNode.text).toBe("true");
+      expect(textNode.text).toBe("pointercancel");
     });
 
-    test("lostpointercapture removes pointer from active set", async () => {
+    test("lostpointercapture keeps pointer in active set", async () => {
       const mockEl = createMockPointerElement();
 
       const TestComponent = () => {
@@ -1332,6 +1241,43 @@ describe("createPointer", () => {
       mockEl.dispatchPointerDown(1, 100, 200);
       await ticker.tickFrames(1);
       expect(textNode.text).toBe("1");
+    });
+
+    test("stale events before subscriber attaches are discarded", async () => {
+      const mockEl = createMockPointerElement();
+      let pointer: Maybe<Pointer> = null;
+
+      const TestComponent = () => {
+        pointer = createPointer(mockEl, { expect: true });
+        return <text>ready</text>;
+      };
+
+      const { ticker } = await renderApplicationWithFakeTicker(() => (
+        <TestComponent />
+      ));
+
+      // Pointer exists but NO subscriber yet
+      invariant(pointer);
+
+      // Fire events BEFORE any subscriber exists - they'll buffer
+      mockEl.dispatchPointerDown(1, 100, 200);
+      mockEl.dispatchPointerDown(2, 150, 250);
+
+      // Tick frames with no subscribers - buffer should be cleared
+      await ticker.tickFrames(2);
+
+      // NOW create a subscriber
+      const events = (pointer as Pointer).onPointerEvent("pointerdown");
+
+      // Tick a frame - should get empty array, not stale events
+      await ticker.tickFrames(1);
+      expect(events()).toEqual([]);
+
+      // New events should work normally
+      mockEl.dispatchPointerDown(3, 200, 300);
+      await ticker.tickFrames(1);
+      expect(events().length).toBe(1);
+      expect(events()[0]?.pointerId).toBe(3);
     });
   });
 });

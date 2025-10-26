@@ -25,7 +25,6 @@ export const Pointer = () => {
 
   return (
     <>
-      <text>Capabilities: {JSON.stringify(pointer.capabilities, null, 0)}</text>
       <text y={50}>
         Coords: {JSON.stringify(pos())}, Type: {type()}
       </text>

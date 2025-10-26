@@ -1,7 +1,6 @@
 import {
   createComputed,
   createSignal,
-  createStore,
   onCleanup,
 } from "../../../../pixi-jsx/solidjs-universal-renderer/index.js";
 import { onEveryFrame } from "../../../core/query-fns.js";
@@ -24,222 +23,94 @@ export const createPointerImpl = (element: PointerLikeEl): Pointer => {
   const eventBuffer: PointerEventData[] = [];
   const eventSubscribers = new Set<EventSubscriber>();
   const seenEvents = new Set<string>();
-  const activePointers = new Set<number>();
   let hadEventsLastFrame = false;
 
-  // Reactive capability store
-  const [capabilities, setCapabilities] = createStore({
-    hasMultiTouch: false,
-    hasStylus: false,
-    hasPressure: false,
-  });
-
-  const updateCapabilities = (event: PointerEvent) => {
-    if (event.pointerType === "pen") {
-      setCapabilities("hasStylus", true);
-    }
-    // Only detect true pressure-sensitive devices
-    // Mice and basic touch report 0.5 when pressed but don't have real pressure sensing
-    if (
-      event.pointerType === "pen" ||
-      (event.pressure > 0 && event.pressure !== 0.5)
-    ) {
-      setCapabilities("hasPressure", true);
-    }
-    if (activePointers.size > 1) {
-      setCapabilities("hasMultiTouch", true);
-    }
-  };
-
-  const handlePointerDown = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    activePointers.add(event.pointerId);
-    updateCapabilities(event);
-    eventBuffer.push(createPointerEventData(event, "pointerdown"));
-  };
-
-  const handlePointerUp = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    activePointers.delete(event.pointerId);
-    updateCapabilities(event);
-    eventBuffer.push(createPointerEventData(event, "pointerup"));
-  };
-
-  const handlePointerMove = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    updateCapabilities(event);
-    eventBuffer.push(createPointerEventData(event, "pointermove"));
-  };
-
-  const handlePointerCancel = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    activePointers.delete(event.pointerId);
-    updateCapabilities(event);
-    eventBuffer.push(createPointerEventData(event, "pointercancel"));
-  };
-
-  const handlePointerOver = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    eventBuffer.push(createPointerEventData(event, "pointerover"));
-  };
-
-  const handlePointerOut = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    eventBuffer.push(createPointerEventData(event, "pointerout"));
-  };
-
-  const handlePointerEnter = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    eventBuffer.push(createPointerEventData(event, "pointerenter"));
-  };
-
-  const handlePointerLeave = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    eventBuffer.push(createPointerEventData(event, "pointerleave"));
-  };
-
-  const handleGotPointerCapture = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    eventBuffer.push(createPointerEventData(event, "gotpointercapture"));
-  };
-
-  const handleLostPointerCapture = (event: PointerEvent) => {
-    if (isDuplicateMouseEvent(event, seenEvents)) {
-      return;
-    }
-
-    eventBuffer.push(createPointerEventData(event, "lostpointercapture"));
-  };
-
-  createComputed(() => {
-    element.addEventListener("pointerdown", handlePointerDown, listenerOptions);
-    element.addEventListener("pointerup", handlePointerUp, listenerOptions);
-    element.addEventListener("pointermove", handlePointerMove, listenerOptions);
-    element.addEventListener(
-      "pointercancel",
-      handlePointerCancel,
-      listenerOptions,
-    );
-    element.addEventListener("pointerover", handlePointerOver, listenerOptions);
-    element.addEventListener("pointerout", handlePointerOut, listenerOptions);
-    element.addEventListener(
-      "pointerenter",
-      handlePointerEnter,
-      listenerOptions,
-    );
-    element.addEventListener(
-      "pointerleave",
-      handlePointerLeave,
-      listenerOptions,
-    );
-    element.addEventListener(
-      "gotpointercapture",
-      handleGotPointerCapture,
-      listenerOptions,
-    );
-    element.addEventListener(
-      "lostpointercapture",
-      handleLostPointerCapture,
-      listenerOptions,
-    );
-  });
-
-  onCleanup(() => {
-    element.removeEventListener(
-      "pointerdown",
-      handlePointerDown,
-      listenerOptions,
-    );
-    element.removeEventListener("pointerup", handlePointerUp, listenerOptions);
-    element.removeEventListener(
-      "pointermove",
-      handlePointerMove,
-      listenerOptions,
-    );
-    element.removeEventListener(
-      "pointercancel",
-      handlePointerCancel,
-      listenerOptions,
-    );
-    element.removeEventListener(
-      "pointerover",
-      handlePointerOver,
-      listenerOptions,
-    );
-    element.removeEventListener(
-      "pointerout",
-      handlePointerOut,
-      listenerOptions,
-    );
-    element.removeEventListener(
-      "pointerenter",
-      handlePointerEnter,
-      listenerOptions,
-    );
-    element.removeEventListener(
-      "pointerleave",
-      handlePointerLeave,
-      listenerOptions,
-    );
-    element.removeEventListener(
-      "gotpointercapture",
-      handleGotPointerCapture,
-      listenerOptions,
-    );
-    element.removeEventListener(
-      "lostpointercapture",
-      handleLostPointerCapture,
-      listenerOptions,
-    );
-
+  const clearEventAndSubscriberTracking = () => {
     eventBuffer.length = 0;
     eventSubscribers.clear();
     seenEvents.clear();
-    activePointers.clear();
+    hadEventsLastFrame = false;
+  };
+
+  const noEventsToProcess = () =>
+    eventBuffer.length === 0 && !hadEventsLastFrame;
+
+  const shouldNotifyOnLastFrame = () =>
+    eventBuffer.length === 0 && hadEventsLastFrame;
+
+  const eventMap: Record<PointerEventType, (event: PointerEvent) => void> = {
+    pointerdown: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "pointerdown"));
+    },
+    pointerup: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "pointerup"));
+    },
+    pointermove: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "pointermove"));
+    },
+    pointercancel: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "pointercancel"));
+    },
+    pointerover: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "pointerover"));
+    },
+    pointerout: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "pointerout"));
+    },
+    pointerenter: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "pointerenter"));
+    },
+    pointerleave: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "pointerleave"));
+    },
+    gotpointercapture: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "gotpointercapture"));
+    },
+    lostpointercapture: (event) => {
+      if (isDuplicateMouseEvent(event, seenEvents)) return;
+      eventBuffer.push(createPointerEventData(event, "lostpointercapture"));
+    },
+  };
+
+  createComputed(() => {
+    Object.entries(eventMap).forEach(([name, fn]) => {
+      element.addEventListener(name as PointerEventType, fn, listenerOptions);
+    });
+  });
+
+  onCleanup(() => {
+    Object.entries(eventMap).forEach(([name, fn]) => {
+      element.removeEventListener(
+        name as PointerEventType,
+        fn,
+        listenerOptions,
+      );
+    });
+    clearEventAndSubscriberTracking();
   });
 
   onEveryFrame(() => {
-    if (eventSubscribers.size === 0) {
+    // Clear stale events when no subscribers to prevent replay later
+    if (eventSubscribers.size === 0) return clearEventAndSubscriberTracking();
+    // No events to process so we return early
+    if (noEventsToProcess()) return;
+    // No events this frame, but had events last frame - notify with empty arrays
+    if (shouldNotifyOnLastFrame()) {
       hadEventsLastFrame = false;
-      return;
-    }
-
-    const hasEvents = eventBuffer.length > 0;
-
-    // Skip work on idle frames after the first idle frame
-    if (!hasEvents && !hadEventsLastFrame) {
-      return;
-    }
-
-    if (hasEvents) {
-      // Process events with filtering
+      eventSubscribers.forEach((subscriber) => {
+        subscriber.setValue([]);
+      });
+    } else {
+      hadEventsLastFrame = true;
       eventSubscribers.forEach((subscriber) => {
         const matchedEvents = eventBuffer.filter((event) => {
           const typeMatches = subscriber.eventTypes.has(event.eventType);
@@ -254,13 +125,6 @@ export const createPointerImpl = (element: PointerLikeEl): Pointer => {
 
       eventBuffer.length = 0;
       seenEvents.clear();
-      hadEventsLastFrame = true;
-    } else {
-      // No events this frame, but had events last frame - notify with empty arrays
-      eventSubscribers.forEach((subscriber) => {
-        subscriber.setValue([]);
-      });
-      hadEventsLastFrame = false;
     }
   });
 
@@ -294,6 +158,5 @@ export const createPointerImpl = (element: PointerLikeEl): Pointer => {
 
   return {
     onPointerEvent,
-    capabilities,
   };
 };
