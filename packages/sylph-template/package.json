@@ -21,6 +21,13 @@
   "dependencies": {
     "pixi.js": "8.14.0",
     "solid-js": "1.9.4",
-    "sylph-jsx": "^0.5.0"
+    "sylph-jsx": "latest"
+  },
+  "devDependencies": {
+    "@pixi/devtools": "^2.0.1",
+    "typescript": "^5.9.3",
+    "vite": "7.2.2",
+    "vite-plugin-solid": "2.11.10",
+    "vitest": "^4.0.8"
   }
 }
