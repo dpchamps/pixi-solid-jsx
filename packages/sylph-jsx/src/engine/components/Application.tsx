@@ -5,6 +5,7 @@ import {
   useContext,
   createResource,
   Show,
+  onMount,
 } from "../../pixi-jsx/solidjs-universal-renderer/index.js";
 import { Application as PixiApplication, Ticker } from "pixi.js";
 import { invariant, Maybe } from "../../utility-types.js";
@@ -103,34 +104,43 @@ export const useApplicationState = () => {
  */
 export const Application = (props: JSX.IntrinsicElements["application"]) => {
   const [application, setApplication] = createSignal<ApplicationNode>();
+  const [mounted, setMounted] = createSignal(false);
+  const applicationAttached = () =>
+    mounted() && application() ? application() : undefined;
   const scheduledEffects = new Map<string, (ticker: Ticker) => void>();
   const timer = createTimer({
     nextFrameFns: scheduledEffects,
     createTicker: props.createTicker,
   });
+
   const applicationState = {
     application: null as Maybe<ApplicationState["application"]>,
   };
 
-  const [applicationReady] = createResource(application, async (app) => {
-    if (import.meta.env.DEV) {
-      await initDevtools({ app: app.container });
-    }
-    /**
-     * @warn
-     * You must assign the ticker prior to initialization.
-     * Otherwise, another ticker will start and can cause (to the best of my knowledge)
-     * two stage renders simultaneously.
-     *
-     * This will cause FPS degradation and frame drop stuttering.
-     */
-    app.container.ticker = timer.ticker;
-    await app.initialize();
-    await props.appInitialize?.(app.container);
-    timer.ticker.start();
-    applicationState.application = app.container;
-    return true;
-  });
+  onMount(() => setMounted(true));
+
+  const [applicationReady] = createResource(
+    applicationAttached,
+    async (app) => {
+      if (import.meta.env.DEV) {
+        await initDevtools({ app: app.container });
+      }
+      /**
+       * @warn
+       * You must assign the ticker prior to initialization.
+       * Otherwise, another ticker will start and can cause (to the best of my knowledge)
+       * two stage renders simultaneously.
+       *
+       * This will cause FPS degradation and frame drop stuttering.
+       */
+      app.container.ticker = timer.ticker;
+      await app.initialize();
+      await props.appInitialize?.(app.container);
+      timer.ticker.start();
+      applicationState.application = app.container;
+      return true;
+    },
+  );
 
   const fallback = props.loadingState ?? <text>Loading...</text>;
 
