@@ -58,8 +58,8 @@
     "solid-js": "1.9.4"
   },
   "devDependencies": {
-    "tsc-alias": "^1.8.16",
     "@pixi/devtools": "^2.0.1",
+    "tsc-alias": "^1.8.16",
     "vite-plugin-solid": "2.11.9"
   }
 }

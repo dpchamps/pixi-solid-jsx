@@ -1,8 +1,6 @@
 export {
   Suspense,
   SuspenseList,
-  Switch,
-  Match,
   ErrorBoundary,
   createEffect,
   createMemo,
@@ -53,6 +51,9 @@ import {
   useContext as solidUseContext,
   children as solidChildren,
   EffectOptions,
+  lazy as solidLazy,
+  Match as SolidMatch,
+  Switch as SolidSwitch,
 } from "solid-js";
 
 /// Index
@@ -84,6 +85,16 @@ export declare function ShowType<
 >(props: {
   when: T | undefined | null | false;
   keyed?: false;
+  fallback?: JSX.Element;
+  children: JSX.Element | RequiredParameter<TRenderFunction>;
+}): JSX.Element;
+
+export declare function ShowType<
+  T,
+  TRenderFunction extends (item: NonNullable<T>) => JSX.Element,
+>(props: {
+  when: T | undefined | null | false;
+  keyed: true;
   fallback?: JSX.Element;
   children: JSX.Element | RequiredParameter<TRenderFunction>;
 }): JSX.Element;
@@ -127,3 +138,45 @@ export declare function childrenType(
 ): ChildrenReturn;
 
 export const children = solidChildren as unknown as typeof childrenType;
+
+/// lazy
+export declare function lazyType<T extends Component<any>>(
+  fn: () => Promise<{
+    default: T;
+  }>,
+): T & {
+  preload: () => Promise<{ default: T }>;
+};
+
+export const lazy = solidLazy as unknown as typeof lazyType;
+
+/// Switch
+
+export declare function SwitchType(props: {
+  fallback?: JSX.Element;
+  children: JSX.Element;
+}): JSX.Element;
+
+export const Switch = SolidSwitch as unknown as typeof SwitchType;
+
+/// Match
+
+export declare function MatchType<
+  T,
+  TRenderFunction extends (item: SolidAccessor<NonNullable<T>>) => JSX.Element,
+>(props: {
+  when: T | undefined | null | false;
+  keyed?: false;
+  children: JSX.Element | RequiredParameter<TRenderFunction>;
+}): JSX.Element;
+
+export declare function MatchType<
+  T,
+  TRenderFunction extends (item: NonNullable<T>) => JSX.Element,
+>(props: {
+  when: T | undefined | null | false;
+  keyed: true;
+  children: JSX.Element | RequiredParameter<TRenderFunction>;
+}): JSX.Element;
+
+export const Match = SolidMatch as unknown as typeof MatchType;
