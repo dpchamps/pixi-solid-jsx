@@ -1,6 +1,4 @@
 export {
-  Suspense,
-  SuspenseList,
   ErrorBoundary,
   createEffect,
   createMemo,
@@ -54,6 +52,8 @@ import {
   lazy as solidLazy,
   Match as SolidMatch,
   Switch as SolidSwitch,
+  SuspenseList as SolidSuspenseList,
+  Suspense as SolidSuspense,
 } from "solid-js";
 
 /// Index
@@ -180,3 +180,21 @@ export declare function MatchType<
 }): JSX.Element;
 
 export const Match = SolidMatch as unknown as typeof MatchType;
+
+/// Suspense
+
+export declare function SuspenseListType(props: {
+  children: JSX.Element;
+  revealOrder: "forwards" | "backwards" | "together";
+  tail?: "collapsed" | "hidden";
+}): JSX.Element;
+
+export const SuspenseList =
+  SolidSuspenseList as unknown as typeof SuspenseListType;
+
+export declare function SuspenseType(props: {
+  fallback?: JSX.Element;
+  children: JSX.Element;
+}): JSX.Element;
+
+export const Suspense = SolidSuspense as unknown as typeof SuspenseType;
