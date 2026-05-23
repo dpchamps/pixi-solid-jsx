@@ -15,12 +15,13 @@ import {
   ProxyDomNode,
   SpriteNode,
   TextNode,
+  GraphicsNode,
+  RenderLayerNode,
 } from "../proxy-dom/index.js";
 import { Setter } from "../solidjs-universal-renderer/index.js";
-import { GraphicsNode } from "../proxy-dom/nodes/Graphics.js";
-import { RenderLayerNode } from "../proxy-dom/nodes/RenderLayerNode.js";
 
 export type UnknownNodeProps = Record<string, unknown>;
+
 export type PixiNodeProps<
   Props extends UnknownRecord = {},
   RefValue = JSXNode,
@@ -33,6 +34,18 @@ export type ChildPropType<Node = JSXNode> = { children?: Children<Node> };
 export type RefType<RefValue> = {
   ref?: RefValue | undefined | Setter<RefValue | undefined>;
 };
+
+/**
+ * Use this to get handle into a ref type, instead of exposing direct container types.
+ *
+ * Example usage:
+ *
+ * ```typescript
+ *  const [graphics, setGraphics] = createSignal<Ref<GraphicsProps>>();
+ * ```_
+ */
+export type Ref<Intrinsic extends PixiNodeProps> =
+  Intrinsic extends PixiNodeProps<{}, infer T, any> ? T : never;
 
 export type ClassType = { class?: string | undefined };
 

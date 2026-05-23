@@ -14,6 +14,7 @@ export * from "./nodes/ContainerNode.js";
 export * from "./nodes/ApplicationNode.js";
 export * from "./nodes/SpriteNode.js";
 export * from "./nodes/RenderLayerNode.js";
+export * from "./nodes/Graphics.js";
 
 export const createProxiedPixieContainerNode = (tag: string) => {
   switch (tag) {
