@@ -18,6 +18,16 @@ export * from "./libs/Easing.js";
 export * from "./components/GameLoopContextProvider.jsx";
 export * from "./components/Application.jsx";
 export * from "./components/extensions/EasingCoroutine.jsx";
+export * from "./components/extensions/createLocalStorage.js";
+export * from "./components/extensions/Graphics.jsx";
+export * from "./components/extensions/TilingSprite.jsx";
+export * from "./components/extensions/HTMLTextNode.jsx";
+export * from "./components/extensions/Audio.jsx";
+export * from "./components/extensions/ui/Checkbox.jsx";
+export * from "./components/extensions/ui/ScrollableContent.jsx";
+export * from "./components/extensions/ui/Select.jsx";
+export * from "./components/extensions/ui/Slider.jsx";
+export { HTMLTextNode as UIHTMLTextNode } from "./components/extensions/ui/HTMLTextNode.jsx";
 export * from "./components/PixiExternalContainer.jsx";
 
 // export * from "./tags/FlexBox/FlexBox";

@@ -54,11 +54,15 @@
   "author": "me@davecampion.com",
   "license": "MIT",
   "peerDependencies": {
+    "@pixi/sound": "^6.0.1",
+    "@pixi/ui": "^2.3.2",
     "pixi.js": "8.14.0",
     "solid-js": "1.9.4"
   },
   "devDependencies": {
     "@pixi/devtools": "^2.0.1",
+    "@pixi/sound": "^6.0.1",
+    "@pixi/ui": "^2.3.2",
     "tsc-alias": "^1.8.16",
     "vite-plugin-solid": "2.11.9"
   }
