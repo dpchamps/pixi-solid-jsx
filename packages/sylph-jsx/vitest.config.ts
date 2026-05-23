@@ -3,7 +3,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import solidPlugin from "vite-plugin-solid";
 import dts from "vite-plugin-dts";
 import { fileURLToPath } from "node:url";
-
+//vitest
 export default defineConfig({
   test: {
     include: ["src/**/*/__tests__/**/*"],
